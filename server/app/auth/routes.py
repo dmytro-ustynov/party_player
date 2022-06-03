@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Response, Request
 from app.auth.models import User
 from app.auth.models import UserSchema
 from app.auth.models import UserLoginSchema
 from app.auth.jwt_handler import sign_jwt
+from app.auth.jwt_handler import decode_jwt
 from app.dependencies import MM
 
 
@@ -20,7 +21,7 @@ def get_all_users():
     return {"users": all_users}
 
 
-@router.post("/user/signup", tags=['user'])
+@router.post("/user/signup")
 def user_signup(user: UserSchema = Body(default=None)):
     if MM.query(User).get(email_address=user.email_address) is not None:
         return {'result': False,
@@ -34,8 +35,8 @@ def user_signup(user: UserSchema = Body(default=None)):
         return {'result': False}
 
 
-@router.post("/user/login", tags=['user'])
-def user_login(login: UserLoginSchema):
+@router.post("/user/login")
+def user_login(login: UserLoginSchema, response: Response):
     email = login.email_address
     password = login.password
     mongo_user = MM.query(User).get(email_address=email)
@@ -47,4 +48,30 @@ def user_login(login: UserLoginSchema):
     result = {**sign_jwt(mongo_user.user_id),
               **sign_jwt(mongo_user.user_id, seconds=3000, token_key='refresh_token'),
               'result': True}  # dict
+    response.set_cookie(key='refresh_token', value=result.get('refresh_token', ''))
+    return result
+
+
+@router.get('/user/refresh_token')
+def refresh_token(request: Request, response: Response):
+    """
+    Endpoint to silently refresh tokens
+    :param request:
+    :param response:
+    :return:
+    """
+    token = request.cookies.get('refresh_token')
+    if not token:
+        return {'result': False}
+    decoded = decode_jwt(token)
+    if decoded is None:
+        return {'result': False}
+    user_id = decoded.get('user_id')
+    mongo_user = MM.query(User).get(user_id=user_id)
+    if not mongo_user:
+        return {'result': False}
+    result = {**sign_jwt(mongo_user.user_id),
+              **sign_jwt(mongo_user.user_id, seconds=3000, token_key='refresh_token'),
+              'result': True}  # dict
+    response.set_cookie(key='refresh_token', value=result.get('refresh_token', ''))
     return result

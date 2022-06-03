@@ -9,7 +9,8 @@ JWT_ALGORITHM = config('JWT_ALGORITHM', 'HS256')       # HS256
 def token_response(token: str, token_key: str = "access_token"):
     """
     Returns the dict with access_token encoded
-    :param token:
+    :param token: token string itself
+    :param token_key: token key : "access_token" or "refresh_token"
     :return: dict
     """
     return {
