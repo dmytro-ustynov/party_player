@@ -1,11 +1,13 @@
 import aiofiles
 from fastapi import APIRouter, Depends, UploadFile
+from fastapi.responses import StreamingResponse
 from app.auth.models import User
 from app.auth.utils import get_current_user_id
 from app.auth.jwt_bearer import JWTBearer
 from app.dependencies import MM, ALLOWED_FORMATS
 from app.audio.models import AudioFile
 from app.audio.audio_operations import update_duration
+from app.audio.audio_operations import generate_stream
 
 
 router = APIRouter(prefix='/audio',
@@ -37,3 +39,16 @@ async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_
         await update_duration(MM, file_id)
         return {'result': True, 'file_id': file_id}
     return {'result': False, 'details': 'upload failed'}
+
+
+@router.get("/get_audio_stream", dependencies=[Depends(JWTBearer(auto_error=False))])
+async def stream_file(file_id: str):
+    try:
+        audio_file = MM.query(AudioFile).get(file_id=file_id)
+        if audio_file is not None:
+            return StreamingResponse(generate_stream(audio_file.file_path), media_type='audio')
+        else:
+            return {'result': False, 'details': 'file not found'}
+    except Exception as e:
+        raise e
+
