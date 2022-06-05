@@ -16,7 +16,10 @@
         DB_COLLECTIONS: ${DB_COLLECTIONS}
         JWT_SECRET: ${JWT_SECRET}
         JWT_ALGORITHM: ${JWT_ALGORITHM}
+        UPLOAD_FOLDER: ${UPLOAD_FOLDER}
       hostname: api
+      volumes:
+        - ./server/data/upload_files:/code/data/upload_files/
     client:
       build: ./client
       container_name: client_react
