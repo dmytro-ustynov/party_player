@@ -60,6 +60,7 @@ class AudioFile:
         ext = file.filename.split('.')[-1].lower()
         file_path = os.path.join(UPLOAD_FOLDER, '{}.{}'.format(file_id, ext))
         return dict(file_id=file_id,
+                    ext=ext,
                     filename=filename,
                     file_path=file_path)
 
@@ -67,3 +68,6 @@ class AudioFile:
     def allowed_file(filename):
         return '.' in filename and \
                filename.rsplit('.', 1)[1].lower() in ALLOWED_FORMATS
+
+    def to_dict(self):
+        return {s: getattr(self, s) for s in self.__slots__}

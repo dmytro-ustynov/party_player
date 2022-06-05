@@ -24,7 +24,6 @@ class MongoManager:
         user = config.get('DB_USERNAME')
         password = config.get('DB_PASSWORD')
         collection_names = [c.strip() for c in config.get('DB_COLLECTIONS', 'users').split(',')]
-        # collection_names = ['users']
         connection_line = f'mongodb://{user}:{password}@{host}:{port}'
         self._client = MongoClient(connection_line)
         try:
@@ -108,10 +107,16 @@ class MongoQuery:
         self._collection = cls.__collection__
 
     def find(self, filters, **kwargs):
+        """
+        Returns a generator which yields ORM models found in db by filters
+        :param filters: dict with key- value pairs to find in DB
+        :param kwargs:
+        :return: generator object
+        """
         if 'sort' in kwargs:
             kwargs['sort'] = self.create_sort_payload(kwargs)
-        # todo: maybe return as instances of the self.cls()?
-        return self._db_manager.find(filters=filters, collection=self._collection, **kwargs)
+        for instance in self._db_manager.find(filters=filters, collection=self._collection, **kwargs):
+            yield self.cls(**instance)
 
     def get(self, *args, **kwargs):
         self._validate_filters(kwargs)

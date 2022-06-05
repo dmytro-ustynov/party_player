@@ -1,6 +1,7 @@
 import aiofiles
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse
 from app.auth.models import User
 from app.auth.utils import get_current_user_id
 from app.auth.jwt_bearer import JWTBearer
@@ -14,12 +15,13 @@ router = APIRouter(prefix='/audio',
                    tags=['audio'])
 
 
-@router.get("/", tags=['audio'],
+@router.get("/get_my_files", tags=['audio'],
             dependencies=[Depends(JWTBearer(auto_error=False))])
-def get_audio(user_id: str = Depends(get_current_user_id)):
-    # init route to create structure and routes
+def get_my_files(user_id: str = Depends(get_current_user_id)):
     user = MM.query(User).get(user_id=user_id)
-    return {'result': True, 'details': f'ok, {user.username} you have 10 songs'}
+    db_files = MM.query(AudioFile).find(filters={'user_id': user_id})       # generator object
+    files = [f.to_dict() for f in db_files]
+    return {'result': True, 'details': f'ok, {user.username}, you have {len(files)} files', 'files': files}
 
 
 @router.post("/upload_file", dependencies=[Depends(JWTBearer(auto_error=False))])
@@ -52,3 +54,14 @@ async def stream_file(file_id: str):
     except Exception as e:
         raise e
 
+
+@router.get("/get_audio", dependencies=[Depends(JWTBearer(auto_error=False))])
+async def get_audio(file_id: str):
+    audio_file = MM.query(AudioFile).get(file_id=file_id)
+    if audio_file is not None:
+        fpath = audio_file.file_path
+        # with open(fpath, "rb") as fwav:
+        #     data = fwav.read()
+        mimetype = audio_file.mimetype
+        return FileResponse(fpath, media_type=mimetype)
+    return {'result': False, 'details': 'file not found'}
