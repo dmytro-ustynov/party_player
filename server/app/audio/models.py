@@ -5,11 +5,7 @@ from pydub.utils import mediainfo
 import mimetypes
 from datetime import datetime
 from fastapi import UploadFile
-from decouple import config as ENV
-from app.dependencies import ALLOWED_FORMATS
-
-
-UPLOAD_FOLDER = os.path.join(os.getcwd(), ENV('UPLOAD_FOLDER'))
+from app.dependencies import ALLOWED_FORMATS, UPLOAD_FOLDER
 
 
 class AudioFile:

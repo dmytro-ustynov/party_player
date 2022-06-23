@@ -1,7 +1,9 @@
+import os
 import asyncio
 from pydub import AudioSegment
 from time import time
 from app.audio.models import AudioFile
+from app.dependencies import logger
 
 
 class FileObject(object):
@@ -352,10 +354,34 @@ def do_operation(operation, **kwargs):
     return func(**kwargs)
 
 
-async def update_duration(mongo_manager, file_id ):
+async def update_duration(mongo_manager, file_id):
     doc = mongo_manager.query(AudioFile).get(file_id=file_id)
     fpath = doc.file_path
     sound = AudioSegment.from_file(fpath)
     result = mongo_manager.query(AudioFile).update(filters={'file_id': str(file_id)},
                                                    payload={'duration': round(sound.duration_seconds, 3)})
-    return print('File info updated : {}'.format(file_id) if result else 'ERROR UPDATING FILE ')
+    if result:
+        logger.info(f'File info updated : {file_id}')
+    else:
+        logger.error(f'ERROR UPDATING  :{file_id}')
+    # return print('File info updated : {}'.format(file_id) if result else 'ERROR UPDATING FILE ')
+
+
+async def create_file_for_yt(mongo_manager, file_path, user_id, file_id):
+    sound = AudioSegment.from_file(file_path)
+    duration = round(sound.duration_seconds, 3)
+    folder, filename = os.path.split(file_path)
+    ext = filename.split('.')[-1].lower()
+    # file_id = str(uuid.uuid4())
+    new_path = os.path.join(folder, f'{file_id}.{ext}')
+    audio_payload = dict(file_id=file_id,
+                         user_id=user_id,
+                         ext=ext,
+                         duration=duration,
+                         filename=filename,
+                         file_path=new_path)
+    os.rename(file_path, new_path)
+    if mongo_manager.query(AudioFile).create(audio_payload):
+        logger.info(f'YT file saved to DB: {file_id}')
+    else:
+        logger.error(f'Error saving file {filename}')

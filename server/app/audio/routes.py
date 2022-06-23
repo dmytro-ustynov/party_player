@@ -1,3 +1,4 @@
+import uuid
 import aiofiles
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import StreamingResponse
@@ -5,10 +6,13 @@ from fastapi.responses import FileResponse
 from app.auth.models import User
 from app.auth.utils import get_current_user_id
 from app.auth.jwt_bearer import JWTBearer
-from app.dependencies import MM, ALLOWED_FORMATS
+from app.dependencies import MM, ALLOWED_FORMATS, UPLOAD_FOLDER
 from app.audio.models import AudioFile
 from app.audio.audio_operations import update_duration
 from app.audio.audio_operations import generate_stream
+from app.audio.audio_operations import create_file_for_yt
+from pytube import YouTube
+import ssl
 
 
 router = APIRouter(prefix='/audio',
@@ -60,8 +64,31 @@ async def get_audio(file_id: str):
     audio_file = MM.query(AudioFile).get(file_id=file_id)
     if audio_file is not None:
         fpath = audio_file.file_path
-        # with open(fpath, "rb") as fwav:
-        #     data = fwav.read()
         mimetype = audio_file.mimetype
         return FileResponse(fpath, media_type=mimetype)
     return {'result': False, 'details': 'file not found'}
+
+
+@router.get("/get_from_youtube", dependencies=[Depends(JWTBearer(auto_error=False))])
+async def get_youtube_audio(youtube_url: str, user_id: str = Depends(get_current_user_id)):
+    """
+    Download audio from YouTube, and save to user's files in MongoDB.
+    :param youtube_url: url of the YouTube video
+    :param user_id:
+    :return:
+    """
+    try:
+        ssl._create_default_https_context = ssl._create_unverified_context
+        yt = YouTube(youtube_url)
+        # video_length = yt.vid_info.get('videoDetails', {}).get('lengthSeconds')
+        # pics = yt.vid_info.get('videoDetails', {}).get('thumbnail')  # dict
+        # author = yt.vid_info.get('videoDetails', {}).get('author')
+        title = yt.vid_info.get('videoDetails', {}).get('title')
+        audio_streams = yt.streams.filter(type='audio').order_by('abr').desc()
+        stream = audio_streams.first()
+        file_id = str(uuid.uuid4())
+        default_filename = stream.download(output_path=UPLOAD_FOLDER)
+        await create_file_for_yt(MM, default_filename, user_id, file_id)
+        return {'result': True, 'file_id': file_id, 'filename': title}
+    except Exception as e:
+        return {'result': False, 'details': str(e)}
