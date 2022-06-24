@@ -1,3 +1,4 @@
+import os
 import uuid
 import aiofiles
 from fastapi import APIRouter, Depends, UploadFile
@@ -47,6 +48,18 @@ async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_
     return {'result': False, 'details': 'upload failed'}
 
 
+@router.delete("/delete_file", dependencies=[Depends(JWTBearer(auto_error=False))])
+async def delete_file(file_id: str, user_id: str = Depends(get_current_user_id)):
+    db_file = MM.query(AudioFile).get(file_id=file_id)
+    if not db_file:
+        return {'result': False, 'details': 'file not found'}
+    if db_file.user_id != user_id:
+        return {'result': False, 'details': 'not allowed to delete other files'}
+    result = MM.query(AudioFile).delete(filter={'file_id': file_id})
+    if result:
+        return {'result': True, 'details': f'deleted {file_id}'}
+
+
 @router.get("/get_audio_stream", dependencies=[Depends(JWTBearer(auto_error=False))])
 async def stream_file(file_id: str):
     try:
@@ -65,7 +78,8 @@ async def get_audio(file_id: str):
     if audio_file is not None:
         fpath = audio_file.file_path
         mimetype = audio_file.mimetype
-        return FileResponse(fpath, media_type=mimetype)
+        if os.path.isfile(fpath):
+            return FileResponse(fpath, media_type=mimetype)
     return {'result': False, 'details': 'file not found'}
 
 

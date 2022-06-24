@@ -62,6 +62,12 @@ class MongoManager:
             return _id
 
     def get(self, filters, collection=None):
+        """
+        Get only one instance
+        :param filters:
+        :param collection:
+        :return:
+        """
         collection = self._get_collection(collection)
         if collection is not None and filters:
             return collection.find_one(filters)
@@ -87,6 +93,13 @@ class MongoManager:
             return collection.find_one_and_update(filter, {operation: payload})
 
     def find(self, filters, collection=None, **kwargs):
+        """
+        Return a generator to iterate
+        :param filters:
+        :param collection:
+        :param kwargs:
+        :return:
+        """
         collection = self._get_collection(collection)
         if collection is not None:
             return collection.find(filters, **kwargs)
@@ -94,7 +107,7 @@ class MongoManager:
     def delete(self, filters, collection=None, **kwargs):
         collection = self._get_collection(collection)
         if collection is not None:
-            return collection.remove(filters, **kwargs)
+            return collection.delete_one(**filters)
 
     def query(self, cls):
         return MongoQuery(db=self, cls=cls)
