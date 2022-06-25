@@ -1,0 +1,30 @@
+logging:
+  version: 1
+  formatters:
+    simple:
+      format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: INFO
+      stream: ext://sys.stdout
+      formatter: simple
+    server-file:
+      class: logging.FileHandler
+      level: INFO
+      filename: data/logs/server.log
+      formatter: simple
+    storage-cleaner-file:
+      class: logging.FileHandler
+      level: INFO
+      filename: data/logs/storage_cleaner.log
+      formatter: simple
+  loggers:
+    server:
+      level: INFO
+      handlers: [server-file]
+      propagate: no
+    storage_cleaner:
+      level: INFO
+      handlers: [console,  storage-cleaner-file]
+      propagate: no
