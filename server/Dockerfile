@@ -11,5 +11,6 @@ RUN apt-get -y upgrade
 RUN apt-get install -y ffmpeg
 
 COPY ./app /code/app
+COPY ./logger_config.yaml /code/logger_config.yaml
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000"]

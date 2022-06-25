@@ -17,9 +17,11 @@
         JWT_SECRET: ${JWT_SECRET}
         JWT_ALGORITHM: ${JWT_ALGORITHM}
         UPLOAD_FOLDER: ${UPLOAD_FOLDER}
+        ALLOWED_FORMATS: ${ALLOWED_FORMATS}
       hostname: api
       volumes:
         - ./server/data/upload_files:/code/data/upload_files/
+        - ./server/data/logs:/code/data/logs/
     client:
       build: ./client
       container_name: client_react
