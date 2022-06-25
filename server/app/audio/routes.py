@@ -8,6 +8,7 @@ from app.auth.models import User
 from app.auth.utils import get_current_user_id
 from app.auth.jwt_bearer import JWTBearer
 from app.dependencies import MM, ALLOWED_FORMATS, UPLOAD_FOLDER
+from app.dependencies import logger
 from app.audio.models import AudioFile
 from app.audio.audio_operations import update_duration
 from app.audio.audio_operations import generate_stream
@@ -44,6 +45,7 @@ async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_
 
     if MM.query(AudioFile).create(audio_payload):
         await update_duration(MM, file_id)
+        logger.info(f'User uploaded new file: user {user_id} : file {file_id}')
         return {'result': True, 'file_id': file_id}
     return {'result': False, 'details': 'upload failed'}
 
@@ -57,6 +59,7 @@ async def delete_file(file_id: str, user_id: str = Depends(get_current_user_id))
         return {'result': False, 'details': 'not allowed to delete other files'}
     result = MM.query(AudioFile).delete(filter={'file_id': file_id})
     if result:
+        logger.info(f'User deleted file: user {user_id} : file {file_id}')
         return {'result': True, 'details': f'deleted {file_id}'}
 
 
@@ -72,7 +75,7 @@ async def stream_file(file_id: str):
         raise e
 
 
-@router.get("/get_audio", dependencies=[Depends(JWTBearer(auto_error=False))])
+@router.get("/get_audio")  # dependencies=[Depends(JWTBearer(auto_error=False))])
 async def get_audio(file_id: str):
     audio_file = MM.query(AudioFile).get(file_id=file_id)
     if audio_file is not None:
@@ -92,6 +95,7 @@ async def get_youtube_audio(youtube_url: str, user_id: str = Depends(get_current
     :return:
     """
     try:
+        logger.info(f'Start loading youtube URL: {youtube_url}')
         ssl._create_default_https_context = ssl._create_unverified_context
         yt = YouTube(youtube_url)
         # video_length = yt.vid_info.get('videoDetails', {}).get('lengthSeconds')
@@ -103,6 +107,7 @@ async def get_youtube_audio(youtube_url: str, user_id: str = Depends(get_current
         file_id = str(uuid.uuid4())
         default_filename = stream.download(output_path=UPLOAD_FOLDER)
         await create_file_for_yt(MM, default_filename, user_id, file_id)
+        logger.info(f'Youtube downloaded successfully: {file_id} - {title}')
         return {'result': True, 'file_id': file_id, 'filename': title}
     except Exception as e:
         return {'result': False, 'details': str(e)}

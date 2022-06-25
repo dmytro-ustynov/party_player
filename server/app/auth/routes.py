@@ -5,6 +5,7 @@ from app.auth.models import UserLoginSchema
 from app.auth.jwt_handler import sign_jwt
 from app.auth.jwt_handler import decode_jwt
 from app.dependencies import MM
+from app.dependencies import logger
 
 
 router = APIRouter(prefix='/users',
@@ -30,6 +31,7 @@ def user_signup(user: UserSchema = Body(default=None)):
     if MM.query(User).create(mongo_user):
         res = sign_jwt(mongo_user['user_id'])
         res['result'] = True
+        logger.info(f'NEW USER signed up: {user.email_address}')
         return res
     else:
         return {'result': False}
@@ -44,11 +46,13 @@ def user_login(login: UserLoginSchema, response: Response):
     if not mongo_user:
         return {'result': False, 'details': error_msg}
     if not mongo_user.check_password(password):
+        logger.warning(f'Logging user attempt failed: {email} - {password}')
         return {'result': False, 'details': error_msg}
     result = {**sign_jwt(mongo_user.user_id),
               **sign_jwt(mongo_user.user_id, seconds=3000, token_key='refresh_token'),
               'result': True}  # dict
     response.set_cookie(key='refresh_token', value=result.get('refresh_token', ''))
+    logger.info(f'User logged in : {email}')
     return result
 
 
