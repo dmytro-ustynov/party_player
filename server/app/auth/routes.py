@@ -8,7 +8,7 @@ from app.dependencies import MM
 from app.dependencies import logger
 
 
-router = APIRouter(prefix='/users',
+router = APIRouter(prefix='/auth',
                    tags=['user'])
 
 
@@ -22,7 +22,7 @@ def get_all_users():
     return {"users": all_users}
 
 
-@router.post("/user/signup")
+@router.post("/signup")
 def user_signup(user: UserSchema = Body(default=None)):
     if MM.query(User).get(email_address=user.email_address) is not None:
         return {'result': False,
@@ -37,7 +37,7 @@ def user_signup(user: UserSchema = Body(default=None)):
         return {'result': False}
 
 
-@router.post("/user/login")
+@router.post("/login")
 def user_login(login: UserLoginSchema, response: Response):
     email = login.email_address
     password = login.password
@@ -56,7 +56,7 @@ def user_login(login: UserLoginSchema, response: Response):
     return result
 
 
-@router.get('/user/refresh_token')
+@router.post('/refresh_token')
 def refresh_token(request: Request, response: Response):
     """
     Endpoint to silently refresh tokens
@@ -79,3 +79,9 @@ def refresh_token(request: Request, response: Response):
               'result': True}  # dict
     response.set_cookie(key='refresh_token', value=result.get('refresh_token', ''))
     return result
+
+
+@router.get('/logout')
+async def logout(request: Request, response: Response):
+    # unset_jwt_cookies
+    return {'result': True}
