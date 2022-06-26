@@ -92,12 +92,15 @@ class User:
         """
         :return: json object for the user entity
         """
-        return json.dumps({
+        return json.dumps(self.to_dict())
+
+    def to_dict(self):
+        return {
             'user_id': self.user_id,
             'username': self.username,
             'email_address': self.email_address,
             'level': self.acc_level
-        })
+        }
 
 
 class Roles:
