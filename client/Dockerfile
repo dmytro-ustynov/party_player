@@ -9,6 +9,6 @@ RUN npm run build
 #Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
 FROM nginx:1.15
 COPY --from=build_stage /app/build/ /usr/share/nginx/html
-## Copy the default nginx.conf provided by tiangolo/node-frontend
+## Copy the default nginx.conf
 COPY default.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
