@@ -10,6 +10,7 @@ import {AuthProvider} from "./components/auth/context";
 import PageNotFound from "./pages/PageNotFound/PageNotFound";
 import HomePage from "./pages/HomePage/HomePage";
 import LoginPage from "./components/auth/Login/LoginPage";
+import LandingPage from "./pages/LandingPage/LandingPage";
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -21,6 +22,7 @@ root.render(
                 <Routes>
                     <Route exact path='/' element={<HomePage />}/>
                     <Route path='/login' element={<LoginPage />}/>
+                    <Route path='/welcome' element={<LandingPage />}/>
                     <Route path='/*' element={<PageNotFound />}/>
                 </Routes>
             </BrowserRouter>
