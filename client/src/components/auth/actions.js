@@ -19,6 +19,7 @@ export async function loginUser(dispatch, payload) {
     }
 
     dispatch({ type: authTypes.LOGIN_ERROR, error: data.errors });
+    return data
   } catch (error) {
     dispatch({ type: authTypes.LOGIN_ERROR, error: error });
   }

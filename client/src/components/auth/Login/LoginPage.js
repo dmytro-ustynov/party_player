@@ -20,8 +20,7 @@ function LoginPage(props) {
 
         try {
             let response = await loginUser(dispatch, {email_address: username, password})
-            console.log(response)
-            if (Boolean(response.result)) {
+            if (response.result === true ) {
                 navigate('/')
             }
         } catch (error) {
