@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import {
   BrowserRouter,
   Routes,
@@ -13,9 +13,7 @@ import LoginPage from "./components/auth/Login/LoginPage";
 import LandingPage from "./pages/LandingPage/LandingPage";
 
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
+ReactDOM.render(
         <AuthProvider>
         <div className='app-wrapper'>
             <BrowserRouter>
@@ -28,5 +26,4 @@ root.render(
             </BrowserRouter>
         </div>
     </AuthProvider>
-  </React.StrictMode>
-);
+    , document.getElementById('root'));
