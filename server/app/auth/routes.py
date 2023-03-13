@@ -13,16 +13,16 @@ router = APIRouter(prefix='/users',
 
 
 # users
-@router.get("/")
+@router.get("/", summary="Get list of all users")
 def get_all_users():
     all_users = []
     for u in MM.query(User).find(filters={}):
-        all_users.append({'username': u.get('username'),
-                          'email': u.get('email_address')})
+        all_users.append({'username': u.username,
+                          'email': u.email_address})
     return {"users": all_users}
 
 
-@router.post("/user/signup")
+@router.post("/signup")
 def user_signup(user: UserSchema = Body(default=None)):
     if MM.query(User).get(email_address=user.email_address) is not None:
         return {'result': False,
@@ -37,7 +37,7 @@ def user_signup(user: UserSchema = Body(default=None)):
         return {'result': False}
 
 
-@router.post("/user/login")
+@router.post("/login")
 def user_login(login: UserLoginSchema, response: Response):
     email = login.email_address
     password = login.password
@@ -56,7 +56,7 @@ def user_login(login: UserLoginSchema, response: Response):
     return result
 
 
-@router.get('/user/refresh_token')
+@router.get('/refresh_token')
 def refresh_token(request: Request, response: Response):
     """
     Endpoint to silently refresh tokens
