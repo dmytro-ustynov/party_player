@@ -16,7 +16,8 @@ class JWTBearer(HTTPBearer):
         else:
             raise HTTPException(status_code=403, detail='Invalid or expired token')
 
-    def verify_jwt(self, token: str):
+    @staticmethod
+    def verify_jwt(token: str):
         payload = decode_jwt(token)
         if payload:
             return True

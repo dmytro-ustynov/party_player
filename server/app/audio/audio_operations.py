@@ -2,8 +2,8 @@ import os
 import asyncio
 from pydub import AudioSegment
 from time import time
-from app.audio.models import AudioFile
-from app.dependencies import logger
+from server.app.audio.models import AudioFile
+from server.app.dependencies import logger
 
 
 class FileObject(object):

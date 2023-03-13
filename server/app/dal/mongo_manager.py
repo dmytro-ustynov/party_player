@@ -25,7 +25,7 @@ class MongoManager:
         password = config.get('DB_PASSWORD')
         collection_names = [c.strip() for c in config.get('DB_COLLECTIONS', 'users').split(',')]
         connection_line = f'mongodb://{user}:{password}@{host}:{port}'
-        self._client = MongoClient(connection_line)
+        self._client = MongoClient(connection_line, serverSelectionTimeoutMS=5000)
         try:
             _ = self._client.server_info()
             self.connected = True

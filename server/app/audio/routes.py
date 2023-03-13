@@ -4,15 +4,15 @@ import aiofiles
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.responses import FileResponse
-from app.auth.models import User
-from app.auth.utils import get_current_user_id
-from app.auth.jwt_bearer import JWTBearer
-from app.dependencies import MM, ALLOWED_FORMATS, UPLOAD_FOLDER
-from app.dependencies import logger
-from app.audio.models import AudioFile
-from app.audio.audio_operations import update_duration
-from app.audio.audio_operations import generate_stream
-from app.audio.audio_operations import create_file_for_yt
+from server.app.auth.models import User
+from server.app.auth.utils import get_current_user_id
+from server.app.auth.jwt_bearer import JWTBearer
+from server.app.dependencies import MM, UPLOAD_FOLDER
+from server.app.dependencies import logger
+from server.app.audio.models import AudioFile
+from server.app.audio.audio_operations import update_duration
+from server.app.audio.audio_operations import generate_stream
+from server.app.audio.audio_operations import create_file_for_yt
 from pytube import YouTube
 import ssl
 

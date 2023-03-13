@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Body, Response, Request
-from app.auth.models import User
-from app.auth.models import UserSchema
-from app.auth.models import UserLoginSchema
-from app.auth.jwt_handler import sign_jwt
-from app.auth.jwt_handler import decode_jwt
-from app.dependencies import MM
-from app.dependencies import logger
+from server.app.auth.models import User
+from server.app.auth.models import UserSchema
+from server.app.auth.models import UserLoginSchema
+from server.app.auth.jwt_handler import sign_jwt
+from server.app.auth.jwt_handler import decode_jwt
+from server.app.dependencies import MM
+from server.app.dependencies import logger
 
 
 router = APIRouter(prefix='/users',
