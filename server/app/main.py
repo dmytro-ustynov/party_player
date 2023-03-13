@@ -31,4 +31,4 @@ app.include_router(auth_router.router)
 
 
 if __name__ == '__main__':
-    uvicorn.run("main:app", host="localhost", port=8008, reload=True)
+    uvicorn.run("main:app", host="localhost", port=8008, reload=True, reload_excludes='data')
