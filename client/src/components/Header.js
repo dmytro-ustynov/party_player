@@ -1,16 +1,15 @@
 import Login from "./auth/Login/Login";
-import logoImage from "../images/logo_640.png"
+import BrandLogo from "./BrandLogo";
 
-export default function Header() {
+export default function Header(props) {
+    const {displayLogin = true} = props
+
     return (
         <header className="top-header">
             <div className="header-left-menu">
-                <img src={logoImage} alt={"logo"} className="image-logo"
-                     onClick={() => {
-                         window.location.replace("/")
-                     }}/>
+                <BrandLogo/>
             </div>
-            <Login/>
+            {displayLogin && <Login/>}
         </header>
     )
 }

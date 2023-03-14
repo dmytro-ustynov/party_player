@@ -42,14 +42,20 @@ def user_login(login: UserLoginSchema, response: Response):
     email = login.email_address
     password = login.password
     mongo_user = MM.query(User).get(email_address=email)
-    error_msg = 'not valid user or password'
+    error_msg = 'Not valid user or password'
     if not mongo_user:
         return {'result': False, 'details': error_msg}
     if not mongo_user.check_password(password):
         logger.warning(f'Logging user attempt failed: {email} - {password}')
         return {'result': False, 'details': error_msg}
+    user = {
+        'username': mongo_user.username,
+        'user_id': mongo_user.user_id,
+        'role': mongo_user.acc_level
+    }
     result = {**sign_jwt(mongo_user.user_id),
               **sign_jwt(mongo_user.user_id, seconds=3000, token_key='refresh_token'),
+              'user': user,
               'result': True}  # dict
     response.set_cookie(key='refresh_token', value=result.get('refresh_token', ''))
     logger.info(f'User logged in : {email}')
@@ -79,3 +85,10 @@ def refresh_token(request: Request, response: Response):
               'result': True}  # dict
     response.set_cookie(key='refresh_token', value=result.get('refresh_token', ''))
     return result
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.set_cookie(key='refresh_token', value='')
+    # unset_jwt_cookies(response)
+    return {"msg": "logout OK"}
