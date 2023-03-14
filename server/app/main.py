@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from server.app.audio import routes as audio_router
 from server.app.auth import routes as auth_router
+from server.app.image_service import routes as img_router
 
 app = FastAPI()
 
@@ -28,6 +29,7 @@ async def root():
 
 app.include_router(audio_router.router)
 app.include_router(auth_router.router)
+app.include_router(img_router.router)
 
 
 if __name__ == '__main__':
