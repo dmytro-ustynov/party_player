@@ -20,6 +20,7 @@ import {useAuthDispatch} from "../components/auth/context";
 export default function LoginPage() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const [remember, setRemember] = useState(false)
     const [error, setError] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
     const [loading, setLoading] = useState(false)
@@ -36,7 +37,7 @@ export default function LoginPage() {
             setErrorMessage(null)
             setLoading(true)
             try {
-                let response = await loginUser(dispatch, {email_address: username, password})
+                let response = await loginUser(dispatch, {username, password, remember})
                 if (!response.result) {
                     setError(true)
                     setErrorMessage(response.details)
@@ -63,7 +64,6 @@ export default function LoginPage() {
     return (
         <>
             <Grid container sx={{height: '100vh'}}>
-                {/*<CssBaseline/>*/}
                 <Grid
                     item
                     xs={false}
@@ -122,7 +122,9 @@ export default function LoginPage() {
                                 onChange={handleInputPassword}
                             />
                             <FormControlLabel
-                                control={<Checkbox value="remember" color="primary"/>}
+                                control={<Checkbox value={remember}
+                                                   color="primary"
+                                                   onChange={() => setRemember(!remember)}/>}
                                 label="Remember me"
                             />
                             <LoadingButton

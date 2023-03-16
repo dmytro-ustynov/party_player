@@ -1,15 +1,35 @@
 import bcrypt
 import uuid
 import json
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, validator
 
 
 # Pydantic Schemas
 class UserSchema(BaseModel):
-    username: str = Field(default=None)
-    email_address: EmailStr = Field(default=None)
-    password: str = Field(default=None)
+    user_id: str = Field(default=None)
+    username: str
+    email_address: str = Field(default=None)
+    password: str
+    first_name: str = Field(default=None)
+    last_name: str = Field(default=None)
     acc_level: str = Field(default=None)
+    email: str = None
+
+    @validator('email_address', pre=True, always=True)
+    def empty_string_to_none(cls, value):
+        if value == '':
+            return None
+        return value
+
+    @validator('email_address')
+    def validate_email_address(cls, value, values):
+        if value is None:
+            return None
+        if not isinstance(value, str):
+            raise ValueError('string required')
+        if len(value.strip()) == 0:
+            return None
+        return EmailStr.validate(value)
 
     class Config:
         schema = {
@@ -23,8 +43,9 @@ class UserSchema(BaseModel):
 
 
 class UserLoginSchema(BaseModel):
-    email_address: EmailStr = Field(default=None)
+    username: str = Field(default='')
     password: str = Field(default=None)
+    remember: bool = Field(default=False)
 
     class Config:
         schema = {
@@ -38,15 +59,17 @@ class UserLoginSchema(BaseModel):
 # Mongo models
 class User:
     __collection__ = 'users'
-    __slots__ = ('user_id', 'username', 'email_address', 'password',
+    __slots__ = ('user_id', 'username', 'email_address', 'password', 'first_name', 'last_name',
                  'acc_level', 'is_active', 'created_at', 'updated_at')
 
     def __init__(self, user_id=None, username=None, email_address=None, password=None,
-                 acc_level=None, is_active=None, **kwargs):
+                 acc_level=None, is_active=None, first_name=None, last_name=None, **kwargs):
         self.user_id = user_id
         self.username = username
         self.email_address = email_address
         self.password = password
+        self.first_name = first_name
+        self.last_name = last_name
         self.acc_level = acc_level
         self.is_active = is_active
         self.created_at = kwargs.get('created_at')
@@ -69,7 +92,7 @@ class User:
     @staticmethod
     def create_password(password_string: str):
         """
-        Creates a hashed password reaady to save in the DB
+        Creates a hashed password ready to save in the DB
         :param password_string: password in string format
         :return:
         """
@@ -78,12 +101,14 @@ class User:
     @classmethod
     def create_user_dict(cls, user: UserSchema):
         password = cls.create_password(user.password)
-        uid = str(uuid.uuid4())
+        uid = user.user_id or str(uuid.uuid4())
         return dict(user_id=uid,
                     username=user.username,
                     email_address=user.email_address,
                     password=password,
-                    acc_level=user.acc_level,
+                    first_name=user.first_name,
+                    last_name=user.last_name,
+                    acc_level=Roles.REGISTERED,
                     is_active=True
                     # created=datetime.now()
                     )

@@ -6,7 +6,7 @@ let user
 let token
 let uid
 const getCookie = function (name) {
-    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     if (match) return match[2];
 }
 
@@ -26,9 +26,7 @@ const init = async () => {
     const cookieToken = getCookie(ACCESS_TOKEN_KEY)
     token = cookieToken || storageToken
     if (!token) {
-        console.log('refreshing token')
-        const payload = {uid: user.user_id}
-        const tokenData = await fetcher({url, payload, credentials: true})
+        const tokenData = await fetcher({url, credentials: true, method: "GET"})
         token = tokenData.access_token ? tokenData.access_token : ''
     }
     localStorage.setItem(ACCESS_TOKEN_KEY, token)

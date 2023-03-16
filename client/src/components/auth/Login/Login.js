@@ -30,6 +30,12 @@ export default function Login() {
     const handleLogout = async () => {
         handleClose()
         logout(dispatch)
+        document.cookie.split(";").forEach(function (c) {
+            document.cookie = c.replace(/^ +/, "")
+                .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+        // reload homepage to flush saved uid
+        window.location.replace('/')
     }
 
     return (
