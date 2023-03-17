@@ -4,7 +4,6 @@ import aiofiles
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.responses import FileResponse
-from server.app.auth.models import User
 from server.app.auth.utils import get_current_user_id
 from server.app.auth.jwt_bearer import JWTBearer
 from server.app.dependencies import MM, UPLOAD_FOLDER
@@ -24,10 +23,10 @@ router = APIRouter(prefix='/audio',
 @router.get("/get_my_files", tags=['audio'],
             dependencies=[Depends(JWTBearer(auto_error=False))])
 def get_my_files(user_id: str = Depends(get_current_user_id)):
-    user = MM.query(User).get(user_id=user_id)
+    # user = MM.query(User).get(user_id=user_id)
     db_files = MM.query(AudioFile).find(filters={'user_id': user_id})       # generator object
     files = [f.to_dict() for f in db_files]
-    return {'result': True, 'details': f'ok, {user.username}, you have {len(files)} files', 'files': files}
+    return {'result': True, 'details': f'you have {len(files)} files', 'files': files}
 
 
 @router.post("/upload_file", dependencies=[Depends(JWTBearer(auto_error=False))])
@@ -87,7 +86,7 @@ async def get_audio(file_id: str):
 
 
 @router.get("/get_from_youtube", dependencies=[Depends(JWTBearer(auto_error=False))])
-async def get_youtube_audio(youtube_url: str, user_id: str = Depends(get_current_user_id)):
+async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id)):
     """
     Download audio from YouTube, and save to user's files in MongoDB.
     :param youtube_url: url of the YouTube video
@@ -95,9 +94,9 @@ async def get_youtube_audio(youtube_url: str, user_id: str = Depends(get_current
     :return:
     """
     try:
-        logger.info(f'Start loading youtube URL: {youtube_url}')
+        logger.info(f'Start loading youtube URL: {url}')
         ssl._create_default_https_context = ssl._create_unverified_context
-        yt = YouTube(youtube_url)
+        yt = YouTube(url)
         # video_length = yt.vid_info.get('videoDetails', {}).get('lengthSeconds')
         # pics = yt.vid_info.get('videoDetails', {}).get('thumbnail')  # dict
         # author = yt.vid_info.get('videoDetails', {}).get('author')
@@ -105,9 +104,11 @@ async def get_youtube_audio(youtube_url: str, user_id: str = Depends(get_current
         audio_streams = yt.streams.filter(type='audio').order_by('abr').desc()
         stream = audio_streams.first()
         file_id = str(uuid.uuid4())
+        author = yt.author
+        thumbnail = yt.thumbnail_url
         default_filename = stream.download(output_path=UPLOAD_FOLDER)
-        await create_file_for_yt(MM, default_filename, user_id, file_id)
+        newfile = await create_file_for_yt(MM, default_filename, user_id, file_id, title, author, thumbnail)
         logger.info(f'Youtube downloaded successfully: {file_id} - {title}')
-        return {'result': True, 'file_id': file_id, 'filename': title}
+        return {'result': True, 'file_id': file_id, 'filename': title, 'file': newfile}
     except Exception as e:
         return {'result': False, 'details': str(e)}

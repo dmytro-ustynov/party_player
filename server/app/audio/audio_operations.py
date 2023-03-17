@@ -367,7 +367,8 @@ async def update_duration(mongo_manager, file_id):
     # return print('File info updated : {}'.format(file_id) if result else 'ERROR UPDATING FILE ')
 
 
-async def create_file_for_yt(mongo_manager, file_path, user_id, file_id):
+async def create_file_for_yt(mongo_manager, file_path, user_id, file_id,
+                             author=None, title=None, thumbnail=None):
     sound = AudioSegment.from_file(file_path)
     duration = round(sound.duration_seconds, 3)
     folder, filename = os.path.split(file_path)
@@ -380,8 +381,16 @@ async def create_file_for_yt(mongo_manager, file_path, user_id, file_id):
                          duration=duration,
                          filename=filename,
                          file_path=new_path)
+    if author is not None:
+        audio_payload['author'] = author
+    if title is not None:
+        audio_payload['title'] = title
+    if thumbnail is not None:
+        audio_payload['thumbnail'] = thumbnail
     os.rename(file_path, new_path)
-    if mongo_manager.query(AudioFile).create(audio_payload):
+    result = mongo_manager.query(AudioFile).create(audio_payload)
+    if result:
         logger.info(f'YT file saved to DB: {file_id}')
     else:
         logger.error(f'Error saving file {filename}')
+    return result

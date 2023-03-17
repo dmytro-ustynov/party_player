@@ -11,7 +11,7 @@ import {
 import {useState} from "react";
 import {Roles, useAuthDispatch, useAuthState} from "../context";
 import {logout} from "../actions";
-
+import MenuIcon from '@mui/icons-material/Menu';
 
 export default function Login() {
     const state = useAuthState()
@@ -53,32 +53,55 @@ export default function Login() {
                                 href="/login"
                                 variant="contained">Login</Button>
                     </Tooltip>
-                </>) : (<Tooltip title="Account settings">
-                <IconButton sx={{ml: 2}}
-                            onClick={handleClick}
-                            color="primary">
-                    <AccountCircleIcon
-                        sx={{width: 32, height: 32}}
-                        color="primary"/>
-                </IconButton>
-            </Tooltip>)}
-            <Menu
-                id="fade-menu"
-                MenuListProps={{
-                    'aria-labelledby': 'fade-button',
-                }}
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                TransitionComponent={Fade}
-            >
-                <p style={{padding: "5px"}}>Signed as <strong>{user.username}</strong></p>
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
-                <MenuItem onClick={handleClose}>F.A.Q.</MenuItem>
-                <Divider/>
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-            </Menu>
+                    <IconButton sx={{ml: 2}}
+                                onClick={handleClick}
+                                color="primary">
+                        <MenuIcon
+                            sx={{width: 32, height: 32}}
+                        />
+                    </IconButton>
+                    <Menu
+                        id="fade-menu"
+                        MenuListProps={{
+                            'aria-labelledby': 'fade-button',
+                        }}
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handleClose}
+                        TransitionComponent={Fade}
+                    >
+                        <MenuItem onClick={handleClose}>Help</MenuItem>
+                        <MenuItem onClick={handleClose}>Why register?</MenuItem>
+                        <MenuItem onClick={handleClose}>F.A.Q.</MenuItem>
+                    </Menu>
+                </>) : (<>
+                <Tooltip title="Account settings">
+                    <IconButton sx={{ml: 2}}
+                                onClick={handleClick}
+                                color="primary">
+                        <AccountCircleIcon
+                            sx={{width: 32, height: 32}}
+                            color="primary"/>
+                    </IconButton>
+                </Tooltip>
+                <Menu
+                    id="fade-menu"
+                    MenuListProps={{
+                        'aria-labelledby': 'fade-button',
+                    }}
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    TransitionComponent={Fade}
+                >
+                    <p style={{padding: "5px"}}>Signed as <strong>{user.username}</strong></p>
+                    <MenuItem onClick={handleClose}>Profile</MenuItem>
+                    <MenuItem onClick={handleClose}>My account</MenuItem>
+                    <MenuItem onClick={handleClose}>F.A.Q.</MenuItem>
+                    <Divider/>
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </Menu>
+            </>)}
         </div>
     )
 }
