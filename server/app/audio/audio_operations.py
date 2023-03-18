@@ -391,6 +391,7 @@ async def create_file_for_yt(mongo_manager, file_path, user_id, file_id,
     result = mongo_manager.query(AudioFile).create(audio_payload)
     if result:
         logger.info(f'YT file saved to DB: {file_id}')
+        return audio_payload
     else:
         logger.error(f'Error saving file {filename}')
-    return result
+        return {}

@@ -38,8 +38,10 @@ export default function FileCard(props) {
 
     useEffect(() => {
         const updateCurrentTime = () => {
-            const time = audioRef.current.currentTime.toFixed(2)
-            setCurrentTime(time);
+            const time = player.currentTime.toFixed(1)
+            if (!player.paused) {
+                setCurrentTime(time);
+            }
             setProgress(Math.round(100 * time / file.duration, 1))
         };
         if (player) {
@@ -62,6 +64,7 @@ export default function FileCard(props) {
         if (player) {
             player.pause()
             player.currentTime = 0
+            setCurrentTime(0)
         }
     }
 
@@ -81,12 +84,12 @@ export default function FileCard(props) {
     const controlsProps = {height: 28, width: 28}
     return (
         <div key={file.file_id}>
-            <Card sx={{display: 'flex', width: '10rem', borderRadius: "8px"}}>
+            <Card className="file-card">
                 <audio src={BASE_URL + "/audio/get_audio?file_id=" + file.file_id}
                        ref={audioRef}
                 />
                 <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                    <CardContent sx={{flex: '1 0 auto'}}>
+                    <CardContent className="file-card-title">
                         <Typography component="div" variant="p">
                             {file.filename}
                         </Typography>
@@ -98,20 +101,21 @@ export default function FileCard(props) {
                         <LinearProgress variant="determinate" value={progress}/>
                     </Box>
                     <Box sx={{display: 'flex', alignItems: 'center', pl: 1, pb: 1}}>
-                        <IconButton onClick={handleStopClick}>
+                        <IconButton onClick={handleStopClick} color='primary'>
                             <StopCircleOutlined sx={controlsProps}/>
                         </IconButton>
                         {playing ? (
-                            <IconButton onClick={() => player.pause()}>
+                            <IconButton onClick={() => player.pause()} color='primary'>
                                 <PauseCircleOutlineIcon sx={controlsProps}/>
                             </IconButton>
                         ) : (
-                            <IconButton onClick={() => player.play()}>
+                            <IconButton onClick={() => player.play()} color='primary'>
                                 <PlayArrowIcon sx={controlsProps}/>
                             </IconButton>
                         )}
-                        {currentTime !== 0 &&
-                            <Typography variant="body2">{currentTime}</Typography>}
+                        {currentTime !== 0 && <div style={{marginLeft: 'auto', paddingRight: '15px'}}>
+                            <Typography variant="body2">{currentTime}</Typography>
+                        </div>}
                     </Box>
                 </Box>
             </Card>

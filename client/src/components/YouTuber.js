@@ -55,17 +55,18 @@ export default function YouTuber(props) {
             console.log('download complete : ')
             setOpen(false)
             // post load logic
-
+            window.location.replace('/')
         } else {
             console.log('error loading')
         }
         console.log(req)
         setLoading(false)
+        handleClose()
     }
 
     return (
-        <Grid item>
-            <Paper sx={{m: 2, p: 4}} elevation={5}>
+        <Grid item sx={{width: '16rem', height: '16rem'}} >
+            <Paper   sx={{m: 1, p: 1,}} elevation={5}>
                 <IconButton title={"Load sound from Youtube"} onClick={() => setOpen(true)}>
                     <YouTubeIcon {...btnProps} color='error'/>
                 </IconButton>

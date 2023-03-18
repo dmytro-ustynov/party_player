@@ -8,7 +8,6 @@
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     content: "";
     display: block;
-    height: 100px;
     background-color: #eeff;
 }
 
@@ -52,4 +51,33 @@ footer {
     background-color: #282c34;
     color: wheat;
     min-height: var(--footer-height);
+}
+
+.dropzone {
+    border: 3px dashed deepskyblue;
+    margin: 0;
+    padding: 0;
+    height: 171px;
+}
+
+.file-card {
+    display: flex;
+    width: 13rem;
+    height: 12rem;
+    border-radius: 1rem;
+}
+
+.file-card-title {
+    flex: 1 0 auto;
+
+    width: 11rem; /* fixed width */
+    height: 6.5rem; /* fixed height */
+    overflow: hidden; /* hide overflow content */
+    max-height: 200px; /* maximum height for the card */
+    max-width: 300px; /* maximum width for the card */
+}
+
+.file-card-title:hover {
+    overflow: visible; /* show hidden content on hover */
+    filter: none; /* remove the blur effect on hover */
 }

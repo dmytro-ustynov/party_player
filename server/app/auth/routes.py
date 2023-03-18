@@ -31,7 +31,7 @@ def user_signup(user: UserSchema):
         if found.username == user.username:
             return {'result': False,
                     'details': 'username already registered'}
-        if found.email_address == user.email_address:
+        if user.email_address and found.email_address == user.email_address:
             return {'result': False,
                     'details': 'email already registered'}
         if found.user_id == user.user_id:

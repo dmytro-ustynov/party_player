@@ -11,8 +11,7 @@ export default function RecentFiles() {
         const user = JSON.parse(localStorage.getItem(CURRENT_USER_KEY))
         if (Boolean(user)) {
             const url = BASE_URL + "/audio/get_my_files?user_id=" + user.user_id
-            const req = await fetcher({url, method: "GET"})
-            console.log(req)
+            const req = await fetcher({url, method: "GET", credentials: true})
             if (req.result === true) {
                 setRecentFiles(req.files)
             }
@@ -25,20 +24,20 @@ export default function RecentFiles() {
     }, [])
 
     return (
-        <div>
+        <div style={{justifyContent: 'center'}}>
             <Typography variant={"h5"}>Recent files</Typography>
             {recentFiles && recentFiles.length > 0 ? (
-                <Grid container ml={4} mr={4}>
+                <Grid container ml={4} mr={4} sx={{display: 'flex', maxWidth: '75%'}}>
                     {recentFiles.map(file => {
                         return (
-                            <Grid item key={file.file_id}>
+                            <Grid item key={file.file_id} m={1} sx={{flex: "1 0 18%"}}>
                                 <FileCard file={file}/>
                             </Grid>
                         )
                     })}
                 </Grid>
             ) : (
-                <div> start creating your library with recording voice, loading audio from your PC or downloading
+                <div> Start creating your library with recording voice, loading audio from your PC or downloading
                     sound!</div>)}
         </div>
     )

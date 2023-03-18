@@ -20,17 +20,16 @@ router = APIRouter(prefix='/audio',
                    tags=['audio'])
 
 
-@router.get("/get_my_files", tags=['audio'],
-            dependencies=[Depends(JWTBearer(auto_error=False))])
-def get_my_files(user_id: str = Depends(get_current_user_id)):
+@router.get("/get_my_files", tags=['audio'])
+def get_my_files(user_id: str):
     # user = MM.query(User).get(user_id=user_id)
     db_files = MM.query(AudioFile).find(filters={'user_id': user_id})       # generator object
     files = [f.to_dict() for f in db_files]
     return {'result': True, 'details': f'you have {len(files)} files', 'files': files}
 
 
-@router.post("/upload_file", dependencies=[Depends(JWTBearer(auto_error=False))])
-async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_user_id)):
+@router.post("/upload_file")
+async def upload_file(audiofile: UploadFile, user_id: str):
     if audiofile.content_type != 'audio/mpeg' and not AudioFile.allowed_file(audiofile.filename):
         return {'result': False, 'details': 'file not accepted'}
     audio_payload = {**AudioFile.create_file_payload(audiofile),
@@ -97,7 +96,7 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
         logger.info(f'Start loading youtube URL: {url}')
         ssl._create_default_https_context = ssl._create_unverified_context
         yt = YouTube(url)
-        # video_length = yt.vid_info.get('videoDetails', {}).get('lengthSeconds')
+        video_length = yt.vid_info.get('videoDetails', {}).get('lengthSeconds')
         # pics = yt.vid_info.get('videoDetails', {}).get('thumbnail')  # dict
         # author = yt.vid_info.get('videoDetails', {}).get('author')
         title = yt.vid_info.get('videoDetails', {}).get('title')
@@ -107,8 +106,8 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
         author = yt.author
         thumbnail = yt.thumbnail_url
         default_filename = stream.download(output_path=UPLOAD_FOLDER)
-        newfile = await create_file_for_yt(MM, default_filename, user_id, file_id, title, author, thumbnail)
+        await create_file_for_yt(MM, default_filename, user_id, file_id, title, author, thumbnail)
         logger.info(f'Youtube downloaded successfully: {file_id} - {title}')
-        return {'result': True, 'file_id': file_id, 'filename': title, 'file': newfile}
+        return {'result': True, 'file_id': file_id, 'filename': title, 'duration': video_length}
     except Exception as e:
         return {'result': False, 'details': str(e)}
