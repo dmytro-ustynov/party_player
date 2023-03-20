@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import BrandLogo from "../components/BrandLogo";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {BASE_URL, CURRENT_USER_KEY, IMAGE_URL} from "../utils/constants";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -29,6 +29,10 @@ function validateEmail(email) {
 function PasswordField({value, setValue, label, error, errorMessage}) {
     const [showPassword, setShowPassword] = useState(false);
     const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+    useEffect(()=>{
+        document.title = 'SounDream | Register'
+    }, [])
 
     return (
         <TextField

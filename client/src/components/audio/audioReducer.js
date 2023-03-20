@@ -20,6 +20,11 @@ const AudioReducer = ( audioState, action ) => {
                 ...audioState,
                 files: [...audioState.files, action.file]
             }
+        case AudioAction.SET_SOUND:
+            return {
+                ...audioState,
+                sound: action.soundId
+            }
         default:
             return audioState
     }

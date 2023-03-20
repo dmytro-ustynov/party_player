@@ -22,7 +22,6 @@ export default function RecentFiles() {
                 }
             }
         }
-        document.title = 'SounDream | Home'
         loadRecentFiles()
     }, [dispatch])
 

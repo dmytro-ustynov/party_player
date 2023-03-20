@@ -12,6 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import YouTuber from "../components/YouTuber";
 import RecentFiles from "../components/RecentFiles";
 import FileUploader from "../components/FileUploader";
+import {useEffect} from "react";
 
 
 export default function HomePage() {
@@ -23,6 +24,9 @@ export default function HomePage() {
             borderRadius: "5rem",
         }
     }
+    useEffect(() => {
+        document.title = 'SounDream | Home'
+    }, [])
 
     return (
         <>
@@ -37,7 +41,7 @@ export default function HomePage() {
                     </Grid>
                 </Grid>
                 <Grid container justifyContent="center" p={3}>
-                    <Grid item sx={{width: '16rem', height: '16rem'}} >
+                    <Grid item sx={{width: '16rem'}}>
                         <Paper
                             sx={{m: 1, p: 1,}}
                             elevation={5}>
@@ -51,7 +55,7 @@ export default function HomePage() {
                     {/* grid item root element */}
                     <YouTuber btnProps={btnProps}/>
                 </Grid>
-                <RecentFiles />
+                <RecentFiles/>
             </div>
             <Footer/>
         </>

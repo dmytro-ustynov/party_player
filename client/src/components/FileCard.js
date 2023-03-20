@@ -4,6 +4,9 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
 import {StopCircleOutlined} from "@mui/icons-material";
 import {BASE_URL} from "../utils/constants";
+import {useAudioState} from "./audio/audioReducer";
+import {AudioAction} from "./audio/actions";
+import {useNavigate} from 'react-router-dom';
 
 function formatDuration(duration) {
     duration = parseFloat(duration)
@@ -33,7 +36,8 @@ export default function FileCard(props) {
     const [player, setPlayer] = useState(null)
     const [progress, setProgress] = useState(0);
     const [volume, setVolume] = useState(100)
-
+    const {dispatch} = useAudioState()
+    const navigate = useNavigate()
 
     useEffect(() => {
         setPlayer(audioRef.current)
@@ -86,16 +90,24 @@ export default function FileCard(props) {
         setVolume(event.target.value)
         player.volume = parseFloat(event.target.value / 100)
     };
+    const handleDoubleClick = () =>{
+        dispatch({type: AudioAction.SET_SOUND, soundId: file.file_id})
+        // window.location.replace('/redactor')
+        navigate('/redactor')
+    }
     const controlsProps = {height: 28, width: 28}
     return (
         <div key={file.file_id}>
             <Card className="file-card">
-                <audio src={BASE_URL + "/audio/get_audio?file_id=" + file.file_id}
+                <audio src={BASE_URL + "/audio/get_audio?file_id=" + file.file_id} preload="none"
                        ref={audioRef}
                 />
                 <div style={{display: 'flex', flexDirection: 'column'}}>
                     <CardContent className="file-card-title">
-                        <Typography component="div" variant="p">
+                        <Typography component="div" variant="p"
+                                    onDoubleClick={handleDoubleClick}
+                                    sx={{cursor: 'pointer'}}
+                                    title="Double click to open in redactor">
                             {file.filename}
                         </Typography>
                         <Typography variant="subtitle1" color="text.secondary"

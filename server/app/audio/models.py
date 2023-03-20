@@ -10,7 +10,7 @@ from server.app.dependencies import ALLOWED_FORMATS, UPLOAD_FOLDER
 
 class AudioFile:
     __collection__ = 'files'
-    __slots__ = ('file_id', 'filename', 'ext', 'file_path', 'user_id', 'duration',
+    __slots__ = ('file_id', 'filename', 'ext', 'file_path', 'user_id', 'duration', 'author', 'thumbnail', 'title',
                  'created_at', 'updated_at')
 
     def __init__(self, file_id=None, filename=None, ext=None, file_path=None, user_id=None, duration=None,
@@ -24,6 +24,9 @@ class AudioFile:
         self.file_path = file_path or self.create_path()
         self.user_id = user_id
         self.duration = duration
+        self.author = kwargs.get('author')
+        self.thumbnail = kwargs.get('thumbnail')
+        self.title = kwargs.get('title')
         self.created_at = created_at or datetime.now()
         self.updated_at = updated_at or datetime.now()
 

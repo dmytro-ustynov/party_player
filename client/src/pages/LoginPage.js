@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import LoadingButton from '@mui/lab/LoadingButton';
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {IMAGE_URL} from "../utils/constants";
 import {loginUser} from "../components/auth/actions";
 import {useAuthDispatch} from "../components/auth/context";
@@ -28,6 +28,9 @@ export default function LoginPage() {
     // const state = useAuthState()
     const dispatch = useAuthDispatch()
 
+    useEffect(()=>{
+        document.title = 'SounDream | Log In'
+    }, [])
     const handleSubmit = async () => {
         if (!(username && password)) {
             setError(true)

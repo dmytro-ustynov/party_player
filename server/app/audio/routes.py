@@ -20,6 +20,12 @@ router = APIRouter(prefix='/audio',
                    tags=['audio'])
 
 
+@router.get("/", tags=['audio'])
+async def file_info(file_id: str):
+    file = MM.query(AudioFile).get(file_id=file_id)
+    return file.to_dict()
+
+
 @router.get("/get_my_files", tags=['audio'])
 def get_my_files(user_id: str):
     # user = MM.query(User).get(user_id=user_id)

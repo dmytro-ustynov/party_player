@@ -38,7 +38,7 @@ function validateAudioFile(file) {
     return null;
 }
 
-const defaultTitle = 'drag here'
+const defaultTitle = 'drag file here'
 export default function FileUploader(props) {
     const [file, setFile] = useState([])
     const [title, setTitle] = useState(defaultTitle)

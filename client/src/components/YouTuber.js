@@ -68,7 +68,7 @@ export default function YouTuber(props) {
     }
 
     return (
-        <Grid item sx={{width: '16rem', height: '16rem'}} >
+        <Grid item sx={{width: '16rem'}} >
             <Paper   sx={{m: 1, p: 1,}} elevation={5}>
                 <IconButton title={"Load sound from Youtube"} onClick={() => setOpen(true)}>
                     <YouTubeIcon {...btnProps} color='error'/>
