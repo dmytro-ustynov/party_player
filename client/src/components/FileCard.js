@@ -6,7 +6,11 @@ import {StopCircleOutlined} from "@mui/icons-material";
 import {BASE_URL} from "../utils/constants";
 
 function formatDuration(duration) {
-    if (duration < 60) {
+    if (duration < 5) {
+        return duration.toFixed(2) + "s";
+    } else if (duration < 10) {
+        return duration.toFixed(1) + "s";
+    } else if (duration < 60) {
         return duration.toFixed(0) + "s";
     } else if (duration < 3600) {
         const minutes = Math.floor(duration / 60);
@@ -88,16 +92,18 @@ export default function FileCard(props) {
                 <audio src={BASE_URL + "/audio/get_audio?file_id=" + file.file_id}
                        ref={audioRef}
                 />
-                <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                <div style={{display: 'flex', flexDirection: 'column'}}>
                     <CardContent className="file-card-title">
                         <Typography component="div" variant="p">
                             {file.filename}
                         </Typography>
-                        <Typography variant="subtitle1" color="text.secondary" component="div">
+                        <Typography variant="subtitle1" color="text.secondary"
+                                    component="div"
+                                    sx={{marginTop: "auto"}}>
                             {formatDuration(file.duration)}
                         </Typography>
                     </CardContent>
-                    <Box sx={{width: '100%'}}>
+                    <Box>
                         <LinearProgress variant="determinate" value={progress}/>
                     </Box>
                     <Box sx={{display: 'flex', alignItems: 'center', pl: 1, pb: 1}}>
@@ -117,7 +123,7 @@ export default function FileCard(props) {
                             <Typography variant="body2">{currentTime}</Typography>
                         </div>}
                     </Box>
-                </Box>
+                </div>
             </Card>
         </div>
     )

@@ -364,7 +364,7 @@ async def update_duration(mongo_manager, file_id):
         logger.info(f'File info updated : {file_id}')
     else:
         logger.error(f'ERROR UPDATING  :{file_id}')
-    # return print('File info updated : {}'.format(file_id) if result else 'ERROR UPDATING FILE ')
+    return round(sound.duration_seconds, 3)
 
 
 async def create_file_for_yt(mongo_manager, file_path, user_id, file_id,
@@ -395,3 +395,13 @@ async def create_file_for_yt(mongo_manager, file_path, user_id, file_id,
     else:
         logger.error(f'Error saving file {filename}')
         return {}
+
+
+async def export(**kwargs):
+    # todo: implement this export function
+    mongo_manager = kwargs.get('mongo_manager')
+    file_id = kwargs.get('source')
+    doc = mongo_manager.query(AudioFile).get(file_id=file_id)
+    fpath = doc.file_path
+    sound = AudioSegment.from_file(fpath)
+    sound.export('file.mp3')

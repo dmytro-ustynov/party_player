@@ -42,9 +42,11 @@ async def upload_file(audiofile: UploadFile, user_id: str):
         await out_file.write(content)       # async write
 
     if MM.query(AudioFile).create(audio_payload):
-        await update_duration(MM, file_id)
+        duration = await update_duration(MM, file_id)
         logger.info(f'User uploaded new file: user {user_id} : file {file_id}')
-        return {'result': True, 'file_id': file_id}
+        return {'result': True, 'file': {'file_id': file_id,
+                                         'filename': audiofile.filename,
+                                         'duration': duration}}
     return {'result': False, 'details': 'upload failed'}
 
 
@@ -108,6 +110,6 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
         default_filename = stream.download(output_path=UPLOAD_FOLDER)
         await create_file_for_yt(MM, default_filename, user_id, file_id, title, author, thumbnail)
         logger.info(f'Youtube downloaded successfully: {file_id} - {title}')
-        return {'result': True, 'file_id': file_id, 'filename': title, 'duration': video_length}
+        return {'result': True, 'file': {'file_id': file_id, 'filename': title, 'duration': video_length}}
     except Exception as e:
         return {'result': False, 'details': str(e)}

@@ -62,22 +62,25 @@ footer {
 
 .file-card {
     display: flex;
-    width: 13rem;
-    height: 12rem;
+    width: 14rem;
+    height: 10rem;
     border-radius: 1rem;
 }
 
 .file-card-title {
+    display: flex;
+    flex-direction: column;
     flex: 1 0 auto;
-
-    width: 11rem; /* fixed width */
-    height: 6.5rem; /* fixed height */
+    width: 12rem; /* fixed width */
+    height: 5rem; /* fixed height */
     overflow: hidden; /* hide overflow content */
-    max-height: 200px; /* maximum height for the card */
-    max-width: 300px; /* maximum width for the card */
+    padding: 16px 16px 2px;
 }
 
 .file-card-title:hover {
     overflow: visible; /* show hidden content on hover */
     filter: none; /* remove the blur effect on hover */
+}
+.duration-info{
+    margin-top: auto;
 }

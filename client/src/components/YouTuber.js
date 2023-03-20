@@ -15,6 +15,8 @@ import {useState} from "react";
 import LoadingButton from "@mui/lab/LoadingButton";
 import {YOUTUBE_LOAD_URL} from "../utils/constants";
 import {fetcher} from "../utils/fetch_utils";
+import {useAudioState} from "./audio/audioReducer";
+import {AudioAction} from "./audio/actions";
 
 export default function YouTuber(props) {
     const {btnProps} = props
@@ -23,6 +25,7 @@ export default function YouTuber(props) {
     const [disabled, setDisabled] = useState(true);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const {dispatch} = useAudioState()
 
     const handleClose = () => {
         setOpen(false);
@@ -55,7 +58,7 @@ export default function YouTuber(props) {
             console.log('download complete : ')
             setOpen(false)
             // post load logic
-            window.location.replace('/')
+            dispatch({type: AudioAction.ADD_FILE, file: req.file})
         } else {
             console.log('error loading')
         }

@@ -8,6 +8,8 @@ import {useCallback, useState} from "react";
 import {UPLOAD_FILE_URL} from "../utils/constants";
 import {fetcher} from "../utils/fetch_utils";
 import {useAuthState} from "./auth/context";
+import {useAudioState} from "./audio/audioReducer";
+import {AudioAction} from "./audio/actions";
 
 // const fileTypes = ["MP3", "OGG", "FLAC", "WAV"];
 
@@ -36,12 +38,14 @@ function validateAudioFile(file) {
     return null;
 }
 
+const defaultTitle = 'drag here'
 export default function FileUploader(props) {
     const [file, setFile] = useState([])
-    const [title, setTitle] = useState('drag here')
+    const [title, setTitle] = useState(defaultTitle)
     const [forbidden, setForbidden] = useState(true)
     const {btnProps} = props
     const state = useAuthState()
+    const {audio, dispatch} = useAudioState()
     const user = state.user
 
 
@@ -70,7 +74,10 @@ export default function FileUploader(props) {
         // body.append('user_id', user.user_id)
         const req = await fetcher({url, credentials: true, body})
         if (req.result === true) {
-            window.location.replace('/')
+            // window.location.replace('/')
+            dispatch({type: AudioAction.ADD_FILE, file: req.file})
+            setForbidden(true)
+            setTitle(defaultTitle)
         } else {
             console.log('error uploading')
         }
