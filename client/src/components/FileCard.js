@@ -1,4 +1,4 @@
-import {Box, Card, CardContent, IconButton, LinearProgress, Typography} from "@mui/material";
+import {Box, Card, CardContent, IconButton, LinearProgress, Slider, Typography} from "@mui/material";
 import {useEffect, useRef, useState} from "react";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
@@ -6,6 +6,7 @@ import {StopCircleOutlined} from "@mui/icons-material";
 import {BASE_URL} from "../utils/constants";
 
 function formatDuration(duration) {
+    duration = parseFloat(duration)
     if (duration < 5) {
         return duration.toFixed(2) + "s";
     } else if (duration < 10) {
@@ -31,6 +32,7 @@ export default function FileCard(props) {
     const audioRef = useRef(null);
     const [player, setPlayer] = useState(null)
     const [progress, setProgress] = useState(0);
+    const [volume, setVolume] = useState(100)
 
 
     useEffect(() => {
@@ -42,7 +44,7 @@ export default function FileCard(props) {
 
     useEffect(() => {
         const updateCurrentTime = () => {
-            const time = player.currentTime.toFixed(1)
+            const time = player.currentTime > 300 ? player.currentTime.toFixed(0) : player.currentTime.toFixed(1)
             if (!player.paused) {
                 setCurrentTime(time);
             }
@@ -51,7 +53,6 @@ export default function FileCard(props) {
         if (player) {
             player.addEventListener("play", handlePlay);
             player.addEventListener("pause", handlePause);
-            player.addEventListener("volumechange", handleVolumeChange);
             player.addEventListener("timeupdate", updateCurrentTime);
         }
 
@@ -59,7 +60,6 @@ export default function FileCard(props) {
             if (player) {
                 player.removeEventListener("play", handlePlay);
                 player.removeEventListener("pause", handlePause);
-                player.removeEventListener("volumechange", handleVolumeChange);
                 player.removeEventListener('timeupdate', updateCurrentTime);
             }
         };
@@ -82,8 +82,9 @@ export default function FileCard(props) {
         setPlaying(false)
     };
 
-    const handleVolumeChange = () => {
-        // Handle the volume change event
+    const handleVolumeChange = (event) => {
+        setVolume(event.target.value)
+        player.volume = parseFloat(event.target.value / 100)
     };
     const controlsProps = {height: 28, width: 28}
     return (
@@ -107,7 +108,7 @@ export default function FileCard(props) {
                         <LinearProgress variant="determinate" value={progress}/>
                     </Box>
                     <Box sx={{display: 'flex', alignItems: 'center', pl: 1, pb: 1}}>
-                        <IconButton onClick={handleStopClick} color='primary'>
+                        <IconButton onClick={handleStopClick} color='primary' sx={{p: 0.5}}>
                             <StopCircleOutlined sx={controlsProps}/>
                         </IconButton>
                         {playing ? (
@@ -119,6 +120,11 @@ export default function FileCard(props) {
                                 <PlayArrowIcon sx={controlsProps}/>
                             </IconButton>
                         )}
+                        <Slider size="small"
+                                aria-label="Volume"
+                                value={volume}
+                                onChange={handleVolumeChange}
+                                sx={{width: '60px'}}/>
                         {currentTime !== 0 && <div style={{marginLeft: 'auto', paddingRight: '15px'}}>
                             <Typography variant="body2">{currentTime}</Typography>
                         </div>}

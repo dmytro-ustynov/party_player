@@ -22,10 +22,9 @@ export default function RecentFiles() {
                 }
             }
         }
-
         document.title = 'SounDream | Home'
         loadRecentFiles()
-    }, [])
+    }, [dispatch])
 
     return (
         <div style={{justifyContent: 'center'}}>

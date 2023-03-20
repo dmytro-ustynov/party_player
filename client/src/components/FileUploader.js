@@ -45,7 +45,7 @@ export default function FileUploader(props) {
     const [forbidden, setForbidden] = useState(true)
     const {btnProps} = props
     const state = useAuthState()
-    const {audio, dispatch} = useAudioState()
+    const {dispatch} = useAudioState()
     const user = state.user
 
 
