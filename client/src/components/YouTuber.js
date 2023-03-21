@@ -19,7 +19,7 @@ import {useAudioState} from "./audio/audioReducer";
 import {AudioAction} from "./audio/actions";
 
 export default function YouTuber(props) {
-    const {btnProps} = props
+    const {styles} = props
     const [open, setOpen] = useState(false);
     const [link, setLink] = useState('');
     const [disabled, setDisabled] = useState(true);
@@ -68,10 +68,10 @@ export default function YouTuber(props) {
     }
 
     return (
-        <Grid item sx={{width: '16rem'}} >
-            <Paper   sx={{m: 1, p: 1,}} elevation={5}>
+        <Grid item {...styles.gridProps} >
+            <Paper {...styles.paperProps}>
                 <IconButton title={"Load sound from Youtube"} onClick={() => setOpen(true)}>
-                    <YouTubeIcon {...btnProps} color='error'/>
+                    <YouTubeIcon {...styles.btnProps} color='error'/>
                 </IconButton>
             </Paper>
             <Dialog open={open} onClose={handleClose}>

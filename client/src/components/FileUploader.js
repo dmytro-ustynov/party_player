@@ -43,7 +43,7 @@ export default function FileUploader(props) {
     const [file, setFile] = useState([])
     const [title, setTitle] = useState(defaultTitle)
     const [forbidden, setForbidden] = useState(true)
-    const {btnProps} = props
+    const {styles} = props
     const state = useAuthState()
     const {dispatch} = useAudioState()
     const user = state.user
@@ -86,13 +86,13 @@ export default function FileUploader(props) {
 
 
     return (
-        <Grid item sx={{width: '16rem'}} >
-            <Paper  sx={{m: 1,p:1}}  elevation={5}>
+        <Grid item {...styles.gridProps}>
+            <Paper  {...styles.paperProps}>
                 {forbidden ? (
                     <div {...getRootProps({className: "dropzone"})} title="Drop audio file here">
                         <input  {...getInputProps({accept: "audio/*"})}/>
                         <IconButton title={"Click to open audio file"}>
-                            <AddCircleOutlineIcon  {...btnProps} sx={{fontSize: "7rem"}}/>
+                            <AddCircleOutlineIcon  {...styles.btnProps} sx={{fontSize: "7rem"}}/>
                         </IconButton>
                         <Typography variant="subtitle1" color="text.secondary"> {isDragActive ? "drop" : title} </Typography>
                     </div>

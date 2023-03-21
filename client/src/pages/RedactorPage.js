@@ -69,7 +69,7 @@ export default function RedactorPage() {
                                                         <TableCell> {key} </TableCell>
                                                         {key === 'thumbnail' ?
                                                             <TableCell>
-                                                                <img src={value}
+                                                                <img src={value} alt={'thumb'}
                                                                      style={{maxWidth: "320px"}}/>
                                                             </TableCell> :
                                                             (<TableCell> {value} </TableCell>)}

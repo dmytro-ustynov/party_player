@@ -2,10 +2,8 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import {
     Grid,
-    Paper,
     TextField,
 } from "@mui/material";
-import MicIcon from '@mui/icons-material/Mic';
 import SearchIcon from '@mui/icons-material/Search';
 
 import IconButton from '@mui/material/IconButton';
@@ -13,15 +11,28 @@ import YouTuber from "../components/YouTuber";
 import RecentFiles from "../components/RecentFiles";
 import FileUploader from "../components/FileUploader";
 import {useEffect} from "react";
-
+import MicRecorder from "../components/MicRecorder";
 
 export default function HomePage() {
+    const styles = {
+        btnProps: {
+            color: 'primary',
+            sx: {
+                fontSize: "10rem",
+                borderRadius: "5rem",
+            }
+        },
+        gridProps: {
+            sx: {width: '16rem'}
+        },
+        paperProps: {
+            sx: {
+                m: 1,
+                p: 1,
+                borderRadius: "0.8rem",
+            },
 
-    const btnProps = {
-        color: "primary",
-        sx: {
-            fontSize: "10rem",
-            borderRadius: "5rem",
+            elevation: 6
         }
     }
     useEffect(() => {
@@ -41,19 +52,10 @@ export default function HomePage() {
                     </Grid>
                 </Grid>
                 <Grid container justifyContent="center" p={3}>
-                    <Grid item sx={{width: '16rem'}}>
-                        <Paper
-                            sx={{m: 1, p: 1,}}
-                            elevation={5}>
-                            <IconButton title={"Start recording"}>
-                                <MicIcon {...btnProps} />
-                            </IconButton>
-                        </Paper>
-                    </Grid>
-                    {/* grid item root element */}
-                    <FileUploader btnProps={btnProps}/>
-                    {/* grid item root element */}
-                    <YouTuber btnProps={btnProps}/>
+                    {/* grid item root element for each child below: */}
+                    <MicRecorder styles={styles}/>
+                    <FileUploader styles={styles}/>
+                    <YouTuber styles={styles}/>
                 </Grid>
                 <RecentFiles/>
             </div>
