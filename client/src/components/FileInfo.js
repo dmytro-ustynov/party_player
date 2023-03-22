@@ -2,7 +2,7 @@ import {Grid, Table, TableBody, TableCell, TableRow} from "@mui/material";
 
 export default function FileInfo(props) {
     const {info} = props
-    let forbiddenKeys = ["updated_at", "file_path", "user_id"]
+    let forbiddenKeys = ["updated_at", "file_path", "user_id", "deleted"]
     return (
         <Grid container>
             <Grid item>

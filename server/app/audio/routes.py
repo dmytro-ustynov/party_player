@@ -9,7 +9,7 @@ from server.app.auth.utils import get_current_user_id
 from server.app.auth.jwt_bearer import JWTBearer
 from server.app.dependencies import MM, UPLOAD_FOLDER
 from server.app.dependencies import logger
-from server.app.audio.models import AudioFile, DownloadFileSchema
+from server.app.audio.models import AudioFile, DownloadFileSchema, UpdateFilenameSchema
 from server.app.audio.audio_operations import update_duration
 from server.app.audio.audio_operations import generate_stream
 from server.app.audio.audio_operations import create_file_for_yt
@@ -79,6 +79,22 @@ async def stream_file(file_id: str):
             return {'result': False, 'details': 'file not found'}
     except Exception as e:
         raise e
+
+
+@router.post("/change_filename", dependencies=[Depends(JWTBearer(auto_error=False))])
+async def update_file_name(update: UpdateFilenameSchema, user_id: str = Depends(get_current_user_id)):
+    file_id = update.file_id
+    filename = update.filename
+    db_file = MM.query(AudioFile).get(file_id=file_id)
+    if not db_file:
+        return {'result': False, 'details': 'file not found'}
+    if db_file.user_id != user_id:
+        return {'result': False, 'details': 'not allowed to change other files'}
+    result = MM.query(AudioFile).update(filters={'file_id': file_id}, payload={'filename': filename})
+    if result:
+        logger.info(f'User changed filename: user {user_id} ; file {file_id}; filename {filename}')
+        return {'result': True, 'filename': filename}
+    return {'result': False, 'details': "filename wasn't updated"}
 
 
 @router.get("/get_audio")  # dependencies=[Depends(JWTBearer(auto_error=False))])

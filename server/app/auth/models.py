@@ -48,10 +48,10 @@ class UserLoginSchema(BaseModel):
     remember: bool = Field(default=False)
 
     class Config:
-        schema = {
-            'user_demo': {
-                'email_address': 'email@addr.ess',
-                'password': 'password',
+        schema_extra = {
+            'example': {
+                'username': 'admin',
+                'password': '12345',
             }
         }
 

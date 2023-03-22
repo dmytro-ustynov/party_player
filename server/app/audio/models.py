@@ -1,7 +1,8 @@
 import os
+import re
 import uuid
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, constr, validator
 from pydub import AudioSegment
 from pydub.utils import mediainfo
 import mimetypes
@@ -85,3 +86,28 @@ class AudioFile:
 class DownloadFileSchema(BaseModel):
     file_id: str
     format: AudioFormats
+
+
+class UpdateFilenameSchema(BaseModel):
+    file_id: str
+    filename: str
+    class Config:
+        schema_extra = {
+            'example': {
+                'file_id': '1de44018-7856-4a2a-b5ea-ff88b4078d54',
+                'filename': 'This is Awesome Music Track!',
+            }
+        }
+
+    @validator('filename')
+    def filename_length(cls, value):
+        if len(value) > 200:
+            raise ValueError('filename is too long (max 200 characters)')
+        return value
+
+    @validator('filename')
+    def filename_special_chars(cls, value):
+        if not re.match(r'^[\w\-. ]+$', value):
+            raise ValueError('filename contains special characters')
+        return value
+
