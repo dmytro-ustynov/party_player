@@ -1,6 +1,6 @@
 import React from 'react'
 
-const PageNotFound = () => {
+export default function PageNotFound (){
 
     const welcomeMessage = 'Welcome, '
     return (
@@ -11,5 +11,3 @@ const PageNotFound = () => {
         </>
     )
 }
-
-export default PageNotFound

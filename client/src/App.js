@@ -4,6 +4,8 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import RedactorPage from "./pages/RedactorPage";
+import LandingPage from "./pages/LandingPage";
+import PageNotFound from "./pages/PageNotFound";
 
 function App() {
     return (
@@ -12,10 +14,10 @@ function App() {
                 <Route path="/" element={<HomePage/>}/>
                 <Route path="/login" element={<LoginPage/>}/>
                 <Route path="/register" element={<RegisterPage/>}/>
-                <Route path="/welcome" element={<p>welcome</p>}/>
+                <Route path="/welcome" element={<LandingPage />}/>
                 <Route path="/redactor" element={<RedactorPage />}/>
                 <Route path="/about" element={<p>about</p>}/>
-                <Route path="/*" element={<p>not found</p>}/>
+                <Route path="/*" element={<PageNotFound />}/>
             </Routes>
         </div>
     );
