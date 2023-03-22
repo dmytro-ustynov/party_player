@@ -15,23 +15,22 @@ import MicRecorder from "../components/MicRecorder";
 
 export default function HomePage() {
     const styles = {
-        btnProps: {
+        btn: {
             color: 'primary',
             sx: {
                 fontSize: "10rem",
                 borderRadius: "5rem",
             }
         },
-        gridProps: {
+        grid: {
             sx: {width: '16rem'}
         },
-        paperProps: {
+        paper: {
             sx: {
                 m: 1,
                 p: 1,
                 borderRadius: "0.8rem",
             },
-
             elevation: 6
         }
     }

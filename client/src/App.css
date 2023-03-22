@@ -81,6 +81,13 @@ footer {
     overflow: visible; /* show hidden content on hover */
     filter: none; /* remove the blur effect on hover */
 }
-.duration-info{
+
+.duration-info {
     margin-top: auto;
+}
+
+.on-air-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
 }

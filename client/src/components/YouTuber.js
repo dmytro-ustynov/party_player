@@ -68,10 +68,10 @@ export default function YouTuber(props) {
     }
 
     return (
-        <Grid item {...styles.gridProps} >
-            <Paper {...styles.paperProps}>
+        <Grid item {...styles.grid} >
+            <Paper {...styles.paper}>
                 <IconButton title={"Load sound from Youtube"} onClick={() => setOpen(true)}>
-                    <YouTubeIcon {...styles.btnProps} color='error'/>
+                    <YouTubeIcon {...styles.btn} color='error'/>
                 </IconButton>
             </Paper>
             <Dialog open={open} onClose={handleClose}>

@@ -11,8 +11,6 @@ import {useAuthState} from "./auth/context";
 import {useAudioState} from "./audio/audioReducer";
 import {AudioAction} from "./audio/actions";
 
-// const fileTypes = ["MP3", "OGG", "FLAC", "WAV"];
-
 function validateAudioFile(file) {
     // Define the maximum file size (in bytes)
     const maxSize = 15 * 1024 * 1024; // 15MB in bytes
@@ -52,7 +50,6 @@ export default function FileUploader(props) {
     const onDrop = useCallback(acceptedFiles => {
         const file = acceptedFiles[0]
         const errMessage = validateAudioFile(file)
-        // setError(errMessage)
         console.log(file)
         if (!errMessage) {
             setFile(file)
@@ -74,7 +71,6 @@ export default function FileUploader(props) {
         // body.append('user_id', user.user_id)
         const req = await fetcher({url, credentials: true, body})
         if (req.result === true) {
-            // window.location.replace('/')
             dispatch({type: AudioAction.ADD_FILE, file: req.file})
             setForbidden(true)
             setTitle(defaultTitle)
@@ -84,15 +80,14 @@ export default function FileUploader(props) {
         console.log(req)
     }
 
-
     return (
-        <Grid item {...styles.gridProps}>
-            <Paper  {...styles.paperProps}>
+        <Grid item {...styles.grid}>
+            <Paper  {...styles.paper}>
                 {forbidden ? (
                     <div {...getRootProps({className: "dropzone"})} title="Drop audio file here">
                         <input  {...getInputProps({accept: "audio/*"})}/>
                         <IconButton title={"Click to open audio file"}>
-                            <AddCircleOutlineIcon  {...styles.btnProps} sx={{fontSize: "7rem"}}/>
+                            <AddCircleOutlineIcon  {...styles.btn} sx={{fontSize: "7rem"}}/>
                         </IconButton>
                         <Typography variant="subtitle1" color="text.secondary"> {isDragActive ? "drop" : title} </Typography>
                     </div>

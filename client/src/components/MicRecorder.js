@@ -97,10 +97,10 @@ const MicRecorder = (props) => {
 
     return (
         <>
-            <Grid item {...styles.gridProps}>
-                <Paper {...styles.paperProps}>
+            <Grid item {...styles.grid}>
+                <Paper {...styles.paper}>
                     <IconButton title={"Start recording"} onClick={() => setOpen(true)}>
-                        <MicIcon {...styles.btnProps} />
+                        <MicIcon {...styles.btn} />
                     </IconButton>
                 </Paper>
             </Grid>
@@ -108,7 +108,8 @@ const MicRecorder = (props) => {
                 <DialogTitle>
                     <Stack direction="row" spacing={8}>
                         <span>RECORD</span>
-                        <Chip label="ON AIR" color={isRecording && !isPaused ? "error" : "default"}/>
+                        <Chip label={<span className="on-air-label"><MicIcon size="small"/><>ON AIR</></span>}
+                              color={isRecording && !isPaused ? "error" : "default"}/>
                     </Stack>
                 </DialogTitle>
                 <DialogContent>
