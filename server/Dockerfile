@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.10.3
 
 WORKDIR /code
 
@@ -10,7 +10,9 @@ RUN apt-get -y update
 RUN apt-get -y upgrade
 RUN apt-get install -y ffmpeg
 
-COPY ./app /code/app
-COPY ./logger_config.yaml /code/logger_config.yaml
+COPY ./app /code/server/app
+COPY ./jobs /code/server/jobs
+COPY ./static /code/server/static
+COPY ./logger_config.yaml /code/server/logger_config.yaml
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["uvicorn", "server.app.main:app", "--host", "0.0.0.0", "--port", "5000"]

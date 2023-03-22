@@ -12,12 +12,12 @@ logging:
     server-file:
       class: logging.FileHandler
       level: INFO
-      filename: data/logs/server.log
+      filename: server/data/logs/server.log
       formatter: simple
     storage-cleaner-file:
       class: logging.FileHandler
       level: INFO
-      filename: data/logs/storage_cleaner.log
+      filename: server/data/logs/storage_cleaner.log
       formatter: simple
   loggers:
     server:

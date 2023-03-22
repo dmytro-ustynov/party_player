@@ -20,8 +20,8 @@
         ALLOWED_FORMATS: ${ALLOWED_FORMATS}
       hostname: api
       volumes:
-        - ./server/data/upload_files:/code/data/upload_files/
-        - ./server/data/logs:/code/data/logs/
+        - ./server/data/upload_files:/code/server/data/upload_files/
+        - ./server/data/logs:/code/server/data/logs/
     client:
       build: ./client
       container_name: client_react
