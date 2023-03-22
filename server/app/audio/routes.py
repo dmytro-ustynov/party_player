@@ -30,7 +30,7 @@ async def file_info(file_id: str):
 def get_my_files(user_id: str):
     # user = MM.query(User).get(user_id=user_id)
     db_files = MM.query(AudioFile).find(filters={'user_id': user_id})  # generator object
-    files = [f.to_dict() for f in db_files]
+    files = [f.to_dict() for f in db_files if not f.deleted]
     return {'result': True, 'details': f'you have {len(files)} files', 'files': files}
 
 
@@ -56,14 +56,14 @@ async def upload_file(audiofile: UploadFile, user_id: str):
     return {'result': False, 'details': 'upload failed'}
 
 
-@router.post("/delete_file", dependencies=[Depends(JWTBearer(auto_error=False))])
+@router.delete("/file", dependencies=[Depends(JWTBearer(auto_error=False))])
 async def delete_file(file_id: str, user_id: str = Depends(get_current_user_id)):
     db_file = MM.query(AudioFile).get(file_id=file_id)
     if not db_file:
         return {'result': False, 'details': 'file not found'}
     if db_file.user_id != user_id:
         return {'result': False, 'details': 'not allowed to delete other files'}
-    result = MM.query(AudioFile).delete(filter={'file_id': file_id})
+    result = MM.query(AudioFile).update(filters={'file_id': file_id}, payload={'deleted': True})
     if result:
         logger.info(f'User deleted file: user {user_id} : file {file_id}')
         return {'result': True, 'details': f'deleted {file_id}'}

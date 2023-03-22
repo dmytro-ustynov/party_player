@@ -11,7 +11,7 @@ import {
     Menu,
     MenuItem,
     Stack,
-    TextField, Typography
+    TextField
 } from "@mui/material";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ShareIcon from '@mui/icons-material/Share';
@@ -21,7 +21,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import FileInfo from "../components/FileInfo";
 import {useAudioState} from "../components/audio/audioReducer";
-import {BASE_URL, SAVEAS_URL} from "../utils/constants";
+import {BASE_URL, DELETE_FILE_URL, SAVEAS_URL} from "../utils/constants";
 import {fetcher, download} from "../utils/fetch_utils";
 
 const FONT_SIZE = 9
@@ -36,7 +36,7 @@ export default function RedactorPage() {
     const navigate = useNavigate()
     const [anchorFileEl, setAnchorFileEl] = useState(null);
     const openFileSubmenu = Boolean(anchorFileEl);
-    const [downloading, setDownloading] = useState(false)
+    const [pendingRequest, setPendingRequest] = useState(false)
     const handleFileClick = (event) => {
         setAnchorFileEl(event.currentTarget);
     };
@@ -71,7 +71,7 @@ export default function RedactorPage() {
         }
     }
     const saveAsFile = async (format) => {
-        setDownloading(true)
+        setPendingRequest(true)
         const url = SAVEAS_URL
         const data = {'file_id': sound, 'format': format}
         const file = await fetcher({url, payload: data, credentials: true, asFile: true})
@@ -81,22 +81,32 @@ export default function RedactorPage() {
         } else {
             console.log(file)
         }
-        setDownloading(false)
+        setPendingRequest(false)
     }
     const saveAsMP3 = () => {
-        setDownloading(true)
+        setPendingRequest(true)
         saveAsFile('mp3')
         handleFileClose()
     }
     const saveAsWAV = () => {
-        setDownloading(true)
+        setPendingRequest(true)
         saveAsFile('wav')
         handleFileClose()
     }
     const saveAsFLAC = () => {
-        setDownloading(true)
+        setPendingRequest(true)
         saveAsFile('flac')
         handleFileClose()
+    }
+
+    const handleDelete = async () =>{
+        setPendingRequest(true)
+        const url = DELETE_FILE_URL + sound
+        const response = await fetcher({url, credentials: true, method: "DELETE"})
+        if (response.result ===true){
+            navigate('/')
+        }
+        setPendingRequest(false)
     }
     return (
         <>
@@ -106,7 +116,7 @@ export default function RedactorPage() {
                         <div className="file-menu">
                             <Stack direction="row" spacing={4}>
                                 <span style={{minWidth: "40px", minHeight: "45px"}}>
-                                    {downloading && <CircularProgress color='secondary'/>}
+                                    {pendingRequest && <CircularProgress color='secondary'/>}
                                 </span>
                                 <Button {...styles.btn}
                                         onClick={handleFileClick}
@@ -126,26 +136,26 @@ export default function RedactorPage() {
                                 MenuListProps={{
                                     'aria-labelledby': 'basic-button',
                                 }}>
-                                <MenuItem onClick={saveAsMP3} disabled={downloading}>
+                                <MenuItem onClick={saveAsMP3} disabled={pendingRequest}>
                                     <ListItemIcon>
                                         <DownloadIcon fontSize="small"/>
                                     </ListItemIcon>
                                     <ListItemText>Save as MP3</ListItemText>
                                 </MenuItem>
-                                <MenuItem onClick={saveAsWAV} disabled={downloading}>
+                                <MenuItem onClick={saveAsWAV} disabled={pendingRequest}>
                                     <ListItemIcon>
                                         <DownloadIcon fontSize="small"/>
                                     </ListItemIcon>
                                     <ListItemText>Save as WAV</ListItemText>
                                 </MenuItem>
-                                <MenuItem onClick={saveAsFLAC} disabled={downloading}>
+                                <MenuItem onClick={saveAsFLAC} disabled={pendingRequest}>
                                     <ListItemIcon>
                                         <DownloadIcon fontSize="small"/>
                                     </ListItemIcon>
                                     <ListItemText>Save as FLAC</ListItemText>
                                 </MenuItem>
 
-                                <MenuItem onClick={handleFileClose} disabled={downloading}>
+                                <MenuItem onClick={handleDelete} disabled={pendingRequest}>
                                     <ListItemIcon>
                                         <DeleteIcon fontSize="small"/>
                                     </ListItemIcon>

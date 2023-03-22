@@ -19,7 +19,7 @@ class AudioFormats(str, Enum):
 class AudioFile:
     __collection__ = 'files'
     __slots__ = ('file_id', 'filename', 'ext', 'file_path', 'user_id', 'duration', 'author', 'thumbnail', 'title',
-                 'created_at', 'updated_at')
+                 'deleted', 'created_at', 'updated_at')
 
     def __init__(self, file_id=None, filename=None, ext=None, file_path=None, user_id=None, duration=None,
                  created_at=None, updated_at=None, **kwargs):
@@ -35,6 +35,7 @@ class AudioFile:
         self.author = kwargs.get('author')
         self.thumbnail = kwargs.get('thumbnail')
         self.title = kwargs.get('title')
+        self.deleted = kwargs.get('deleted')
         self.created_at = created_at or datetime.now()
         self.updated_at = updated_at or datetime.now()
 
