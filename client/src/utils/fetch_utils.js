@@ -36,3 +36,18 @@ export async function fetcher(params) {
         return {}
     }
 }
+
+export async function download(blob, filename) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  const clicker = () => {
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      a.removeEventListener('click', clicker);
+    }, 150)
+  }
+  a.addEventListener('click', clicker, false)
+  a.click()
+}

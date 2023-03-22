@@ -4,17 +4,17 @@ import aiofiles
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.responses import FileResponse
+from pydub import AudioSegment
 from server.app.auth.utils import get_current_user_id
 from server.app.auth.jwt_bearer import JWTBearer
 from server.app.dependencies import MM, UPLOAD_FOLDER
 from server.app.dependencies import logger
-from server.app.audio.models import AudioFile
+from server.app.audio.models import AudioFile, DownloadFileSchema
 from server.app.audio.audio_operations import update_duration
 from server.app.audio.audio_operations import generate_stream
 from server.app.audio.audio_operations import create_file_for_yt
 from pytube import YouTube
 import ssl
-
 
 router = APIRouter(prefix='/audio',
                    tags=['audio'])
@@ -29,7 +29,7 @@ async def file_info(file_id: str):
 @router.get("/get_my_files", tags=['audio'])
 def get_my_files(user_id: str):
     # user = MM.query(User).get(user_id=user_id)
-    db_files = MM.query(AudioFile).find(filters={'user_id': user_id})       # generator object
+    db_files = MM.query(AudioFile).find(filters={'user_id': user_id})  # generator object
     files = [f.to_dict() for f in db_files]
     return {'result': True, 'details': f'you have {len(files)} files', 'files': files}
 
@@ -44,8 +44,8 @@ async def upload_file(audiofile: UploadFile, user_id: str):
     file_id = audio_payload.get('file_id')
     out_file_path = audio_payload.get('file_path')
     async with aiofiles.open(out_file_path, 'wb') as out_file:
-        content = audiofile.file.read()     # async read
-        await out_file.write(content)       # async write
+        content = audiofile.file.read()  # async read
+        await out_file.write(content)  # async write
 
     if MM.query(AudioFile).create(audio_payload):
         duration = await update_duration(MM, file_id)
@@ -127,3 +127,19 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
         return {'result': True, 'file': {'file_id': file_id, 'filename': title, 'duration': video_length}}
     except Exception as e:
         return {'result': False, 'details': str(e)}
+
+
+@router.post("/save_as", dependencies=[Depends(JWTBearer(auto_error=False))])
+async def save_as(file: DownloadFileSchema):
+    file_id = file.file_id
+    format_ = file.format
+    audio_file = MM.query(AudioFile).get(file_id=file_id)
+    if not audio_file:
+        return {"result": False, "details": 'file not found'}
+    path = os.path.join(UPLOAD_FOLDER, file_id + '.' + format_)
+    logger.info(f'User exporting file {file_id} to {format_}')
+    if os.path.isfile(path):
+        return FileResponse(path)
+    sound = AudioSegment.from_file(audio_file.file_path)
+    sound.export(out_f=path, format=format_)
+    return FileResponse(path)

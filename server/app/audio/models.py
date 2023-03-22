@@ -1,11 +1,19 @@
 import os
 import uuid
+from enum import Enum
+from pydantic import BaseModel
 from pydub import AudioSegment
 from pydub.utils import mediainfo
 import mimetypes
 from datetime import datetime
 from fastapi import UploadFile
-from server.app.dependencies import ALLOWED_FORMATS, UPLOAD_FOLDER
+from server.app.dependencies import UPLOAD_FOLDER
+
+
+class AudioFormats(str, Enum):
+    mp3 = "mp3"
+    wav = "wav"
+    flac = "flac"
 
 
 class AudioFile:
@@ -65,8 +73,14 @@ class AudioFile:
 
     @staticmethod
     def allowed_file(filename):
+        allowed = [f for f in AudioFormats]
         return '.' in filename and \
-               filename.rsplit('.', 1)[1].lower() in ALLOWED_FORMATS
+               filename.rsplit('.', 1)[1].lower() in allowed
 
     def to_dict(self):
         return {s: getattr(self, s) for s in self.__slots__}
+
+
+class DownloadFileSchema(BaseModel):
+    file_id: str
+    format: AudioFormats

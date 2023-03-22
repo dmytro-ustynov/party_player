@@ -6,8 +6,6 @@ from logging.config import dictConfig
 from server.app.dal.mongo_manager import MongoManager
 
 
-ALLOWED_FORMATS = [c.strip() for c in config('ALLOWED_FORMATS',).split(',')]
-
 UPLOAD_FOLDER = os.path.join(os.getcwd(), config('UPLOAD_FOLDER'))
 
 LOG_YAML = os.path.join(os.getcwd(), 'server', 'logger_config.yaml')
