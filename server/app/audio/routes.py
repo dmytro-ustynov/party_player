@@ -56,7 +56,7 @@ async def upload_file(audiofile: UploadFile, user_id: str):
     return {'result': False, 'details': 'upload failed'}
 
 
-@router.delete("/delete_file", dependencies=[Depends(JWTBearer(auto_error=False))])
+@router.post("/delete_file", dependencies=[Depends(JWTBearer(auto_error=False))])
 async def delete_file(file_id: str, user_id: str = Depends(get_current_user_id)):
     db_file = MM.query(AudioFile).get(file_id=file_id)
     if not db_file:
@@ -90,6 +90,14 @@ async def get_audio(file_id: str):
         if os.path.isfile(fpath):
             return FileResponse(fpath, media_type=mimetype)
     return {'result': False, 'details': 'file not found'}
+
+
+@router.get("/file", dependencies=[Depends(JWTBearer(auto_error=False))])
+async def get_file(file_id: str):
+    audio_file = MM.query(AudioFile).get(file_id=file_id)
+    if audio_file is not None:
+        return {'result': True, 'file': audio_file.to_dict()}
+    return {'result': False, 'errors': 'file not found'}
 
 
 @router.get("/get_from_youtube", dependencies=[Depends(JWTBearer(auto_error=False))])
