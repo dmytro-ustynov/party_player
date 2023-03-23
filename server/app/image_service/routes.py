@@ -8,7 +8,7 @@ from starlette.responses import StreamingResponse
 router = APIRouter(prefix='/image',
                    tags=['image'])
 
-STATIC_FOLDER = os.path.join(os.getcwd(), 'static', 'random_image')
+STATIC_FOLDER = os.path.join(os.getcwd(), 'server', 'static', 'random_image')
 
 
 @router.get("/random")
