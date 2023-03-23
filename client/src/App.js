@@ -6,6 +6,7 @@ import RegisterPage from "./pages/RegisterPage";
 import RedactorPage from "./pages/RedactorPage";
 import LandingPage from "./pages/LandingPage";
 import PageNotFound from "./pages/PageNotFound";
+import TermsOfUsePage from "./pages/TermsOfUsePage";
 
 function App() {
     return (
@@ -16,6 +17,7 @@ function App() {
                 <Route path="/register" element={<RegisterPage/>}/>
                 <Route path="/welcome" element={<LandingPage />}/>
                 <Route path="/redactor" element={<RedactorPage />}/>
+                <Route path="/terms" element={<TermsOfUsePage />}/>
                 <Route path="/about" element={<p>about</p>}/>
                 <Route path="/*" element={<PageNotFound />}/>
             </Routes>
