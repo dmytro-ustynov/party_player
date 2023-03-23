@@ -104,10 +104,3 @@ class UpdateFilenameSchema(BaseModel):
         if len(value) > 200:
             raise ValueError('filename is too long (max 200 characters)')
         return value
-
-    @validator('filename')
-    def filename_special_chars(cls, value):
-        if not re.match(r'^[\w\-. ]+$', value):
-            raise ValueError('filename contains special characters')
-        return value
-

@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import Link from "@mui/material/Link";
 import {
@@ -13,6 +13,7 @@ import {
     Stack,
     TextField
 } from "@mui/material";
+import Snackbar from '@mui/material/Snackbar';
 import InputAdornment from '@mui/material/InputAdornment';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ShareIcon from '@mui/icons-material/Share';
@@ -22,10 +23,10 @@ import DoneIcon from '@mui/icons-material/Done';
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import FileInfo from "../components/FileInfo";
 import {useAudioState} from "../components/audio/audioReducer";
 import {BASE_URL, DELETE_FILE_URL, SAVEAS_URL, UPDATE_FILENAME_URL} from "../utils/constants";
 import {fetcher, download} from "../utils/fetch_utils";
+import SideTab from "../components/SideTab";
 
 const FONT_SIZE = 9
 const DEFAULT_INPUT_WIDTH = 200
@@ -35,6 +36,7 @@ export default function RedactorPage() {
     const [filename, setFilename] = useState('')
     const [updatedFilename, setUpdatedFilename] = useState('')
     const [info, setInfo] = useState({})
+    const [message, setMessage] = useState('')
     const [inputWidth, setInputWidth] = useState(200)
     const sound = audio.sound
     const navigate = useNavigate()
@@ -84,6 +86,7 @@ export default function RedactorPage() {
         if (file instanceof Blob) {
             const name = filename.split('.')[0]
             download(file, `${name}.${format}`)
+            setMessage('download complete')
         } else {
             console.log(file)
         }
@@ -125,8 +128,10 @@ export default function RedactorPage() {
                 credentials: true
             })
             if (response.result === true) {
-                setInfo({...info, filename: response.filename})
+                // todo: save updated filename in audio state
+                // setInfo({...info, filename: response.filename})
                 setFilename(response.filename)
+                setMessage('filename changed')
             }
             console.log(response)
         }
@@ -134,8 +139,9 @@ export default function RedactorPage() {
     return (
         <>
             <Header/>
-            <div className="content">
-                {sound ? (<>
+            <div className="redactor-content">
+                <SideTab info={info}/>
+                {sound ? (<div style={{display: "block", flexGrow: 1}}>
                             <div className="file-menu">
                                 <Stack direction="row" spacing={4}>
                                 <span style={{minWidth: "40px", minHeight: "45px"}}>
@@ -148,17 +154,15 @@ export default function RedactorPage() {
                                     </Button>
                                     <Button {...styles.btn} endIcon={<KeyboardArrowDownIcon/>}>Effects</Button>
                                     <Button {...styles.btn} endIcon={<KeyboardArrowDownIcon/>}>Help</Button>
-
                                 </Stack>
-                                <Menu
-                                    id="basic-menu"
-                                    sx={{width: 320, maxWidth: '100%'}}
-                                    anchorEl={anchorFileEl}
-                                    open={openFileSubmenu}
-                                    onClose={handleFileClose}
-                                    MenuListProps={{
-                                        'aria-labelledby': 'basic-button',
-                                    }}>
+                                <Menu id="basic-menu"
+                                      sx={{width: 320, maxWidth: '100%'}}
+                                      anchorEl={anchorFileEl}
+                                      open={openFileSubmenu}
+                                      onClose={handleFileClose}
+                                      MenuListProps={{
+                                          'aria-labelledby': 'basic-button',
+                                      }}>
                                     <MenuItem onClick={saveAsMP3} disabled={pendingRequest}>
                                         <ListItemIcon>
                                             <DownloadIcon fontSize="small"/>
@@ -193,7 +197,11 @@ export default function RedactorPage() {
                                     </MenuItem>
                                 </Menu>
                             </div>
-
+                            <Snackbar
+                                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                                open={!!message}
+                                onClose={() => setMessage(null)}
+                                message={message}/>
                             <Grid container>
                                 <Grid item id='filename-input'>
                                     <TextField value={updatedFilename}
@@ -215,8 +223,10 @@ export default function RedactorPage() {
                                                }}/>
                                 </Grid>
                             </Grid>
-                            <FileInfo info={info}/>
-                        </>
+                            <Grid container>
+                                <Grid item>player</Grid>
+                            </Grid>
+                        </div>
                     ) :
                     (<span>
                             <p>you should select sound </p>

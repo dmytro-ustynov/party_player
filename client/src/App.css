@@ -11,6 +11,11 @@
     background-color: #eeff;
 }
 
+.redactor-content {
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    display: flex;
+}
+
 :root {
     --color-vnlz: #0a58ca;
     --color-sz: green;
@@ -91,6 +96,12 @@ footer {
     align-items: center;
     gap: 0.4rem;
 }
-.file-menu{
-    margin: 0.5rem 4rem;
+
+.file-menu {
+    margin: 0.5rem 4rem 0;
+}
+
+.side-tabpanel {
+    background-color: whitesmoke;
+    width: 100%;
 }
