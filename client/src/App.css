@@ -105,3 +105,38 @@ footer {
     background-color: whitesmoke;
     width: 100%;
 }
+
+.playerLayerCurrentPosition {
+    margin-bottom: 15px;
+    margin-top: 25px;
+    position: relative;
+    background: #28282f;
+    overflow: scroll;
+}
+
+.playerLayerCurrentPosition marker {
+    top: -5px;
+    height: calc(100% + 25px) !important;
+}
+
+.playerLayerCurrentPosition marker div {
+    cursor: context-menu !important;
+}
+
+.markers-placeholder {
+    background-color: #2f4f4fad;
+    height: 15px;
+}
+
+wave > showtitle {
+    color: #e2ff00;
+}
+
+wave > cursor {
+    color: #02ff2b
+}
+
+region {
+    background-color: yellow;
+    opacity: 0.5;
+}

@@ -27,6 +27,7 @@ import {useAudioState} from "../components/audio/audioReducer";
 import {BASE_URL, DELETE_FILE_URL, SAVEAS_URL, UPDATE_FILENAME_URL} from "../utils/constants";
 import {fetcher, download} from "../utils/fetch_utils";
 import SideTab from "../components/SideTab";
+import AudioRedactor from "../components/AudioRedactor";
 
 const FONT_SIZE = 9
 const DEFAULT_INPUT_WIDTH = 200
@@ -223,9 +224,7 @@ export default function RedactorPage() {
                                                }}/>
                                 </Grid>
                             </Grid>
-                            <Grid container>
-                                <Grid item>player</Grid>
-                            </Grid>
+                            <AudioRedactor/>
                         </div>
                     ) :
                     (<span>
