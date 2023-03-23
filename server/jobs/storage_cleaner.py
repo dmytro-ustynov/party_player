@@ -5,7 +5,7 @@ from logging.config import dictConfig
 from pymongo import MongoClient
 from decouple import config
 
-LOG_YAML = 'logger_config.yaml'
+LOG_YAML = os.path.join('server', 'logger_config.yaml')
 with open(LOG_YAML, 'r') as cfg:
     logger_config = yaml.safe_load(cfg).get('logging')
 dictConfig(logger_config)
@@ -21,7 +21,7 @@ password = config('MONGO_INITDB_ROOT_PASSWORD')
 collection_name = 'files'
 
 connection_line = f'mongodb://{user}:{password}@{host}:{port}'
-client = MongoClient(connection_line)
+client = MongoClient(connection_line, serverSelectionTimeoutMS=5000)
 info = client.server_info()
 db = client.get_database(db_name)
 FILES = db.get_collection(collection_name)
