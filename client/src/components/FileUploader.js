@@ -4,12 +4,13 @@ import IconButton from "@mui/material/IconButton";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import {useDropzone} from "react-dropzone";
 import Typography from "@mui/material/Typography";
-import {useCallback, useState} from "react";
+import React, {useCallback, useState} from "react";
 import {UPLOAD_FILE_URL} from "../utils/constants";
 import {fetcher} from "../utils/fetch_utils";
 import {useAuthState} from "./auth/context";
 import {useAudioState} from "./audio/audioReducer";
 import {AudioAction} from "./audio/actions";
+import Snackbar from "@mui/material/Snackbar";
 
 function validateAudioFile(file) {
     // Define the maximum file size (in bytes)
@@ -41,6 +42,7 @@ export default function FileUploader(props) {
     const [file, setFile] = useState([])
     const [title, setTitle] = useState(defaultTitle)
     const [forbidden, setForbidden] = useState(true)
+    const [message, setMessage] = useState('')
     const {styles} = props
     const state = useAuthState()
     const {dispatch} = useAudioState()
@@ -58,7 +60,8 @@ export default function FileUploader(props) {
             console.log('ready to upload')
             console.log(file)
         } else {
-            setTitle(errMessage)
+            // setTitle(errMessage)
+            setMessage(errMessage)
         }
         console.log(errMessage)
 
@@ -73,6 +76,7 @@ export default function FileUploader(props) {
         if (req.result === true) {
             dispatch({type: AudioAction.ADD_FILE, file: req.file})
             setForbidden(true)
+            setMessage('file uploaded')
             setTitle(defaultTitle)
         } else {
             console.log('error uploading')
@@ -102,6 +106,11 @@ export default function FileUploader(props) {
                     </>
                 )}
             </Paper>
+            <Snackbar
+                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                open={!!message}
+                onClose={() => setMessage(null)}
+                message={message}/>
         </Grid>
     )
 }

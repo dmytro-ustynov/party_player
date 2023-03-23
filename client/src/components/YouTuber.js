@@ -11,12 +11,13 @@ import {
 } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import {useState} from "react";
+import React, {useState} from "react";
 import LoadingButton from "@mui/lab/LoadingButton";
 import {YOUTUBE_LOAD_URL} from "../utils/constants";
 import {fetcher} from "../utils/fetch_utils";
 import {useAudioState} from "./audio/audioReducer";
 import {AudioAction} from "./audio/actions";
+import Snackbar from "@mui/material/Snackbar";
 
 export default function YouTuber(props) {
     const {styles} = props
@@ -25,6 +26,7 @@ export default function YouTuber(props) {
     const [disabled, setDisabled] = useState(true);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('')
     const {dispatch} = useAudioState()
 
     const handleClose = () => {
@@ -54,8 +56,9 @@ export default function YouTuber(props) {
         setLoading(true)
         const url = YOUTUBE_LOAD_URL + link
         const req = await fetcher({url, method: "GET", credentials: true})
-        if (req.result === true){
-            console.log('download complete : ')
+        if (req.result === true) {
+            // console.log('download complete : ')
+            setMessage('download complete')
             setOpen(false)
             // post load logic
             dispatch({type: AudioAction.ADD_FILE, file: req.file})
@@ -74,6 +77,11 @@ export default function YouTuber(props) {
                     <YouTubeIcon {...styles.btn} color='error'/>
                 </IconButton>
             </Paper>
+            <Snackbar
+                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                open={!!message}
+                onClose={() => setMessage(null)}
+                message={message}/>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Download sound from Youtube video</DialogTitle>
                 <DialogContent>
