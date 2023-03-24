@@ -7,6 +7,7 @@ const audioState = {
     sound: null,
     loading: null,
     errorMessage: null,
+    wavesurfer : null,
 }
 
 const AudioReducer = ( audioState, action ) => {
@@ -29,6 +30,11 @@ const AudioReducer = ( audioState, action ) => {
             return {
                 ...audioState,
                 loading: action.loading
+            }
+        case AudioAction.SET_WAVESURFER:
+            return{
+                ...audioState,
+                wavesurfer: action.wavesurfer
             }
         default:
             return audioState

@@ -1,10 +1,10 @@
 import React from 'react'
+import Header from "../components/Header";
 
 export default function PageNotFound (){
-
-    const welcomeMessage = 'Welcome, '
     return (
         <>
+            <Header />
             <div>
             Error 404
             </div>

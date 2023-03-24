@@ -4,4 +4,5 @@ export const AudioAction = {
     REMOVE_FILE: 'REMOVE_FILE',
     SET_LOADING: 'SET_LOADING',
     SET_SOUND: 'SET_SOUND',
+    SET_WAVESURFER: 'SET_WAVESURFER'
 }
