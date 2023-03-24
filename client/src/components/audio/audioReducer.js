@@ -25,6 +25,11 @@ const AudioReducer = ( audioState, action ) => {
                 ...audioState,
                 sound: action.soundId
             }
+        case AudioAction.SET_LOADING:
+            return {
+                ...audioState,
+                loading: action.loading
+            }
         default:
             return audioState
     }

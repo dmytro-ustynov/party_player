@@ -1,4 +1,4 @@
-import {Button, Grid, IconButton, Slider, Stack} from "@mui/material";
+import {Button, ButtonGroup, Grid, IconButton, LinearProgress, Slider, Stack} from "@mui/material";
 import React, {useEffect, useRef, useState} from "react";
 import WaveSurfer from "wavesurfer.js";
 import CursorPlugin from "wavesurfer.js/dist/plugin/wavesurfer.cursor";
@@ -15,16 +15,23 @@ import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import VolumeMuteRoundedIcon from "@mui/icons-material/VolumeMuteRounded";
 import VolumeUpRoundedIcon from "@mui/icons-material/VolumeUpRounded";
 import VolumeOffRoundedIcon from '@mui/icons-material/VolumeOffRounded';
+import ClearIcon from '@mui/icons-material/Clear';
+import ZoomOutRoundedIcon from "@mui/icons-material/ZoomOutRounded";
+import ZoomInRoundedIcon from '@mui/icons-material/ZoomInRounded';
+import SearchOffIcon from '@mui/icons-material/SearchOff';
+import {AudioAction} from "./audio/actions";
+import Box from "@mui/material/Box";
 
 
 export default function AudioRedactor() {
-    const {audio} = useAudioState()
+    const {audio, dispatch} = useAudioState()
     const [volumeLevel, setVolumeLevel] = useState(50)
     const [previousVolume, setPreviousVolume] = useState(50)
 
     const wavesurfer = useRef(null)
 
-    const fileId = audio.sound
+    const sound = audio.sound
+    const loading = audio.loading
 
     useEffect(() => {
         wavesurfer.current = WaveSurfer.create({
@@ -42,13 +49,14 @@ export default function AudioRedactor() {
             plugins: [
                 CursorPlugin.create({
                     container: '#audioplayer',
+                    color: 'red',
                     showTime: true,
                     opacity: 0.9,
                 }),
                 TimelinePlugin.create({
                     container: '#audioplayer_tl'
                 }),
-                RegionsPlugin.create(),
+                RegionsPlugin.create({maxRegions: 1}),
                 MarkersPlugin.create(),
             ]
 
@@ -59,12 +67,15 @@ export default function AudioRedactor() {
         }
     }, [])
     useEffect(() => {
-        if (fileId) {
-            console.log('loading: ', fileId)
-            const url = BASE_URL + "/audio/get_audio?file_id=" + fileId
+        if (sound) {
+            wavesurfer.current.on('ready', function () {
+                dispatch({type: AudioAction.SET_LOADING, loading: false})
+            })
+            dispatch({type: AudioAction.SET_LOADING, loading: true})
+            const url = BASE_URL + "/audio/get_audio?file_id=" + sound
             wavesurfer.current.load(url)
         }
-    }, [fileId])
+    }, [sound])
 
 
     const scrollEvent = () => {
@@ -83,11 +94,31 @@ export default function AudioRedactor() {
             </>
         )
     }
+    const playSelected = () => {
+        let regions = wavesurfer.current.regions
+        if (Object.entries(regions.list).length > 0) {
+            for (const [regionId, region] of Object.entries(regions.list)) {
+                console.log(`${regionId} - ${region.start} : ${region.end}`)
+                region.play()
+            }
+        }
+    }
+    const clearRegions = () => {
+        wavesurfer.current.clearRegions()
+    }
+    const zoomWavePlus = () => {
+        wavesurfer.current.zoom(wavesurfer.current.params.minPxPerSec + 10)
+    }
+    const zoomWaveMinus = () => {
+        wavesurfer.current.zoom(wavesurfer.current.params.minPxPerSec - 10)
+    }
+
+    const dropZoom = () => {
+        wavesurfer.current.zoom(0)
+    }
 
     const createMarker = (e) => {
-        console.log('create new Marker')
         const wave = wavesurfer.current
-        console.log(wave)
         const number = wave.markers.markers.length + 1
         const bbox = wave.container.getBoundingClientRect();
         var xpos = e.clientX - bbox.left
@@ -129,10 +160,13 @@ export default function AudioRedactor() {
     }
     return (
         <Grid container>
-            <Stack direction="row" spacing={2} ml={3} mt={1}>
+            <Stack direction="row" spacing={2} ml={3} mt={1} mb={1}>
                 <Button variant='outlined'>title 1</Button>
                 <Button variant='outlined'>some title</Button>
             </Stack>
+            <Box sx={{width: '100%', minHeight: '5px'}}>
+                {loading && <LinearProgress/>}
+            </Box>
             <div style={{width: '100%'}}>
                 <div id='audioplayer'
                      className='playerLayerCurrentPosition'>
@@ -148,18 +182,23 @@ export default function AudioRedactor() {
                 </div>
             </div>
             <Stack direction="row" spacing={0} ml={3} mt={2}>
-                <Button variant="outlined">
-                    <EjectIcon sx={{transform: "rotate(90deg)"}}/></Button>
-                <Button variant="outlined" onClick={() => {
+                <ButtonGroup color="primary" disabled={loading}>
+                    <Button variant="outlined" onClick={playSelected} title="PLay selected fragment">
+                        <EjectIcon sx={{transform: "rotate(90deg)"}}/></Button>
+                    <Button variant="outlined" title='Drop selection' onClick={clearRegions}>
+                        <ClearIcon/>
+                    </Button>
+                </ButtonGroup>
+                <Button variant="outlined" disabled={loading} onClick={() => {
                     wavesurfer.current.play()
                 }}>
                     <PlayArrowIcon color='success'/></Button>
-                <Button variant="outlined" onClick={() => {
+                <Button variant="outlined" disabled={loading} onClick={() => {
                     wavesurfer.current.pause()
                 }}>
                     <PauseIcon color='primary'/>
                 </Button>
-                <Button variant="outlined" onClick={() => {
+                <Button variant="outlined" disabled={loading} onClick={() => {
                     wavesurfer.current.stop()
                 }}>
                     <StopIcon color="error"/>
@@ -168,12 +207,23 @@ export default function AudioRedactor() {
                     <QueueMusicIcon/>
                 </Button>
                 <Stack spacing={1} direction="row" sx={{width: 200}} alignItems="center">
-                    <IconButton title="Mute" color='primary' onClick={toggleVolume}>
+                    <IconButton title="Mute" color='primary' disabled={loading} onClick={toggleVolume}>
                         {volumeLevel === 0 ? < VolumeOffRoundedIcon/> : <VolumeMuteRoundedIcon/>}
                     </IconButton>
-                    <Slider aria-label="Volume" value={volumeLevel} onChange={setPlayerVolume}/>
+                    <Slider aria-label="Volume" disabled={loading} value={volumeLevel} onChange={setPlayerVolume}/>
                     <VolumeUpRoundedIcon/>
                 </Stack>
+                <ButtonGroup disabled={loading}>
+                    <Button variant="outlined" onClick={dropZoom} title="Drop zoom to default">
+                        <SearchOffIcon/>
+                    </Button>
+                    <Button variant="outlined" onClick={zoomWaveMinus} title="Zoom Less">
+                        <ZoomOutRoundedIcon/>
+                    </Button>
+                    <Button variant="outlined" onClick={zoomWavePlus} title="Zoom More">
+                        <ZoomInRoundedIcon/>
+                    </Button>
+                </ButtonGroup>
             </Stack>
         </Grid>)
 }
