@@ -13,27 +13,30 @@ import ZoomOutRoundedIcon from "@mui/icons-material/ZoomOutRounded";
 import ZoomInRoundedIcon from "@mui/icons-material/ZoomInRounded";
 import React, {useState} from "react";
 import {useAudioState} from "./audioReducer";
+import {AudioAction} from "./actions";
 
 export default function PlayerButtons() {
     const [volumeLevel, setVolumeLevel] = useState(50)
     const [previousVolume, setPreviousVolume] = useState(50)
 
-    const {audio} = useAudioState()
+    const {audio, dispatch} = useAudioState()
 
     const loading = audio.loading
     const wavesurfer = audio.wavesurfer
+    const selection = audio.selection
 
     const playSelected = () => {
         let regions = wavesurfer.current.regions
         if (Object.entries(regions.list).length > 0) {
             for (const [regionId, region] of Object.entries(regions.list)) {
-                console.log(`${regionId} - ${region.start} : ${region.end}`)
+                // console.log(`${regionId} - ${region.start} : ${region.end}`)
                 region.play()
             }
         }
     }
     const clearRegions = () => {
         wavesurfer.current.clearRegions()
+        dispatch({type: AudioAction.ADD_SELECTION, selection: false})
     }
     const zoomWavePlus = () => {
         wavesurfer.current.zoom(wavesurfer.current.params.minPxPerSec + 10)
@@ -64,7 +67,7 @@ export default function PlayerButtons() {
 
     return (
         <Stack direction="row" spacing={0} ml={3} mt={2}>
-            <ButtonGroup color="primary" disabled={loading}>
+            <ButtonGroup color="primary" disabled={loading || !selection}>
                 <Button variant="outlined" onClick={playSelected} title="PLay selected fragment">
                     <EjectIcon sx={{transform: "rotate(90deg)"}}/></Button>
                 <Button variant="outlined" title='Drop selection' onClick={clearRegions}>
@@ -95,7 +98,7 @@ export default function PlayerButtons() {
                 <Slider aria-label="Volume" disabled={loading} value={volumeLevel} onChange={setPlayerVolume}/>
                 <VolumeUpRoundedIcon/>
             </Stack>
-            <ButtonGroup disabled={loading}>
+            <ButtonGroup disabled={loading} sx={{marginLeft: 1}}>
                 <Button variant="outlined" onClick={dropZoom} title="Drop zoom to default">
                     <SearchOffIcon/>
                 </Button>

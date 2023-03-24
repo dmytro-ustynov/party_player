@@ -3,19 +3,21 @@ import {AudioAction} from "./actions";
 
 
 const audioState = {
-    files : [],
+    files: [],
     sound: null,
     loading: null,
     errorMessage: null,
-    wavesurfer : null,
+    wavesurfer: null,
+    selection: null,
 }
 
-const AudioReducer = ( audioState, action ) => {
-    switch (action.type){
+const AudioReducer = (audioState, action) => {
+    switch (action.type) {
         case AudioAction.SET_FILES:
             return {
                 ...audioState,
-                files: action.files}
+                files: action.files
+            }
         case AudioAction.ADD_FILE:
             return {
                 ...audioState,
@@ -32,9 +34,14 @@ const AudioReducer = ( audioState, action ) => {
                 loading: action.loading
             }
         case AudioAction.SET_WAVESURFER:
-            return{
+            return {
                 ...audioState,
                 wavesurfer: action.wavesurfer
+            }
+        case AudioAction.ADD_SELECTION:
+            return {
+                ...audioState,
+                selection: action.selection
             }
         default:
             return audioState
@@ -42,18 +49,19 @@ const AudioReducer = ( audioState, action ) => {
 }
 const AudioContext = createContext()
 
-export function useAudioState(){
+export function useAudioState() {
     const context = useContext(AudioContext)
-    if (context === undefined){
+    if (context === undefined) {
         throw new Error("useAudioContext must be used inside AudioProvider")
     }
     return context
 }
-export function AudioProvider (props) {
+
+export function AudioProvider(props) {
 
     const [audio, dispatch] = useReducer(AudioReducer, audioState)
 
-    return(
+    return (
         <AudioContext.Provider value={{audio, dispatch}}>
             {props.children}
         </AudioContext.Provider>

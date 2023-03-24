@@ -1,4 +1,4 @@
-import {Button, Grid, LinearProgress, Stack} from "@mui/material";
+import {Grid, LinearProgress} from "@mui/material";
 import React, {useEffect, useRef} from "react";
 import {useAudioState} from "./audioReducer";
 import {BASE_URL} from "../../utils/constants";
@@ -6,6 +6,7 @@ import {AudioAction} from "./actions";
 import Box from "@mui/material/Box";
 import createWavesurfer from "./utils";
 import PlayerButtons from "./PlayerButtons";
+import OperationButtons from "./OperationButtons";
 
 
 export default function AudioRedactor() {
@@ -18,6 +19,9 @@ export default function AudioRedactor() {
     useEffect(() => {
         wavesurfer.current = createWavesurfer()
         wavesurfer.current.enableDragSelection({});
+        wavesurfer.current.on('region-created', () => {
+            dispatch({type: AudioAction.ADD_SELECTION, selection: true})
+        })
         dispatch({type: AudioAction.SET_WAVESURFER, wavesurfer})
         return () => {
             wavesurfer.current.destroy()
@@ -35,19 +39,6 @@ export default function AudioRedactor() {
         }
     }, [sound, dispatch])
 
-    const clearMarkers = () => {
-        wavesurfer.current.markers.clear()
-    }
-    let showClearMarkersBtn;
-    if (wavesurfer.current?.markers?.markers?.length) {
-        showClearMarkersBtn = (
-            <>
-                <button className='clearmarkers_btn'
-                        onClick={clearMarkers}>x
-                </button>
-            </>
-        )
-    }
     const createMarker = (e) => {
         const wave = wavesurfer.current
         const number = wave.markers.markers.length + 1
@@ -77,10 +68,7 @@ export default function AudioRedactor() {
 
     return (
         <Grid container>
-            <Stack direction="row" spacing={2} ml={3} mt={1} mb={1}>
-                <Button variant='outlined'>title 1</Button>
-                <Button variant='outlined'>some title</Button>
-            </Stack>
+            <OperationButtons/>
             <Box sx={{width: '100%', minHeight: '5px'}}>
                 {loading && <LinearProgress/>}
             </Box>
@@ -91,7 +79,6 @@ export default function AudioRedactor() {
                          id="markers-placeholder"
                          title='Double click to add marker'
                          onDoubleClick={createMarker}>
-                        {showClearMarkersBtn}
                     </div>
                 </div>
                 <div id='audioplayer_tl'></div>
