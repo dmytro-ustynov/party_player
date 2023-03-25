@@ -1,8 +1,7 @@
 import os
-import re
 import uuid
 from enum import Enum
-from pydantic import BaseModel, constr, validator
+from pydantic import BaseModel, validator
 from pydub import AudioSegment
 from pydub.utils import mediainfo
 import mimetypes
@@ -15,6 +14,20 @@ class AudioFormats(str, Enum):
     mp3 = "mp3"
     wav = "wav"
     flac = "flac"
+
+
+class Actions(str, Enum):
+    CLEAR = 'clear'
+    DELETE_FRAGMENT = 'delete_fragment'
+    TRIM = 'trim'
+    FADE_IN = 'fade_in'
+    FADE_OUT = 'fade_out'
+    GAIN = 'gain'
+    PASTE = 'paste'
+    OVERLAY = 'overlay'
+    INSERT_SILENCE = 'insert_silence'
+    SPEEDUP = 'speedup'
+    UNDO = 'undo'
 
 
 class AudioFile:
@@ -91,6 +104,7 @@ class DownloadFileSchema(BaseModel):
 class UpdateFilenameSchema(BaseModel):
     file_id: str
     filename: str
+
     class Config:
         schema_extra = {
             'example': {
@@ -104,3 +118,22 @@ class UpdateFilenameSchema(BaseModel):
         if len(value) > 200:
             raise ValueError('filename is too long (max 200 characters)')
         return value
+
+
+class OperationSchema(BaseModel):
+    file_id: str
+    action: Actions
+    details: dict = None
+
+    class Config:
+        schema_extra = {
+            'example': {
+                'file_id': '1de44018-7856-4a2a-b5ea-ff88b4078d54',
+                'operation': 'clear',
+                'args': {
+                    'start': 23.5,
+                    'end': 27.5
+                }
+
+            }
+        }

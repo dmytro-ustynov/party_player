@@ -1,4 +1,3 @@
-
 const PORT = process.env.REACT_APP_SERVER_PORT || 8008
 const HOST = process.env.REACT_APP_SERVER_HOST || 'localhost'
 export const BASE_URL = `http://${HOST}:${PORT}`
@@ -8,5 +7,21 @@ export const UPLOAD_FILE_URL = BASE_URL + "/audio/upload_file"
 export const SAVEAS_URL = BASE_URL + "/audio/save_as"
 export const DELETE_FILE_URL = BASE_URL + "/audio/file?file_id="
 export const UPDATE_FILENAME_URL = BASE_URL + "/audio/change_filename"
+
+export const OPERATION_URL = BASE_URL + '/audio/modify'
 export const ACCESS_TOKEN_KEY = "access_token"
 export const CURRENT_USER_KEY = "current_user"
+
+export const AudioOperation = {
+    CLEAR: 'clear',
+    DELETE_FRAGMENT: 'delete_fragment',
+    TRIM: 'trim',
+    FADE_IN: 'fade_in',
+    FADE_OUT: 'fade_out',
+    GAIN: 'gain',
+    PASTE: 'paste',
+    OVERLAY: 'overlay',
+    INSERT_SILENCE: 'insert_silence',
+    SPEEDUP: 'speedup',
+    UNDO: 'undo',
+}

@@ -2,26 +2,8 @@ import os
 import asyncio
 from pydub import AudioSegment
 from time import time
-from server.app.audio.models import AudioFile
+from server.app.audio.models import AudioFile, Actions
 from server.app.dependencies import logger
-
-
-class FileObject(object):
-    pass
-
-
-class Actions:
-    CLEAR = 'clear'
-    DELETE_FRAGMENT = 'delete_fragment'
-    TRIM = 'trim'
-    FADE_IN = 'fade_in'
-    FADE_OUT = 'fade_out'
-    GAIN = 'gain'
-    PASTE = 'paste'
-    OVERLAY = 'overlay'
-    INSERT_SILENCE = 'insert_silence'
-    SPEEDUP = 'speedup'
-    UNDO = 'undo'
 
 
 def clear(**kwargs):
@@ -63,19 +45,17 @@ def delete_fragment(**kwargs):
         doc = mongo_manager.query(AudioFile).get(file_id=file_id)
         fpath = doc.file_path
         sound = AudioSegment.from_file(fpath)
-        # samples = sound.get_array_of_samples()
-        if from_ != 0:
+        if from_ == 0:
+            new_sound = sound[to_:]
+        elif to_ >= len(sound):
+            new_sound = sound[:from_]
+        else:
             new_sound = sound[:from_]
             new_sound = new_sound.append(sound[to_:])
-        else:
-            if to_ < len(sound):
-                new_sound = sound[to_:]
-            else:
-                new_sound = sound
         new_sound.export(fpath)
-        asyncio.run(update_duration(mongo_manager, file_id))
-        return {'result': True}
-        # return {'new_file_id': file_id}
+        mongo_manager.query(AudioFile).update(filters={'file_id': file_id},
+                                              payload={'duration': new_sound.duration_seconds})
+        return {'result': True, 'duration': new_sound.duration_seconds}
     except Exception as e:
         print(str(e))
         return {'result': False, 'error': str(e)}
@@ -305,35 +285,6 @@ def generate_stream(fpath):
         while data:
             yield data
             data = f_wav.read(1024)
-
-
-def check_file_in_request(request):
-    file_obj = FileObject()
-    result, details, file, filename, ext = False, None, None, None, None
-    if 'new_file' not in request.files:
-        details = 'No File in request'
-    else:
-        file = request.files['new_file']
-        content_type = file.content_type
-        if 'audio' not in content_type:
-            details = 'not audio file'
-        else:
-            if file and AudioFile.allowed_file(file.filename):
-                ext = file.filename.rsplit('.', 1)[1].lower()
-                filename = file.filename
-            elif request.form.get('mic'):
-                ext = 'webm'
-                filename = 'Record_{}.{}'.format(int(time()), ext)
-            else:
-                details = 'Can not recognize file source'
-            if ext:
-                result = True
-    file_obj.result = result
-    file_obj.details = details
-    file_obj.file = file
-    file_obj.filename = filename
-    file_obj.ext = ext
-    return file_obj
 
 
 # @history

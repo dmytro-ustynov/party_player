@@ -5,6 +5,7 @@ import {AudioAction} from "./actions";
 const audioState = {
     files: [],
     sound: null,
+    info: {},
     loading: null,
     errorMessage: null,
     wavesurfer: null,
@@ -42,6 +43,11 @@ const AudioReducer = (audioState, action) => {
             return {
                 ...audioState,
                 selection: action.selection
+            }
+        case AudioAction.UPDATE_FILE_INFO:
+            return {
+                ...audioState,
+                info: action.info
             }
         default:
             return audioState

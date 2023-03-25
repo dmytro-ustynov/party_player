@@ -9,8 +9,8 @@ from server.app.auth.utils import get_current_user_id
 from server.app.auth.jwt_bearer import JWTBearer
 from server.app.dependencies import MM, UPLOAD_FOLDER
 from server.app.dependencies import logger
-from server.app.audio.models import AudioFile, DownloadFileSchema, UpdateFilenameSchema
-from server.app.audio.audio_operations import update_duration
+from server.app.audio.models import AudioFile, DownloadFileSchema, UpdateFilenameSchema, OperationSchema
+from server.app.audio.audio_operations import update_duration, do_operation
 from server.app.audio.audio_operations import generate_stream
 from server.app.audio.audio_operations import create_file_for_yt
 from pytube import YouTube
@@ -159,3 +159,13 @@ async def save_as(file: DownloadFileSchema):
     sound = AudioSegment.from_file(audio_file.file_path)
     sound.export(out_f=path, format=format_)
     return FileResponse(path)
+
+
+@router.post("/modify", dependencies=[Depends(JWTBearer(auto_error=False))])
+async def modify_operation(body: OperationSchema):
+    action = body.action
+    try:
+        data = {**body.details, 'file_id': body.file_id, 'mongo_manager': MM}
+        return do_operation(action, **data)
+    except Exception as e:
+        return {'result': False, 'details': str(e)}

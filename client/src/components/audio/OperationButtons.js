@@ -2,13 +2,17 @@ import {Button, Stack} from "@mui/material";
 import React, {useState} from "react";
 import {useAudioState} from "./audioReducer";
 import Snackbar from '@mui/material/Snackbar';
+import {AudioOperation, BASE_URL, OPERATION_URL} from "../../utils/constants";
+import {fetcher} from "../../utils/fetch_utils";
+import {AudioAction} from "./actions";
 
 
 export default function OperationButtons() {
     const [message, setMessage] = useState('')
 
-    const {audio} = useAudioState()
+    const {audio, dispatch} = useAudioState()
 
+    const sound = audio.sound
     const loading = audio.loading
     const selection = audio.selection
     const wavesurfer = audio.wavesurfer
@@ -20,13 +24,63 @@ export default function OperationButtons() {
             setMessage('You must select fragment before')
         }
     }
+    function createOperationPayload(action){
+        const payload = {action, file_id: sound}
+        let regions = wavesurfer.current.regions
+        if (Object.entries(regions.list).length > 0) {
+            for (const region of Object.entries(regions.list)) {
+                payload.details = {
+                    start: region[1].start,
+                    end: region[1].end
+                }
+                break
+            }
+        }
+        console.log(payload)
+        return payload
+    }
+    const handleDelete = async () => {
+        if (!selection) {
+            setMessage('You must select fragment to delete')
+            return
+        }
+        const url = OPERATION_URL
+        const payload = createOperationPayload(AudioOperation.DELETE_FRAGMENT)
+        const response = await fetcher({url, payload, credentials: true})
+        if (response.result === true) {
+            setMessage('delete complete')
+            wavesurfer.current.clearRegions()
+            dispatch({type: AudioAction.ADD_SELECTION, selection: false})
+            dispatch({type: AudioAction.UPDATE_FILE_INFO, info: {...audio.info, duration: response.duration}})
+            wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
+        } else {
+            console.log(response)
+        }
+    }
+    const handleClear = async () => {
+        if (!selection) {
+            setMessage('You must select fragment to clear')
+            return
+        }
+        const url = OPERATION_URL
+        const payload = createOperationPayload(AudioOperation.CLEAR)
+        const response = await fetcher({url, payload, credentials: true})
+        if (response.result === true) {
+            setMessage('clear complete')
+            wavesurfer.current.clearRegions()
+            dispatch({type: AudioAction.ADD_SELECTION, selection: false})
+            wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
+        } else {
+            console.log(response)
+        }
+    }
 
     return (
         <Stack direction="row" spacing={0.5} ml={3} mt={1} mb={1}>
             <Button variant='outlined' disabled={loading}>Fade in</Button>
             <Button variant='outlined' disabled={loading}>Fade Out</Button>
-            <Button variant='outlined' disabled={loading}>Delete </Button>
-            <Button variant='outlined' disabled={loading}>Clear </Button>
+            <Button variant='outlined' disabled={loading} onClick={handleDelete}>Delete </Button>
+            <Button variant='outlined' disabled={loading} onClick={handleClear}>Clear </Button>
             <Button variant='outlined' disabled={loading}>Cut </Button>
             <Button variant='outlined' disabled={loading} onClick={handlePaste}>Paste</Button>
             <Button variant='outlined' disabled={loading} onClick={clearMarkers}>Drop Markers</Button>

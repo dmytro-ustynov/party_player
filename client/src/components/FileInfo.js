@@ -1,8 +1,11 @@
 import {Divider, Grid, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
+import {useAudioState} from "./audio/audioReducer";
 
-export default function FileInfo(props) {
-    const {info} = props
+export default function FileInfo() {
+
+    const {audio} = useAudioState()
+    const info = audio.info
 
     return (
         <Grid container>

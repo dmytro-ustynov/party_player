@@ -28,15 +28,16 @@ import {BASE_URL, DELETE_FILE_URL, SAVEAS_URL, UPDATE_FILENAME_URL} from "../uti
 import {fetcher, download} from "../utils/fetch_utils";
 import SideTab from "../components/SideTab";
 import AudioRedactor from "../components/audio/AudioRedactor";
+import {AudioAction} from "../components/audio/actions";
 
 const FONT_SIZE = 9
 const DEFAULT_INPUT_WIDTH = 200
 
 export default function RedactorPage() {
-    const {audio} = useAudioState()
+    const {audio, dispatch} = useAudioState()
+    const info = audio.info
     const [filename, setFilename] = useState('')
     const [updatedFilename, setUpdatedFilename] = useState('')
-    const [info, setInfo] = useState({})
     const [message, setMessage] = useState('')
     const [inputWidth, setInputWidth] = useState(200)
     const sound = audio.sound
@@ -62,16 +63,16 @@ export default function RedactorPage() {
     useEffect(() => {
         const loadInfo = async () => {
             const url = BASE_URL + '/audio/?file_id=' + sound
-            const req = await fetcher({url, method: "GET"})
-            setInfo(req)
-            setFilename(req.filename)
-            setUpdatedFilename(req.filename)
+            const response = await fetcher({url, method: "GET"})
+            dispatch({type: AudioAction.UPDATE_FILE_INFO, info: response})
+            setFilename(response.filename)
+            setUpdatedFilename(response.filename)
         }
         document.title = 'SounDream | Redactor'
         if (sound) {
             loadInfo()
         }
-    }, [sound])
+    }, [sound, dispatch])
 
     const styles = {
         btn: {
@@ -129,8 +130,7 @@ export default function RedactorPage() {
                 credentials: true
             })
             if (response.result === true) {
-                // todo: save updated filename in audio state
-                // setInfo({...info, filename: response.filename})
+                dispatch({type: AudioAction.UPDATE_FILE_INFO, info: {...info, filename: response.filename}})
                 setFilename(response.filename)
                 setMessage('filename changed')
             }
