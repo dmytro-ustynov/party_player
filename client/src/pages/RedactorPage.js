@@ -30,7 +30,7 @@ import SideTab from "../components/SideTab";
 import AudioRedactor from "../components/audio/AudioRedactor";
 import {AudioAction} from "../components/audio/actions";
 
-const FONT_SIZE = 9
+const FONT_SIZE = 10
 const DEFAULT_INPUT_WIDTH = 200
 
 export default function RedactorPage() {
@@ -54,7 +54,7 @@ export default function RedactorPage() {
 
     useEffect(() => {
         if (updatedFilename.length * FONT_SIZE > DEFAULT_INPUT_WIDTH) {
-            setInputWidth((updatedFilename.length + 2) * FONT_SIZE)
+            setInputWidth((updatedFilename.length + 1) * FONT_SIZE)
         } else {
             setInputWidth(DEFAULT_INPUT_WIDTH)
         }

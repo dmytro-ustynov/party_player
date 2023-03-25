@@ -44,6 +44,7 @@ export default function OperationButtons() {
             setMessage('You must select fragment to delete')
             return
         }
+        dispatch({type: AudioAction.SET_LOADING, loading: true})
         const url = OPERATION_URL
         const payload = createOperationPayload(AudioOperation.DELETE_FRAGMENT)
         const response = await fetcher({url, payload, credentials: true})
@@ -56,12 +57,14 @@ export default function OperationButtons() {
         } else {
             console.log(response)
         }
+        dispatch({type: AudioAction.SET_LOADING, loading: false})
     }
     const handleClear = async () => {
         if (!selection) {
             setMessage('You must select fragment to clear')
             return
         }
+        dispatch({type: AudioAction.SET_LOADING, loading: true})
         const url = OPERATION_URL
         const payload = createOperationPayload(AudioOperation.CLEAR)
         const response = await fetcher({url, payload, credentials: true})
@@ -73,6 +76,7 @@ export default function OperationButtons() {
         } else {
             console.log(response)
         }
+        dispatch({type: AudioAction.SET_LOADING, loading: false})
     }
 
     return (

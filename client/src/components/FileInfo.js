@@ -19,7 +19,7 @@ export default function FileInfo() {
                     <Typography variant="body1">Duration: {info.duration} sec</Typography>
                     {info.thumbnail && <div><img src={info.thumbnail} alt={'thumb'}
                                                  style={{maxWidth: "320px"}}/></div>}
-                    <Typography variant="body1">File id: {info.file_id}</Typography>
+                    <Typography variant="body2">File ID: {info.file_id}</Typography>
                 </Box>
             </Grid>
         </Grid>

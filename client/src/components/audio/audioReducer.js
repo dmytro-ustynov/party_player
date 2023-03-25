@@ -10,6 +10,7 @@ const audioState = {
     errorMessage: null,
     wavesurfer: null,
     selection: null,
+    currentTime: 0,
 }
 
 const AudioReducer = (audioState, action) => {
@@ -49,6 +50,12 @@ const AudioReducer = (audioState, action) => {
                 ...audioState,
                 info: action.info
             }
+        case AudioAction.SET_CURRENT_TIME:
+            return {
+                ...audioState,
+                currentTime: action.time
+            }
+
         default:
             return audioState
     }
