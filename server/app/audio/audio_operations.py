@@ -1,7 +1,6 @@
 import os
 import asyncio
 from pydub import AudioSegment
-from time import time
 from server.app.audio.models import AudioFile, Actions
 from server.app.dependencies import logger
 
@@ -71,10 +70,11 @@ def trim(**kwargs):
         audio = AudioSegment.from_file(fpath)
         start = kwargs.get('start')
         end = kwargs.get('end')
-        segment = audio[int(round(start*1000)):int(round(end*1000))]
-        segment.export(fpath)
-        asyncio.run(update_duration(mongo_manager, file_id))
-        return {'result': True}
+        new_sound = audio[int(round(start*1000)):int(round(end*1000))]
+        new_sound.export(fpath)
+        mongo_manager.query(AudioFile).update(filters={'file_id': file_id},
+                                              payload={'duration': new_sound.duration_seconds})
+        return {'result': True, 'duration': new_sound.duration_seconds}
     except Exception as e:
         print(str(e))
         return {'result': False, 'error': str(e)}
@@ -330,7 +330,7 @@ async def create_file_for_yt(mongo_manager, file_path, user_id, file_id,
                          user_id=user_id,
                          ext=ext,
                          duration=duration,
-                         filename=filename,
+                         filename=filename.split('.')[0],
                          file_path=new_path)
     if author is not None:
         audio_payload['author'] = author

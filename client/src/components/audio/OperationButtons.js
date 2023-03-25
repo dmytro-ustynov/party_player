@@ -39,6 +39,44 @@ export default function OperationButtons() {
         console.log(payload)
         return payload
     }
+    const handleFadeIn = async ()=>{
+        if (!selection) {
+            setMessage('You must select fragment to Fade')
+            return
+        }
+        dispatch({type: AudioAction.SET_LOADING, loading: true})
+        const url = OPERATION_URL
+        const payload = createOperationPayload(AudioOperation.FADE_IN)
+        const response = await fetcher({url, payload, credentials: true})
+        if (response.result === true) {
+            setMessage('Fade In complete')
+            wavesurfer.current.clearRegions()
+            dispatch({type: AudioAction.ADD_SELECTION, selection: false})
+            wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
+        } else {
+            console.log(response)
+        }
+        dispatch({type: AudioAction.SET_LOADING, loading: false})
+    }
+    const handleFadeOut = async ()=>{
+        if (!selection) {
+            setMessage('You must select fragment to Fade')
+            return
+        }
+        dispatch({type: AudioAction.SET_LOADING, loading: true})
+        const url = OPERATION_URL
+        const payload = createOperationPayload(AudioOperation.FADE_OUT)
+        const response = await fetcher({url, payload, credentials: true})
+        if (response.result === true) {
+            setMessage('Fade Out complete')
+            wavesurfer.current.clearRegions()
+            dispatch({type: AudioAction.ADD_SELECTION, selection: false})
+            wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
+        } else {
+            console.log(response)
+        }
+        dispatch({type: AudioAction.SET_LOADING, loading: false})
+    }
     const handleDelete = async () => {
         if (!selection) {
             setMessage('You must select fragment to delete')
@@ -78,14 +116,34 @@ export default function OperationButtons() {
         }
         dispatch({type: AudioAction.SET_LOADING, loading: false})
     }
+    const handleCut = async () => {
+        if (!selection) {
+            setMessage('You must select fragment to cut')
+            return
+        }
+        dispatch({type: AudioAction.SET_LOADING, loading: true})
+        const url = OPERATION_URL
+        const payload = createOperationPayload(AudioOperation.TRIM)
+        const response = await fetcher({url, payload, credentials: true})
+        if (response.result === true) {
+            setMessage('Cut complete')
+            wavesurfer.current.clearRegions()
+            dispatch({type: AudioAction.ADD_SELECTION, selection: false})
+            dispatch({type: AudioAction.UPDATE_FILE_INFO, info: {...audio.info, duration: response.duration}})
+            wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
+        } else {
+            console.log(response)
+        }
+        dispatch({type: AudioAction.SET_LOADING, loading: false})
+    }
 
     return (
         <Stack direction="row" spacing={0.5} ml={3} mt={1} mb={1}>
-            <Button variant='outlined' disabled={loading}>Fade in</Button>
-            <Button variant='outlined' disabled={loading}>Fade Out</Button>
+            <Button variant='outlined' disabled={loading} onClick={handleFadeIn}>Fade in</Button>
+            <Button variant='outlined' disabled={loading} onClick={handleFadeOut}>Fade Out</Button>
             <Button variant='outlined' disabled={loading} onClick={handleDelete}>Delete </Button>
             <Button variant='outlined' disabled={loading} onClick={handleClear}>Clear </Button>
-            <Button variant='outlined' disabled={loading}>Cut </Button>
+            <Button variant='outlined' disabled={loading} onClick={handleCut}>Cut </Button>
             <Button variant='outlined' disabled={loading} onClick={handlePaste}>Paste</Button>
             <Button variant='outlined' disabled={loading} onClick={clearMarkers}>Drop Markers</Button>
             <Snackbar
