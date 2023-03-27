@@ -14,6 +14,7 @@ class AudioFormats(str, Enum):
     mp3 = "mp3"
     wav = "wav"
     flac = "flac"
+    webm = "webm"
 
 
 class Actions(str, Enum):
