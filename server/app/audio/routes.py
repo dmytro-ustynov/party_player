@@ -26,8 +26,8 @@ async def file_info(file_id: str):
     return file.to_dict()
 
 
-@router.get("/get_my_files", tags=['audio'])
-def get_my_files(user_id: str):
+@router.get("/get_my_files", tags=['audio'], dependencies=[Depends(JWTBearer(auto_error=False))])
+def get_my_files(user_id: str = Depends(get_current_user_id)):
     # user = MM.query(User).get(user_id=user_id)
     db_files = MM.query(AudioFile).find(filters={'user_id': user_id})  # generator object
     files = [f.to_dict() for f in db_files if not f.deleted]
@@ -35,12 +35,11 @@ def get_my_files(user_id: str):
 
 
 @router.post("/upload_file")
-async def upload_file(audiofile: UploadFile, user_id: str):
+async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_user_id)):
     if audiofile.content_type != 'audio/mpeg' and not AudioFile.allowed_file(audiofile.filename):
         return {'result': False, 'details': 'file not accepted'}
     audio_payload = {**AudioFile.create_file_payload(audiofile),
-                     'user_id': user_id,
-                     }
+                     'user_id': user_id}
     file_id = audio_payload.get('file_id')
     out_file_path = audio_payload.get('file_path')
     async with aiofiles.open(out_file_path, 'wb') as out_file:
@@ -120,7 +119,7 @@ async def get_file(file_id: str):
 async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id)):
     """
     Download audio from YouTube, and save to user's files in MongoDB.
-    :param youtube_url: url of the YouTube video
+    :param url: url: url of the YouTube video
     :param user_id:
     :return:
     """

@@ -11,7 +11,6 @@ const getCookie = function (name) {
 }
 
 const init = async () => {
-    const url = BASE_URL + '/users/refresh_token'
     user = localStorage.getItem(CURRENT_USER_KEY)
         ? JSON.parse(localStorage.getItem(CURRENT_USER_KEY))
         : "";
@@ -25,6 +24,7 @@ const init = async () => {
     const storageToken = localStorage.getItem(ACCESS_TOKEN_KEY)
     const cookieToken = getCookie(ACCESS_TOKEN_KEY)
     token = cookieToken || storageToken
+    const url = BASE_URL + `/users/temporary_access?user_id=${uid}`
     if (!token) {
         const tokenData = await fetcher({url, credentials: true, method: "GET"})
         token = tokenData.access_token ? tokenData.access_token : ''

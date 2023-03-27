@@ -7,8 +7,10 @@ export const UPLOAD_FILE_URL = BASE_URL + "/audio/upload_file"
 export const SAVEAS_URL = BASE_URL + "/audio/save_as"
 export const DELETE_FILE_URL = BASE_URL + "/audio/file?file_id="
 export const UPDATE_FILENAME_URL = BASE_URL + "/audio/change_filename"
-
 export const OPERATION_URL = BASE_URL + '/audio/modify'
+
+export const LOGIN_PAGE_URL = '/login'
+export const REFRESH_TOKEN_URl = BASE_URL + '/users/refresh_token'
 export const ACCESS_TOKEN_KEY = "access_token"
 export const CURRENT_USER_KEY = "current_user"
 

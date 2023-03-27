@@ -1,4 +1,4 @@
-import {ACCESS_TOKEN_KEY} from "./constants";
+import {ACCESS_TOKEN_KEY, LOGIN_PAGE_URL, REFRESH_TOKEN_URl} from "./constants";
 
 export async function fetcher(params) {
     let {url, payload, body, credentials, headers, method = "POST", asFile = false} = params
@@ -28,8 +28,26 @@ export async function fetcher(params) {
             else return await request.blob()
         } else {
             const status = request.status
-            const data = await request.json()
-            return {result: false, details: data.details, status}
+            if (status === 401) {
+                console.log('try to refresh token...')
+                const refreshResponse = await fetch(REFRESH_TOKEN_URl, {credentials: "include"})
+                const data = await refreshResponse.json()
+
+                if (data[ACCESS_TOKEN_KEY]) {
+                    localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token);
+                    console.log('token refreshed successfully')
+                    // retry the same request with updated access token
+                    return fetcher(params)
+                } else {
+                    console.log('refresh fails, logout...')
+                    localStorage.removeItem(ACCESS_TOKEN_KEY)
+                    // redirect to login page for protected routes
+                    window.location.href = LOGIN_PAGE_URL
+                }
+            } else {
+                const data = await request.json()
+                return {result: false, details: data.details, status}
+            }
         }
     } catch (e) {
         console.warn(`oops, smth wrong at our side, please try later: ${e}`)
@@ -38,16 +56,16 @@ export async function fetcher(params) {
 }
 
 export async function download(blob, filename) {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  const clicker = () => {
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-      a.removeEventListener('click', clicker);
-    }, 150)
-  }
-  a.addEventListener('click', clicker, false)
-  a.click()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    const clicker = () => {
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+            a.removeEventListener('click', clicker);
+        }, 150)
+    }
+    a.addEventListener('click', clicker, false)
+    a.click()
 }

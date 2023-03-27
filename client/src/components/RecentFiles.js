@@ -10,12 +10,11 @@ export default function RecentFiles() {
     const {audio, dispatch} = useAudioState()
     const files = audio.files
 
-
     useEffect(() => {
         const loadRecentFiles = async () => {
             const user = JSON.parse(localStorage.getItem(CURRENT_USER_KEY))
             if (Boolean(user)) {
-                const url = BASE_URL + "/audio/get_my_files?user_id=" + user.user_id
+                const url = BASE_URL + "/audio/get_my_files"
                 const req = await fetcher({url, method: "GET", credentials: true})
                 if (req.result === true) {
                     dispatch({type: AudioAction.SET_FILES, files: req.files})

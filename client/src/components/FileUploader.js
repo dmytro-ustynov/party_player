@@ -7,14 +7,25 @@ import Typography from "@mui/material/Typography";
 import React, {useCallback, useState} from "react";
 import {UPLOAD_FILE_URL} from "../utils/constants";
 import {fetcher} from "../utils/fetch_utils";
-import {useAuthState} from "./auth/context";
+import {Roles, useAuthState} from "./auth/context";
 import {useAudioState} from "./audio/audioReducer";
 import {AudioAction} from "./audio/actions";
 import Snackbar from "@mui/material/Snackbar";
 
-function validateAudioFile(file) {
+function validateAudioFile(file, role) {
     // Define the maximum file size (in bytes)
-    const maxSize = 15 * 1024 * 1024; // 15MB in bytes
+    let maxSize
+    let maxSizeErrorMessage
+    if (role === Roles.REGISTERED) {
+        maxSize = 50 * 1024 * 1024; // 15MB in bytes
+        maxSizeErrorMessage = 'Current maximum size for your plan: 50Mb. Subscribe to higher plan'
+    } else if (role === Roles.PREMIUM) {
+        maxSize = 100 * 1024 * 1024
+        maxSizeErrorMessage = 'Too large file to upload. please contact us if you want to procced with such file'
+    } else {
+        maxSize = 15 * 1024 * 1024
+        maxSizeErrorMessage = 'Register to upload larger size'
+    }
 
     // Define the allowed file types
     const allowedTypes = ["audio/mpeg", "audio/wav", "audio/ogg", "audio/x-m4a"];
@@ -25,15 +36,13 @@ function validateAudioFile(file) {
 
     // Check if the file size is within the allowed limit
     if (fileSize > maxSize) {
-        return "File size exceeds the maximum limit of 15MB.";
+        return maxSizeErrorMessage;
     }
 
     // Check if the file type is allowed
     if (!allowedTypes.includes(fileType)) {
         return "File type not allowed. Please upload an audio file in MP3, WAV, or OGG format.";
     }
-
-    // Return null if the file passes both checks
     return null;
 }
 
@@ -48,10 +57,9 @@ export default function FileUploader(props) {
     const {dispatch} = useAudioState()
     const user = state.user
 
-
     const onDrop = useCallback(acceptedFiles => {
         const file = acceptedFiles[0]
-        const errMessage = validateAudioFile(file)
+        const errMessage = validateAudioFile(file, user.role)
         console.log(file)
         if (!errMessage) {
             setFile(file)
@@ -63,12 +71,11 @@ export default function FileUploader(props) {
             // setTitle(errMessage)
             setMessage(errMessage)
         }
-        console.log(errMessage)
+    }, [user.role])
 
-    }, [])
     const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
     const handleUpload = async () => {
-        const url = UPLOAD_FILE_URL + "?user_id=" + user.user_id
+        const url = UPLOAD_FILE_URL
         const body = new FormData()
         body.append('audiofile', file)
         // body.append('user_id', user.user_id)
@@ -81,7 +88,6 @@ export default function FileUploader(props) {
         } else {
             console.log('error uploading')
         }
-        console.log(req)
     }
 
     return (
@@ -93,7 +99,8 @@ export default function FileUploader(props) {
                         <IconButton title={"Click to open audio file"}>
                             <AddCircleOutlineIcon  {...styles.btn} sx={{fontSize: "7rem"}}/>
                         </IconButton>
-                        <Typography variant="subtitle1" color="text.secondary"> {isDragActive ? "drop" : title} </Typography>
+                        <Typography variant="subtitle1"
+                                    color="text.secondary"> {isDragActive ? "drop" : title} </Typography>
                     </div>
                 ) : (<>
                         <IconButton onClick={handleUpload}>

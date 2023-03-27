@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Body, Response, Request
-from server.app.auth.models import User
+import uuid
+from fastapi import APIRouter, Response, Request
+from starlette.responses import RedirectResponse
+
+from server.app.auth.models import User, Roles
 from server.app.auth.models import UserSchema
 from server.app.auth.models import UserLoginSchema
 from server.app.auth.jwt_handler import sign_jwt
@@ -7,19 +10,8 @@ from server.app.auth.jwt_handler import decode_jwt
 from server.app.dependencies import MM
 from server.app.dependencies import logger
 
-
 router = APIRouter(prefix='/users',
                    tags=['user'])
-
-
-# users
-@router.get("/", summary="Get list of all users")
-def get_all_users():
-    all_users = []
-    for u in MM.query(User).find(filters={}):
-        all_users.append({'username': u.username,
-                          'email': u.email_address})
-    return {"users": all_users}
 
 
 @router.post("/signup")
@@ -67,13 +59,14 @@ def user_login(login: UserLoginSchema, response: Response):
         'user_id': mongo_user.user_id,
         'role': mongo_user.acc_level
     }
-    result = {**sign_jwt(mongo_user.user_id, seconds=24*3600 if remember else 600),
-              **sign_jwt(mongo_user.user_id, seconds=3000, token_key='refresh_token'),
+    result = {**sign_jwt(mongo_user.user_id, seconds=3600 if remember else 600),
+              **sign_jwt(mongo_user.user_id, seconds=7200 if remember else 3000, token_key='refresh_token'),
               'user': user,
               'result': True}  # dict
     response.set_cookie(key='refresh_token', value=result.get('refresh_token', ''))
     logger.info(f'User logged in : {username}')
     return result
+
 
 @router.get('/check_username', summary='Check if the provided username is free to register '
                                        'or username is already in use.')
@@ -103,10 +96,10 @@ def refresh_token(request: Request, response: Response):
     """
     token = request.cookies.get('refresh_token')
     if not token:
-        return {'result': False}
+        return RedirectResponse(url='/login')
     decoded = decode_jwt(token)
-    if decoded is None:
-        return {'result': False}
+    if not decoded:
+        return RedirectResponse(url='/login')
     user_id = decoded.get('user_id')
     mongo_user = MM.query(User).get(user_id=user_id)
     if not mongo_user:
@@ -123,3 +116,16 @@ async def logout(response: Response):
     response.set_cookie(key='refresh_token', value='')
     # unset_jwt_cookies(response)
     return {"msg": "logout OK"}
+
+
+@router.get("/temporary_access")
+async def get_temporary_access(user_id: str = None):
+    user_id = user_id or str(uuid.uuid4())
+    user = {
+        'user_id': user_id,
+        'role': Roles.ANONYMOUS
+    }
+    return {**sign_jwt(user_id, seconds=600),
+            'user': user,
+            'duration_seconds': 600,
+            'result': True}
