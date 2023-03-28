@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from server.app.audio import routes as audio_router
 from server.app.auth import routes as auth_router
 from server.app.image_service import routes as img_router
+from decouple import config as env
 
 app = FastAPI()
 
@@ -32,5 +33,7 @@ app.include_router(auth_router.router)
 app.include_router(img_router.router)
 
 
-if __name__ == '__main__':
-    uvicorn.run("main:app", host="localhost", port=8008, reload=True, reload_excludes='data')
+if __name__ == "__main__":
+    host = env("API_HOST", "localhost")
+    port = int(env("API_PORT", 5000))
+    uvicorn.run("main:app", host=host, port=port, reload=True, reload_excludes="data")

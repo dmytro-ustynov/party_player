@@ -1,4 +1,4 @@
-import {Divider, Grid, Typography} from "@mui/material";
+import {Button, Divider, Grid, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import {useAudioState} from "./audio/audioReducer";
 
@@ -17,8 +17,15 @@ export default function FileInfo() {
                     <Typography variant="body1">{info.filename}</Typography>
                     <Typography variant="body1">ext: {info.ext}</Typography>
                     <Typography variant="body1">Duration: {info.duration} sec</Typography>
-                    {info.thumbnail && <div><img src={info.thumbnail} alt={'thumb'}
-                                                 style={{maxWidth: "320px"}}/></div>}
+                    {info.thumbnail ? <Button component="label">
+                            <input hidden accept="image/*" type="file"/>
+                            <img src={info.thumbnail} alt='thumb' style={{maxWidth: "320px"}}/>
+                        </Button> :
+                        <Button variant="outlined" component="label" title="Click to change thumbnail">
+                            thumbnail
+                            <input hidden accept="image/*" type="file"/>
+                        </Button>}
+
                     <Typography variant="body2">File ID: {info.file_id}</Typography>
                 </Box>
             </Grid>
