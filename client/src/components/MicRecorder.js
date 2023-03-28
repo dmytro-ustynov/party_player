@@ -22,6 +22,7 @@ import {useAuthState} from "./auth/context";
 import {useAudioState} from "./audio/audioReducer";
 import {AudioAction} from "./audio/actions";
 import {fetcher} from "../utils/fetch_utils";
+import Snackbar from "@mui/material/Snackbar";
 
 const MicRecorder = (props) => {
     const {styles} = props
@@ -34,6 +35,7 @@ const MicRecorder = (props) => {
     const [isPaused, setIsPaused] = useState(false);
     const [audioURL, setAudioURL] = useState('');
     const [audioBlob, setAudioBlob] = useState(null);
+    const [message, setMessage] = useState('')
     const mediaRecorderRef = useRef(null);
     const audioRef = useRef(null);
 
@@ -89,8 +91,10 @@ const MicRecorder = (props) => {
             console.log('Audio uploaded successfully');
             dispatch({type: AudioAction.ADD_FILE, file: response.file})
             setOpen(false)
+            setMessage('Record successfully uploaded')
         } else {
             console.log('Failed to upload audio');
+            setMessage('Failed to upload record, try again')
         }
         console.log(response)
     };
@@ -168,6 +172,11 @@ const MicRecorder = (props) => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Snackbar
+                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                open={!!message}
+                onClose={() => setMessage(null)}
+                message={message}/>
         </>
     );
 };
