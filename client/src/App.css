@@ -135,6 +135,17 @@ wave > cursor {
     color: #02ff2b
 }
 
+wave > marker {
+    /* wavesurfer marker label text marker*/
+    color: #02ff2b;
+}
+
+wave > marker > div:first-child {
+    /*wavesurfer marker vertical line*/
+    background-color: lawngreen !important;
+}
+
+
 region {
     background-color: rgba(255, 255, 0, 0.51) !important;
     opacity: 0.5 !important;
