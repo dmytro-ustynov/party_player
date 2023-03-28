@@ -2,7 +2,7 @@ import os
 from random import choice
 
 import aiofiles
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, UploadFile, HTTPException, status
 from starlette.requests import Request
 from starlette.responses import StreamingResponse
 
@@ -55,5 +55,9 @@ async def upload_thumbnail(request: Request, file: UploadFile, file_id: str):
 @router.get('/thumbnail/{filename}')
 async def get_thumbnail(filename: str):
     file_path = os.path.join(UPLOAD_FOLDER, 'thumbnails', filename)
-    media_type = "image/" + file_path.split('.')[-1]
-    return StreamingResponse(iterfile(file_path), media_type=media_type)
+    if os.path.isfile(file_path):
+        media_type = "image/" + file_path.split('.')[-1]
+        return StreamingResponse(iterfile(file_path), media_type=media_type)
+    raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found")
