@@ -134,10 +134,11 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
         audio_streams = yt.streams.filter(type='audio').order_by('abr').desc()
         stream = audio_streams.first()
         file_id = str(uuid.uuid4())
-        author = yt.author
-        thumbnail = yt.thumbnail_url
         default_filename = stream.download(output_path=UPLOAD_FOLDER)
-        await create_file_for_yt(MM, default_filename, user_id, file_id, title, author, thumbnail)
+        await create_file_for_yt(MM, default_filename, user_id, file_id,
+                                 author=yt.author,
+                                 title=title,
+                                 thumbnail=yt.thumbnail_url)
         logger.info(f'Youtube downloaded successfully: {file_id} - {title}')
         return {'result': True, 'file': {'file_id': file_id, 'filename': title, 'duration': video_length}}
     except Exception as e:
@@ -156,7 +157,12 @@ async def save_as(file: DownloadFileSchema):
     if os.path.isfile(path):
         return FileResponse(path)
     sound = AudioSegment.from_file(audio_file.file_path)
-    sound.export(out_f=path, format=format_)
+    if audio_file.thumbnail and format_ == 'mp3':
+        sound.export(out_f=path, format=format_,
+                     tags=audio_file.create_tags(),
+                     cover=audio_file.create_thumbnail_tag())
+    else:
+        sound.export(out_f=path, format=format_, tags=audio_file.create_tags())
     return FileResponse(path)
 
 
@@ -164,7 +170,9 @@ async def save_as(file: DownloadFileSchema):
 async def modify_operation(body: OperationSchema):
     action = body.action
     try:
-        data = {**body.details, 'file_id': body.file_id, 'mongo_manager': MM}
+        data = {'file_id': body.file_id, 'mongo_manager': MM}
+        if body.details is not None:
+            data = {**body.details, **data}
         return do_operation(action, **data)
     except Exception as e:
         return {'result': False, 'details': str(e)}

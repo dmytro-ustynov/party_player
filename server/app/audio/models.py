@@ -1,5 +1,6 @@
 import os
 import uuid
+import requests
 from enum import Enum
 from pydantic import BaseModel, validator
 from pydub import AudioSegment
@@ -76,6 +77,25 @@ class AudioFile:
         mimetype, *_ = mimetypes.guess_type(str(self.file_path))
         return mimetype
 
+    def create_tags(self):
+        tags = {'title': self.title.replace(self.author, ''),
+                'artist': self.author,
+                'album': 'SoundDream'}
+        return tags
+
+    def create_thumbnail_tag(self):
+        if not self.thumbnail:
+            return None
+        f_id = self.thumbnail.split('/')[-1]
+        if f_id.split('.')[0] == self.file_id:
+            return os.path.join(UPLOAD_FOLDER, 'thumbnails', f_id)
+        response = requests.get(self.thumbnail)
+        thumbnail_data = response.content
+        path = os.path.join(UPLOAD_FOLDER, 'thumbnails', f'{self.file_id}.jpg')
+        with open(path, 'wb') as pic:
+            pic.write(thumbnail_data)
+        return path
+
     @staticmethod
     def create_file_payload(file: UploadFile):
         file_id = str(uuid.uuid4())
@@ -91,7 +111,7 @@ class AudioFile:
     def allowed_file(filename):
         allowed = [f for f in AudioFormats]
         return '.' in filename and \
-               filename.rsplit('.', 1)[1].lower() in allowed
+            filename.rsplit('.', 1)[1].lower() in allowed
 
     def to_dict(self):
         return {s: getattr(self, s) for s in self.__slots__}
