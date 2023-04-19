@@ -38,7 +38,7 @@ export default function YouTuber(props) {
     const handleLinkInput = (event) => {
         const checkUrl = (url) => {
             // Regular expression to match YouTube video URLs
-            const regExp = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+$/;
+            const regExp = /^(http(s)?:\/\/)?((w){3}.)?(music.)?youtu(be|.be)?(\.com)?\/.+$/;
             // Test the string against the regular expression
             return regExp.test(url);
         }
