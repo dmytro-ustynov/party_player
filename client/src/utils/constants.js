@@ -26,4 +26,5 @@ export const AudioOperation = {
     INSERT_SILENCE: 'insert_silence',
     SPEEDUP: 'speedup',
     UNDO: 'undo',
+    DENOISE: 'denoise',
 }

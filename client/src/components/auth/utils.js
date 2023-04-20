@@ -4,12 +4,11 @@ const AUTH_URL = BASE_URL + '/auth'
 
 export async function login(data) {
     const loginUrl = AUTH_URL + '/login'
-    const req = await fetch(loginUrl, {
+    return await fetch(loginUrl, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {'Content-Type': 'application/json'}
     })
-    return req
 }
 
 export async function refresh_token() {
@@ -21,6 +20,5 @@ export async function refresh_token() {
         },
         credentials: 'include'
     })
-    const res = await req.json()
-    return res
+    return await req.json()
 }

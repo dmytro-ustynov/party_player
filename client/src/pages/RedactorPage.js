@@ -24,7 +24,14 @@ import DoneIcon from '@mui/icons-material/Done';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import {useAudioState} from "../components/audio/audioReducer";
-import {BASE_URL, DELETE_FILE_URL, SAVEAS_URL, UPDATE_FILENAME_URL} from "../utils/constants";
+import {
+    AudioOperation,
+    BASE_URL,
+    DELETE_FILE_URL,
+    OPERATION_URL,
+    SAVEAS_URL,
+    UPDATE_FILENAME_URL
+} from "../utils/constants";
 import {fetcher, download} from "../utils/fetch_utils";
 import SideTab from "../components/SideTab";
 import AudioRedactor from "../components/audio/AudioRedactor";
@@ -43,13 +50,21 @@ export default function RedactorPage() {
     const sound = audio.sound
     const navigate = useNavigate()
     const [anchorFileEl, setAnchorFileEl] = useState(null);
+    const [anchorEffectsEl, setAnchorEffectsEl] = useState(null);
     const openFileSubmenu = Boolean(anchorFileEl);
+    const openEffectsSubmenu = Boolean(anchorEffectsEl);
     const [pendingRequest, setPendingRequest] = useState(false)
     const handleFileClick = (event) => {
         setAnchorFileEl(event.currentTarget);
     };
     const handleFileClose = () => {
         setAnchorFileEl(null);
+    };
+    const handleEffectsClick = (event) => {
+        setAnchorEffectsEl(event.currentTarget);
+    };
+    const handleEffectsClose = () => {
+        setAnchorEffectsEl(null);
     };
 
     useEffect(() => {
@@ -137,6 +152,19 @@ export default function RedactorPage() {
             console.log(response)
         }
     }
+    const handleDenoise = async () => {
+        console.log('denoisinng....')
+        setPendingRequest(true)
+        const url = OPERATION_URL
+        const payload = {action: AudioOperation.DENOISE, file_id: sound}
+        const response = await fetcher({url, payload, credentials: true})
+        if (response.result === true) {
+            setMessage('Denoise Complete')
+        } else {
+            setMessage(response.details)
+        }
+        setPendingRequest(false)
+    }
     return (
         <>
             <Header/>
@@ -153,7 +181,8 @@ export default function RedactorPage() {
                                             endIcon={<KeyboardArrowDownIcon/>}>
                                         File
                                     </Button>
-                                    <Button {...styles.btn} endIcon={<KeyboardArrowDownIcon/>}>Effects</Button>
+                                    <Button {...styles.btn} onClick={handleEffectsClick}
+                                            endIcon={<KeyboardArrowDownIcon/>}>Effects</Button>
                                     <Button {...styles.btn} endIcon={<KeyboardArrowDownIcon/>}>Help</Button>
                                 </Stack>
                                 <Menu id="basic-menu"
@@ -195,6 +224,21 @@ export default function RedactorPage() {
                                             <ShareIcon fontSize="small"/>
                                         </ListItemIcon>
                                         <ListItemText>Share</ListItemText>
+                                    </MenuItem>
+                                </Menu>
+                                <Menu id="effects-menu"
+                                      sx={{width: 320, maxWidth: '100%'}}
+                                      anchorEl={anchorEffectsEl}
+                                      open={openEffectsSubmenu}
+                                      onClose={handleEffectsClose}
+                                      MenuListProps={{
+                                          'aria-labelledby': 'basic-button',
+                                      }}>
+                                    <MenuItem onClick={handleDenoise}>
+                                        <ListItemIcon>
+                                            N
+                                        </ListItemIcon>
+                                        <ListItemText>Denoise</ListItemText>
                                     </MenuItem>
                                 </Menu>
                             </div>

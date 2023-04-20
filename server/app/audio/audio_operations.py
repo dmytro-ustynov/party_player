@@ -3,6 +3,10 @@ import asyncio
 from pydub import AudioSegment
 from server.app.audio.models import AudioFile, Actions
 from server.app.dependencies import logger
+import librosa
+import librosa.feature
+import numpy as np
+import soundfile as sf
 
 
 def clear(**kwargs):
@@ -195,7 +199,7 @@ def paste(**kwargs):
         return {'error': 'not all params'}
     try:
         doc_source = mongo_manager.query(AudioFile).get(file_id=source)
-        filename = doc_source.filename
+        # filename = doc_source.filename
         fpath_source = doc_source.file_path
         source_sound = AudioSegment.from_file(fpath_source)
         if target == source:
@@ -234,8 +238,7 @@ def overlay(**kwargs):
     if None in [source, mongo_manager, source, target, target_time]:
         return {'error': 'not all params'}
     try:
-        doc_source =  mongo_manager.query(AudioFile).get(file_id=source)
-        filename = doc_source.filename
+        doc_source = mongo_manager.query(AudioFile).get(file_id=source)
         fpath_source = doc_source.file_path
         source_sound = AudioSegment.from_file(fpath_source)
         if target == source:
@@ -279,6 +282,42 @@ def insert_silence(**kwargs):
         return {'result': False, 'error': str(e)}
 
 
+def denoise(**kwargs):
+    file_id = kwargs.get('file_id')
+    mongo_manager = kwargs.get('mongo_manager')
+    try:
+        doc = mongo_manager.query(AudioFile).get(file_id=file_id)
+        path = doc.file_path
+        audio, sr = librosa.load(path, sr=None)
+        if len(audio.shape) > 1:
+            audio = np.mean(audio, axis=1)
+        # hop_length = 512
+        # n_fft = 2048
+        # stft = librosa.stft(audio, n_fft=n_fft, hop_length=hop_length)
+        # spectrogram = np.abs(stft) ** 2
+        # # Compute noise floor
+        # noise = np.median(spectrogram[:, :int(sr / 10)], axis=1, keepdims=True)
+        #
+        # # Apply spectral subtraction
+        # spectrogram -= noise
+        #
+        # # Clip negative values
+        # spectrogram = np.maximum(spectrogram, 0)
+        # denoised_audio = librosa.istft(np.sqrt(spectrogram), hop_length=hop_length)
+        # librosa.output.write_wav(path, denoised_audio, sr)
+
+        rmse = librosa.feature.rms(y=audio)
+        noise_floor = rmse.mean()
+        signal_filtered, index = librosa.effects.trim(audio, top_db=20, frame_length=2048, hop_length=512)
+        # librosa.write_wav(path, signal_filtered, sr)
+        path = path.replace('webm', 'mp3')
+        sf.write(path, signal_filtered, int(sr), format='mp3')
+        mongo_manager.query(AudioFile).update(filters={'file_id': file_id}, payload={'file_path': path})
+        return {'result': True, 'path': path}
+    except Exception as e:
+        return {'result': False, 'error': str(e)}
+
+
 def generate_stream(fpath):
     with open(fpath, "rb") as f_wav:
         data = f_wav.read(1024)
@@ -290,7 +329,7 @@ def generate_stream(fpath):
 # @history
 def do_operation(operation, **kwargs):
     func = {
-        # keys must correspond UI constants: client/src/components/constants.js
+        # keys must fit UI constants: client/src/utils/constants.js
         Actions.CLEAR: clear,
         Actions.DELETE_FRAGMENT: delete_fragment,
         Actions.TRIM: trim,
@@ -300,7 +339,8 @@ def do_operation(operation, **kwargs):
         Actions.SPEEDUP: speed_up,
         Actions.PASTE: paste,
         Actions.OVERLAY: overlay,
-        Actions.INSERT_SILENCE: insert_silence
+        Actions.INSERT_SILENCE: insert_silence,
+        Actions.DENOISE: denoise
     }.get(operation)
     return func(**kwargs)
 
@@ -346,13 +386,3 @@ async def create_file_for_yt(mongo_manager, file_path, user_id, file_id,
     else:
         logger.error(f'Error saving file {filename}')
         return {}
-
-
-async def export(**kwargs):
-    # todo: implement this export function
-    mongo_manager = kwargs.get('mongo_manager')
-    file_id = kwargs.get('source')
-    doc = mongo_manager.query(AudioFile).get(file_id=file_id)
-    fpath = doc.file_path
-    sound = AudioSegment.from_file(fpath)
-    sound.export('file.mp3')
