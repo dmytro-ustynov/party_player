@@ -1,8 +1,9 @@
 import os
 import asyncio
+import uuid
 from pydub import AudioSegment
 from server.app.audio.models import AudioFile, Actions
-from server.app.dependencies import logger
+from server.app.dependencies import logger, UPLOAD_FOLDER
 import librosa
 import librosa.feature
 import numpy as np
@@ -67,18 +68,35 @@ def delete_fragment(**kwargs):
 def trim(**kwargs):
     file_id = kwargs.get('file_id')
     mongo_manager = kwargs.get('mongo_manager')
+    overwrite = kwargs.get('overwrite', False)
     try:
         doc = mongo_manager.query(AudioFile).get(file_id=file_id)
         fpath = doc.file_path
-        # filename = doc.filename
+        filename = doc.filename
         audio = AudioSegment.from_file(fpath)
         start = kwargs.get('start')
         end = kwargs.get('end')
-        new_sound = audio[int(round(start*1000)):int(round(end*1000))]
-        new_sound.export(fpath)
-        mongo_manager.query(AudioFile).update(filters={'file_id': file_id},
-                                              payload={'duration': new_sound.duration_seconds})
-        return {'result': True, 'duration': new_sound.duration_seconds}
+        new_sound = audio[int(round(start * 1000)):int(round(end * 1000))]
+        if overwrite:
+            new_sound.export(fpath)
+            mongo_manager.query(AudioFile).update(filters={'file_id': file_id},
+                                                  payload={'duration': new_sound.duration_seconds})
+        else:
+            file_id = str(uuid.uuid4())
+            fpath = os.path.join(UPLOAD_FOLDER, '{}.{}'.format(file_id, doc.ext))
+            new_sound.export(fpath)
+            filename = f'{filename}__CUT'
+            audio_payload = {**doc.to_dict(),
+                             **{'file_id': file_id,
+                                'file_path': fpath,
+                                'filename': filename,
+                                'duration': new_sound.duration_seconds
+                                }}
+            mongo_manager.query(AudioFile).create(audio_payload)
+        return {'result': True,
+                'duration': new_sound.duration_seconds,
+                'filename': filename,
+                'file_id': file_id}
     except Exception as e:
         print(str(e))
         return {'result': False, 'error': str(e)}
@@ -328,6 +346,7 @@ def generate_stream(fpath):
 
 # @history
 def do_operation(operation, **kwargs):
+    logger.info(f'user: {kwargs.get("user_id")} ; file {kwargs.get("file_id")}; operation: {operation}')
     func = {
         # keys must fit UI constants: client/src/utils/constants.js
         Actions.CLEAR: clear,

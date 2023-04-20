@@ -167,10 +167,10 @@ async def save_as(file: DownloadFileSchema):
 
 
 @router.post("/modify", dependencies=[Depends(JWTBearer(auto_error=False))])
-async def modify_operation(body: OperationSchema):
+async def modify_operation(body: OperationSchema, user_id: str = Depends(get_current_user_id)):
     action = body.action
     try:
-        data = {'file_id': body.file_id, 'mongo_manager': MM}
+        data = {'file_id': body.file_id, 'mongo_manager': MM, 'user_id': user_id}
         if body.details is not None:
             data = {**body.details, **data}
         return do_operation(action, **data)
