@@ -8,7 +8,7 @@ export default function TermsOfUsePage() {
     return (
         <>
             <Header/>
-            <div className="content" style={{padding: "2rem 4rem", width: "100%"}}>
+            <div className="content" style={{padding: "2rem 4rem"}}>
                 <div style={{maxWidth: '960px'}}>
                     <Typography variant="h5">Terms of Use</Typography>
                     <Typography variant="body1" sx={{textAlign: "left"}}>By uploading any sound recording or music to
