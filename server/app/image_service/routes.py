@@ -8,7 +8,7 @@ from starlette.responses import StreamingResponse
 
 from server.app.audio.models import AudioFile
 from server.app.auth.jwt_bearer import JWTBearer
-from server.app.dependencies import MM, UPLOAD_FOLDER
+from server.app.dependencies import UPLOAD_FOLDER
 from decouple import config as env
 
 router = APIRouter(prefix='/image',
@@ -48,7 +48,8 @@ async def upload_thumbnail(request: Request, file: UploadFile, file_id: str):
     # path should be like 'http://localhost:8008/image/thumbnail/839881b5-1391-4aed-88cf-792362a9520b.png'
     # to be successfully recognized by endpoint "get_thumbnail"
     path = f"{env('API_SCHEMA')}://{env('API_HOST')}:{env('API_PORT')}/image/thumbnail/{filename}"
-    MM.query(AudioFile).update(filters={'file_id': file_id}, payload={'thumbnail': path})
+    # todo fix getting thumbnails from new PG model
+    # MM.query(AudioFile).update(filters={'file_id': file_id}, payload={'thumbnail': path})
     return {'result': True, 'path': path}
 
 

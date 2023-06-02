@@ -9,6 +9,11 @@ import mimetypes
 from datetime import datetime
 from fastapi import UploadFile
 from server.app.dependencies import UPLOAD_FOLDER
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import JSONB
+from server.app.dal.database import Base
+
 
 
 class AudioFormats(str, Enum):
@@ -33,28 +38,25 @@ class Actions(str, Enum):
     DENOISE = 'denoise'
 
 
-class AudioFile:
-    __collection__ = 'files'
-    __slots__ = ('file_id', 'filename', 'ext', 'file_path', 'user_id', 'duration', 'author', 'thumbnail', 'title',
-                 'deleted', 'created_at', 'updated_at')
+class AudioFile(Base):
+    __tablename__ = 'audio_files'
 
-    def __init__(self, file_id=None, filename=None, ext=None, file_path=None, user_id=None, duration=None,
-                 created_at=None, updated_at=None, **kwargs):
-        """
-        DO NOT exclude kwargs, bc mongo can send other parameters there
-        """
-        self.file_id = file_id
-        self.filename = filename
-        self.ext = ext
-        self.file_path = file_path or self.create_path()
-        self.user_id = user_id
-        self.duration = duration
-        self.author = kwargs.get('author')
-        self.thumbnail = kwargs.get('thumbnail')
-        self.title = kwargs.get('title')
-        self.deleted = kwargs.get('deleted')
-        self.created_at = created_at or datetime.now()
-        self.updated_at = updated_at or datetime.now()
+    file_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+    filename = Column(String(255), nullable=False)
+    ext = Column(String(10))
+    file_path = Column(String(255))
+    duration = Column(Integer)
+    author = Column(String(100))
+    thumbnail = Column(String(255))
+    title = Column(String(255))
+    is_deleted = Column(Boolean, default=False)
+    meta = Column(JSONB)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
+
+    user = relationship("server.app.users.models.User", back_populates="audio_files")
+
 
     @property
     def valid_path(self):

@@ -3,7 +3,8 @@ import yaml
 from decouple import config
 import logging
 from logging.config import dictConfig
-from server.app.dal.mongo_manager import MongoManager
+from server.app.dal.database import async_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), config('UPLOAD_FOLDER'))
@@ -16,4 +17,7 @@ dictConfig(logger_config)
 
 logger = logging.getLogger('server')
 
-MM = MongoManager()
+
+async def get_session() -> AsyncSession:
+    async with async_session() as session:
+        yield session
