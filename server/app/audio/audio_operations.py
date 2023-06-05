@@ -4,10 +4,6 @@ import uuid
 from pydub import AudioSegment
 from server.app.audio.models import AudioFile, Actions
 from server.app.dependencies import logger, UPLOAD_FOLDER
-import librosa
-import librosa.feature
-import numpy as np
-import soundfile as sf
 
 
 def clear(**kwargs):
@@ -300,40 +296,8 @@ def insert_silence(**kwargs):
         return {'result': False, 'error': str(e)}
 
 
-def denoise(**kwargs):
-    file_id = kwargs.get('file_id')
-    mongo_manager = kwargs.get('mongo_manager')
-    try:
-        doc = mongo_manager.query(AudioFile).get(file_id=file_id)
-        path = doc.file_path
-        audio, sr = librosa.load(path, sr=None)
-        if len(audio.shape) > 1:
-            audio = np.mean(audio, axis=1)
-        # hop_length = 512
-        # n_fft = 2048
-        # stft = librosa.stft(audio, n_fft=n_fft, hop_length=hop_length)
-        # spectrogram = np.abs(stft) ** 2
-        # # Compute noise floor
-        # noise = np.median(spectrogram[:, :int(sr / 10)], axis=1, keepdims=True)
-        #
-        # # Apply spectral subtraction
-        # spectrogram -= noise
-        #
-        # # Clip negative values
-        # spectrogram = np.maximum(spectrogram, 0)
-        # denoised_audio = librosa.istft(np.sqrt(spectrogram), hop_length=hop_length)
-        # librosa.output.write_wav(path, denoised_audio, sr)
-
-        rmse = librosa.feature.rms(y=audio)
-        noise_floor = rmse.mean()
-        signal_filtered, index = librosa.effects.trim(audio, top_db=20, frame_length=2048, hop_length=512)
-        # librosa.write_wav(path, signal_filtered, sr)
-        path = path.replace('webm', 'mp3')
-        sf.write(path, signal_filtered, int(sr), format='mp3')
-        mongo_manager.query(AudioFile).update(filters={'file_id': file_id}, payload={'file_path': path})
-        return {'result': True, 'path': path}
-    except Exception as e:
-        return {'result': False, 'error': str(e)}
+def denoise():
+    pass
 
 
 def generate_stream(fpath):

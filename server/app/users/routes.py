@@ -1,9 +1,7 @@
-import uuid
 from fastapi import APIRouter, Response, Request, HTTPException
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import RedirectResponse
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import IntegrityError
 
 from server.app.dependencies import get_session
@@ -12,7 +10,6 @@ from server.app.dependencies import logger
 from server.app.auth.jwt_handler import sign_jwt
 from server.app.auth.jwt_handler import decode_jwt
 
-from server.app.users.models import User, Roles
 from server.app.users.models import UserSchema
 from server.app.users.models import UserLoginSchema
 from server.app.users import service as user_service
@@ -27,7 +24,7 @@ async def user_signup(user: UserSchema, session: AsyncSession = Depends(get_sess
     try:
         await session.commit()
         return {'result': True, 'user': new_user.to_dict()}
-    except IntegrityError as ex:
+    except IntegrityError:
         await session.rollback()
         raise HTTPException(status_code=422, detail="User exists")
     except Exception as e:
@@ -79,13 +76,13 @@ async def logout(response: Response):
     return {"msg": "logout OK"}
 
 
-
 @router.get('/refresh_token')
 async def refresh_token(request: Request, response: Response, session: AsyncSession = Depends(get_session)):
     """
     Endpoint to silently refresh tokens
     :param request:
     :param response:
+    :param session: async db session
     :return:
     """
     token = request.cookies.get('refresh_token')

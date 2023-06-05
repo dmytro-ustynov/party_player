@@ -3,7 +3,8 @@ FROM python:3.10.3
 WORKDIR /code
 
 COPY ./requirements.txt /code/requirements.txt
-
+#sudo apt-get install libpq-dev
+#sudo apt-get install python-dev
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 RUN apt-get -y update
