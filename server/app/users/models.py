@@ -11,7 +11,6 @@ from sqlalchemy_utils import PasswordType
 from sqlalchemy.dialects.postgresql import UUID
 
 from server.app.dal.database import Base
-# from sqlalchemy.dialects.postgresql import BYTEA
 
 
 # Pydantic Schemas
@@ -58,6 +57,7 @@ class UserLoginSchema(BaseModel):
         }
 
 
+# DB model
 class User(Base):
     __tablename__ = 'users'
 
@@ -89,7 +89,7 @@ class User(Base):
     def disabled(self):
         return not self.is_active
 
-    def toJSON(self):
+    def to_json(self):
         """
         :return: json object for the user entity
         """

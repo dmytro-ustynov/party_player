@@ -41,7 +41,6 @@ async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_
                       session: AsyncSession = Depends(get_session)):
     if audiofile.content_type != 'audio/mpeg' and not AudioFile.allowed_file(audiofile.filename):
         return {'result': False, 'details': 'file not accepted'}
-    # should create new AudioFile instance in db
     try:
         new_file = audio_service.upload_new_audio(audiofile, user_id, session)
         out_file_path = new_file.file_path
@@ -64,9 +63,8 @@ async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_
 @router.delete("/file", dependencies=[Depends(JWTBearer(auto_error=False))])
 async def delete_file(file_id: str, user_id: str = Depends(get_current_user_id),
                       session: AsyncSession = Depends(get_session)):
-    # find the AudioFile, check if user has permissions to delete, mark file as deleted
     try:
-        audio_service.delete_file_by_id(file_id, user_id, session)
+        await audio_service.delete_file_by_id(file_id, user_id, session)
         await session.commit()
         logger.info(f'User deleted file: user {user_id} : file {file_id}')
         return {'result': True, 'details': f'deleted {file_id}'}
@@ -75,13 +73,12 @@ async def delete_file(file_id: str, user_id: str = Depends(get_current_user_id),
         logger.warn(msg)
         return {'result': False, 'details': msg}
     except Exception as e:
+        logger.error(str(e))
         return {'result': False, 'details': f'error deleting file'}
-
 
 
 @router.get("/get_audio_stream", dependencies=[Depends(JWTBearer(auto_error=False))])
 async def stream_file(file_id: str, session: AsyncSession = Depends(get_session)):
-    # get the file by id, get its filepath and then stream
     try:
         file = await audio_service.get_audio_by_id(file_id, session)
         return StreamingResponse(generate_stream(file.file_path), media_type='audio')
@@ -96,14 +93,13 @@ async def update_file_name(update: UpdateFilenameSchema, user_id: str = Depends(
     try:
         file = await audio_service.update_file_name(update, user_id, session)
         await session.commit()
-        # should update file name and return updated filename on success
         logger.info(f'User changed filename: user {user_id} ; file {file.file_id}; '
                     f'filename {file.filename}')
         return {'result': True, 'filename': file.filename}
     except FileNotFoundError:
         return {'result': False, 'details': 'no such file'}
     except OwnerError:
-        msg = f'Forbidden to change filename {file.file_id} by user {user_id}'
+        msg = f'Forbidden to change filename {update.file_id} by user {user_id}'
         logger.warn(msg)
         return {'result': False, 'details': msg}
     except Exception as e:
@@ -114,11 +110,9 @@ async def update_file_name(update: UpdateFilenameSchema, user_id: str = Depends(
 
 @router.get("/get_audio")  # dependencies=[Depends(JWTBearer(auto_error=False))])
 async def get_audio(file_id: str, session: AsyncSession = Depends(get_session)):
-    # should return an audio as a single file object
-    # if file successfully found in DB, and its filepath is correct
     file = await audio_service.get_audio_by_id(file_id, session)
-    fpath = file.file_path
-    if file.valid_path:
+    if file and file.valid_path:
+        fpath = file.file_path
         mimetype = mimetypes.guess_type(fpath)[0]
         return FileResponse(fpath, media_type=mimetype)
     return {'result': False, 'details': 'file not found'}
@@ -144,7 +138,7 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
         return {'result': True, 'file': {'file_id': new_file.file_id,
                                          'filename': new_file.title, 'duration': new_file.duration}}
     except Exception as e:
-        print(str(e))
+        logger.error(str(e))
         return {'result': False, 'details': str(e)}
 
 
@@ -179,9 +173,10 @@ async def modify_operation(body: OperationSchema, user_id: str = Depends(get_cur
     action = body.action
     try:
         # should modify audio_operations,do_operation to work with PostgreSQL session instead of mongo
-        data = {'file_id': body.file_id, 'db_session': session, 'user_id': user_id}
+        data = {'file_id': body.file_id, 'user_id': user_id}
         if body.details is not None:
             data = {**body.details, **data}
-        return do_operation(action, **data)
+        result = await do_operation(action, session, **data)
+        return result
     except Exception as e:
         return {'result': False, 'details': str(e)}

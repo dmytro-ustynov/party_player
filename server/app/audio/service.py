@@ -1,6 +1,8 @@
 import uuid
 import os
 import ssl
+
+from pydub import AudioSegment
 from pytube import YouTube
 
 from fastapi import UploadFile
@@ -39,8 +41,14 @@ async def get_audio_by_id(audio_id, session: AsyncSession):
     return file
 
 
-def update_audio_duration():
-    pass
+async def update_audio_duration(audio_id, session, duration=None):
+    file = await session.get(AudioFile, audio_id)
+    if duration is None:
+        fpath = file.file_path
+        sound = AudioSegment.from_file(fpath)
+        duration = round(sound.duration_seconds, 3)
+    file.duration = duration
+    return file
 
 
 async def delete_file_by_id(file_id: str, user_id: str, session: AsyncSession):
