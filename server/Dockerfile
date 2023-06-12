@@ -2,10 +2,13 @@ FROM python:3.10.3
 
 WORKDIR /code
 
-COPY ./requirements.txt /code/requirements.txt
-#sudo apt-get install libpq-dev
-#sudo apt-get install python-dev
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+COPY ./pyproject.toml ./poetry.lock /code/
+# Install Poetry
+RUN pip install poetry==1.1.13
+
+# Install project dependencies
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi
 
 RUN apt-get -y update
 RUN apt-get -y upgrade
