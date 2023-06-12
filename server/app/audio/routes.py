@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.app.auth.utils import get_current_user_id
 from server.app.auth.jwt_bearer import JWTBearer
+from server.app.dal.database import OwnerError
 from server.app.dependencies import logger, UPLOAD_FOLDER, get_session
 from server.app.audio.models import AudioFile, DownloadFileSchema, UpdateFilenameSchema, OperationSchema
 from server.app.audio.audio_operations import do_operation
@@ -64,8 +65,18 @@ async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_
 async def delete_file(file_id: str, user_id: str = Depends(get_current_user_id),
                       session: AsyncSession = Depends(get_session)):
     # find the AudioFile, check if user has permissions to delete, mark file as deleted
-    logger.info(f'User deleted file: user {user_id} : file {file_id}')
-    return {'result': True, 'details': f'deleted {file_id}'}
+    try:
+        audio_service.delete_file_by_id(file_id, user_id, session)
+        await session.commit()
+        logger.info(f'User deleted file: user {user_id} : file {file_id}')
+        return {'result': True, 'details': f'deleted {file_id}'}
+    except OwnerError:
+        msg = f'Forbidden to delete file {file_id} by user {user_id}'
+        logger.warn(msg)
+        return {'result': False, 'details': msg}
+    except Exception as e:
+        return {'result': False, 'details': f'error deleting file'}
+
 
 
 @router.get("/get_audio_stream", dependencies=[Depends(JWTBearer(auto_error=False))])
@@ -82,13 +93,19 @@ async def stream_file(file_id: str, session: AsyncSession = Depends(get_session)
 @router.post("/change_filename", dependencies=[Depends(JWTBearer(auto_error=False))])
 async def update_file_name(update: UpdateFilenameSchema, user_id: str = Depends(get_current_user_id),
                            session: AsyncSession = Depends(get_session)):
-    file = await audio_service.update_file_name(update, user_id, session)
     try:
+        file = await audio_service.update_file_name(update, user_id, session)
         await session.commit()
         # should update file name and return updated filename on success
         logger.info(f'User changed filename: user {user_id} ; file {file.file_id}; '
                     f'filename {file.filename}')
         return {'result': True, 'filename': file.filename}
+    except FileNotFoundError:
+        return {'result': False, 'details': 'no such file'}
+    except OwnerError:
+        msg = f'Forbidden to change filename {file.file_id} by user {user_id}'
+        logger.warn(msg)
+        return {'result': False, 'details': msg}
     except Exception as e:
         logger.error(str(e))
         await session.rollback()
@@ -119,7 +136,6 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
     """
     try:
         logger.info(f'Start loading youtube URL: {url}')
-
         new_file = await audio_service.create_file_from_yt(url=url,
                                                            user_id=user_id,
                                                            session=session)
@@ -136,23 +152,25 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
 async def save_as(file: DownloadFileSchema, session: AsyncSession = Depends(get_session)):
     file_id = file.file_id
     format_ = file.format
-    # audio_file = MM.query(AudioFile).get(file_id=file_id)
-    # should find file in db and send file response from corresponding file on disk
-    audio_file = " IS A AUDIO FILE"
-    if not audio_file:
-        return {"result": False, "details": 'file not found'}
-    path = os.path.join(UPLOAD_FOLDER, file_id + '.' + format_)
-    logger.info(f'User exporting file {file_id} to {format_}')
-    if os.path.isfile(path):
+    try:
+        audio_file = await audio_service.get_audio_by_id(file_id, session)
+        if not audio_file:
+            return {"result": False, "details": 'file not found'}
+        path = os.path.join(UPLOAD_FOLDER, file_id + '.' + format_)
+        logger.info(f'User exporting file {file_id} to {format_}')
+        if os.path.isfile(path):
+            return FileResponse(path)
+        sound = AudioSegment.from_file(audio_file.file_path)
+        if audio_file.thumbnail and format_ == 'mp3':
+            sound.export(out_f=path, format=format_,
+                         tags=audio_file.create_tags(),
+                         cover=audio_file.create_thumbnail_tag())
+        else:
+            sound.export(out_f=path, format=format_, tags=audio_file.create_tags())
         return FileResponse(path)
-    sound = AudioSegment.from_file(audio_file.file_path)
-    if audio_file.thumbnail and format_ == 'mp3':
-        sound.export(out_f=path, format=format_,
-                     tags=audio_file.create_tags(),
-                     cover=audio_file.create_thumbnail_tag())
-    else:
-        sound.export(out_f=path, format=format_, tags=audio_file.create_tags())
-    return FileResponse(path)
+    except Exception as e:
+        logger.error(str(e))
+        return {'result': False}
 
 
 @router.post("/modify", dependencies=[Depends(JWTBearer(auto_error=False))])

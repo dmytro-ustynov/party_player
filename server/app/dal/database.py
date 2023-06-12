@@ -30,3 +30,7 @@ class SqlManager:
 db = SqlManager()
 
 async_session = db.async_session
+
+
+class OwnerError(Exception):
+    pass

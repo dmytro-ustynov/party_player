@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from server.app.audio.models import AudioFile, UpdateFilenameSchema
+from server.app.dal.database import OwnerError
 from server.app.dependencies import UPLOAD_FOLDER
 
 
@@ -42,11 +43,16 @@ def update_audio_duration():
     pass
 
 
-def delete_file_by_id(file_id, session: AsyncSession):
-    pass
+async def delete_file_by_id(file_id: str, user_id: str, session: AsyncSession):
+    file = await get_audio_by_id(file_id, session)
+    if file.uid == user_id:
+        await session.delete(file)
+        return
+    else:
+        raise OwnerError('Delete Forbidden')
 
 
-async def create_file_from_yt(url:str,  user_id: str, session: AsyncSession):
+async def create_file_from_yt(url: str, user_id: str, session: AsyncSession):
     ssl._create_default_https_context = ssl._create_unverified_context
     yt = YouTube(url)
     video_length = yt.vid_info.get('videoDetails', {}).get('lengthSeconds')
@@ -79,6 +85,10 @@ async def update_file_name(update: UpdateFilenameSchema, user_id, session: Async
     file_id = update.file_id
     filename = update.filename
     file = await get_audio_by_id(file_id, session)
+    if not file:
+        raise FileNotFoundError
     if file.uid == user_id:
         file.filename = filename
-    return file
+        return file
+    else:
+        raise OwnerError('Forbidden to update')
