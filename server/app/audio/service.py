@@ -1,10 +1,17 @@
 import uuid
 import os
+import ssl
+from pytube import YouTube
+
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from server.app.audio.models import AudioFile, UpdateFilenameSchema
+from server.app.dependencies import UPLOAD_FOLDER
+
+
+# from server.app.dependencies import logger
 
 
 def upload_new_audio(audio_file: UploadFile, user_id: str, session: AsyncSession):
@@ -39,29 +46,39 @@ def delete_file_by_id(file_id, session: AsyncSession):
     pass
 
 
-def create_file_from_yt(file_path,  user_id: str,  author: str,
-                        title: str, duration, thumbnail: str, session: AsyncSession):
-    # also check this def:
-    # from audio.audio_operations import create_file_for_yt
-    duration = float(duration)
+async def create_file_from_yt(url:str,  user_id: str, session: AsyncSession):
+    ssl._create_default_https_context = ssl._create_unverified_context
+    yt = YouTube(url)
+    video_length = yt.vid_info.get('videoDetails', {}).get('lengthSeconds')
+    # pics = yt.vid_info.get('videoDetails', {}).get('thumbnail')  # dict
+    # author = yt.vid_info.get('videoDetails', {}).get('author')
+    title = yt.vid_info.get('videoDetails', {}).get('title')
+    audio_streams = yt.streams.filter(type='audio').order_by('abr').desc()
+    stream = audio_streams.first()
+    file_path = stream.download(output_path=UPLOAD_FOLDER)
+    duration = float(video_length)
     file_id = str(uuid.uuid4())
     folder, filename = os.path.split(file_path)
     ext = filename.split('.')[-1].lower()
     new_path = os.path.join(folder, f'{file_id}.{ext}')
-    # file_path = os.path.join(UPLOAD_FOLDER, '{}.{}'.format(file_id, ext))
     new_file = AudioFile(id=file_id,
                          user_id=user_id,
                          file_path=new_path,
                          filename=filename,
                          ext=ext,
-                         author=author,
+                         author=yt.author,
                          duration=duration,
-                         thumbnail=thumbnail,
+                         thumbnail=yt.thumbnail_url,
                          title=title)
     session.add(new_file)
     os.rename(file_path, new_path)
     return new_file
 
 
-def update_file_name(update: UpdateFilenameSchema, user_id, session: AsyncSession):
-    pass
+async def update_file_name(update: UpdateFilenameSchema, user_id, session: AsyncSession):
+    file_id = update.file_id
+    filename = update.filename
+    file = await get_audio_by_id(file_id, session)
+    if file.uid == user_id:
+        file.filename = filename
+    return file

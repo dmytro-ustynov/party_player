@@ -1,5 +1,4 @@
 import os
-import ssl
 import mimetypes
 import aiofiles
 from fastapi import APIRouter, Depends, UploadFile
@@ -15,7 +14,6 @@ from server.app.audio.models import AudioFile, DownloadFileSchema, UpdateFilenam
 from server.app.audio.audio_operations import do_operation
 from server.app.audio.audio_operations import generate_stream
 from server.app.audio import service as audio_service
-from pytube import YouTube
 
 router = APIRouter(prefix='/audio',
                    tags=['audio'])
@@ -74,19 +72,27 @@ async def delete_file(file_id: str, user_id: str = Depends(get_current_user_id),
 async def stream_file(file_id: str, session: AsyncSession = Depends(get_session)):
     # get the file by id, get its filepath and then stream
     try:
-        filepath = f'{file_id}'
-        return StreamingResponse(generate_stream(filepath), media_type='audio')
+        file = await audio_service.get_audio_by_id(file_id, session)
+        return StreamingResponse(generate_stream(file.file_path), media_type='audio')
     except Exception as e:
+        logger.error(str(e))
         raise e
 
 
 @router.post("/change_filename", dependencies=[Depends(JWTBearer(auto_error=False))])
-async def update_file_name(update: UpdateFilenameSchema, user_id: str = Depends(get_current_user_id)):
-    file_id = update.file_id
-    filename = update.filename
-    # should update file name and return updated filename on success
-    logger.info(f'User changed filename: user {user_id} ; file {file_id}; filename {filename}')
-    return {'result': True, 'filename': filename}
+async def update_file_name(update: UpdateFilenameSchema, user_id: str = Depends(get_current_user_id),
+                           session: AsyncSession = Depends(get_session)):
+    file = await audio_service.update_file_name(update, user_id, session)
+    try:
+        await session.commit()
+        # should update file name and return updated filename on success
+        logger.info(f'User changed filename: user {user_id} ; file {file.file_id}; '
+                    f'filename {file.filename}')
+        return {'result': True, 'filename': file.filename}
+    except Exception as e:
+        logger.error(str(e))
+        await session.rollback()
+        return {'result': False, 'details': 'Error updating filename'}
 
 
 @router.get("/get_audio")  # dependencies=[Depends(JWTBearer(auto_error=False))])
@@ -113,26 +119,14 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
     """
     try:
         logger.info(f'Start loading youtube URL: {url}')
-        ssl._create_default_https_context = ssl._create_unverified_context
-        yt = YouTube(url)
-        video_length = yt.vid_info.get('videoDetails', {}).get('lengthSeconds')
-        # pics = yt.vid_info.get('videoDetails', {}).get('thumbnail')  # dict
-        # author = yt.vid_info.get('videoDetails', {}).get('author')
-        title = yt.vid_info.get('videoDetails', {}).get('title')
-        audio_streams = yt.streams.filter(type='audio').order_by('abr').desc()
-        stream = audio_streams.first()
-        file_path = stream.download(output_path=UPLOAD_FOLDER)
-        new_file = audio_service.create_file_from_yt(file_path=file_path,
-                                                     user_id=user_id,
-                                                     session=session,
-                                                     author=yt.author,
-                                                     title=title,
-                                                     duration=video_length,
-                                                     thumbnail=yt.thumbnail_url)
+
+        new_file = await audio_service.create_file_from_yt(url=url,
+                                                           user_id=user_id,
+                                                           session=session)
         await session.commit()
-        logger.info(f'Youtube downloaded successfully: {new_file.file_id} - {title}')
+        logger.info(f'Youtube downloaded successfully: {new_file.file_id} - {new_file.title}')
         return {'result': True, 'file': {'file_id': new_file.file_id,
-                                         'filename': title, 'duration': video_length}}
+                                         'filename': new_file.title, 'duration': new_file.duration}}
     except Exception as e:
         print(str(e))
         return {'result': False, 'details': str(e)}

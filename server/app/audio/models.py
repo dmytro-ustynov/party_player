@@ -61,6 +61,11 @@ class AudioFile(Base):
     def file_id(self):
         return str(self.id)
 
+
+    @property
+    def uid(self):
+        return str(self.user_id)
+
     @property
     def valid_path(self):
         return os.path.isfile(str(self.file_path))
