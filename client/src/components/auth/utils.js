@@ -1,4 +1,4 @@
-import {BASE_URL} from '../constants'
+import {BASE_URL} from "../../utils/constants";
 
 const AUTH_URL = BASE_URL + '/auth'
 

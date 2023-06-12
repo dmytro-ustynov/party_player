@@ -24,9 +24,10 @@ async def user_signup(user: UserSchema, session: AsyncSession = Depends(get_sess
     try:
         await session.commit()
         return {'result': True, 'user': new_user.to_dict()}
-    except IntegrityError:
+    except IntegrityError as e:
+        logger.error(str(e))
         await session.rollback()
-        raise HTTPException(status_code=422, detail="User exists")
+        return {'result': False, 'details': 'User exists'}
     except Exception as e:
         print(str(e))
         raise HTTPException(status_code=422, detail='Error creating new user')
@@ -39,13 +40,13 @@ async def login_user(login: UserLoginSchema, response: Response, session: AsyncS
     remember = login.remember
     db_user = await user_service.get_user_by_username(username, session)
     if db_user is None:
-        raise HTTPException(status_code=404, detail='User not found')
+        return {'result': False, 'details': 'Not valid user or password'}
     db_user = db_user[0]
     if not db_user.check_password(password):
         return {'result': False, 'details': 'Not valid user or password'}
 
-    result = {**sign_jwt(db_user.user_id, seconds=3600 if remember else 600),
-              **sign_jwt(db_user.user_id, seconds=7200 if remember else 3000, token_key='refresh_token'),
+    result = {**sign_jwt(db_user.uid, seconds=3600 if remember else 600),
+              **sign_jwt(db_user.uid, seconds=7200 if remember else 3000, token_key='refresh_token'),
               'user': db_user.to_dict(),
               'result': True}  # dict
     response.set_cookie(key='refresh_token', value=result.get('refresh_token', ''))
@@ -60,13 +61,22 @@ async def logout(response: Response):
     return {"msg": "logout OK"}
 
 
-@router.get('/check_username_or_email', summary='Check if the provided username is free to register '
-                                                'or username is already in use.')
+@router.get('/check_username', summary='Check if the provided username is free to register '
+                                       'or username is already in use.')
 async def check_free_username(username: str, session: AsyncSession = Depends(get_session)):
     db_user = await user_service.get_user_by_username(username, session)
     if db_user is None:
         return {'result': True}
-    return {'result': False, 'details': f"Can't use this {'email' if '@' in username else 'username'}"}
+    return {'result': False, 'details': f"Can't use this username"}
+
+
+@router.get('/check_email', summary='Check if the provided email is free to register '
+                                    'or email is already in use.')
+async def check_free_username(email: str, session: AsyncSession = Depends(get_session)):
+    db_user = await user_service.get_user_by_username(email, session)
+    if db_user is None:
+        return {'result': True}
+    return {'result': False, 'details': f"Can't use this email"}
 
 
 @router.post("/logout")
@@ -95,8 +105,8 @@ async def refresh_token(request: Request, response: Response, session: AsyncSess
     db_user = await user_service.get_user_by_id(user_id, session)
     if not db_user:
         return {'result': False}
-    result = {**sign_jwt(db_user.user_id),
-              **sign_jwt(db_user.user_id, seconds=3000, token_key='refresh_token'),
+    result = {**sign_jwt(db_user.uid),
+              **sign_jwt(db_user.uid, seconds=3000, token_key='refresh_token'),
               'result': True}  # dict
     response.set_cookie(key='refresh_token', value=result.get('refresh_token', ''))
     return result

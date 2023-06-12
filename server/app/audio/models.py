@@ -9,11 +9,11 @@ import mimetypes
 from datetime import datetime
 from fastapi import UploadFile
 from server.app.dependencies import UPLOAD_FOLDER
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID
 from server.app.dal.database import Base
-
 
 
 class AudioFormats(str, Enum):
@@ -41,22 +41,25 @@ class Actions(str, Enum):
 class AudioFile(Base):
     __tablename__ = 'audio_files'
 
-    file_id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID, ForeignKey('users.id'), nullable=False)
     filename = Column(String(255), nullable=False)
     ext = Column(String(10))
     file_path = Column(String(255))
-    duration = Column(Integer)
+    duration = Column(Float)
     author = Column(String(100))
     thumbnail = Column(String(255))
     title = Column(String(255))
     is_deleted = Column(Boolean, default=False)
     meta = Column(JSONB)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, onupdate=datetime.now())
 
     user = relationship("server.app.users.models.User", back_populates="audio_files")
 
+    @property
+    def file_id(self):
+        return str(self.id)
 
     @property
     def valid_path(self):
@@ -117,7 +120,9 @@ class AudioFile(Base):
             filename.rsplit('.', 1)[1].lower() in allowed
 
     def to_dict(self):
-        return {s: getattr(self, s) for s in self.__slots__}
+        result = self.__dict__
+        result['file_id'] = self.file_id
+        return result
 
 
 class DownloadFileSchema(BaseModel):
@@ -158,6 +163,5 @@ class OperationSchema(BaseModel):
                     'start': 23.5,
                     'end': 27.5
                 }
-
             }
         }

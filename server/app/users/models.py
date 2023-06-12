@@ -1,12 +1,14 @@
-import datetime
+from datetime import datetime
 
 import bcrypt
 import json
+import uuid
 
 from pydantic import BaseModel, Field, EmailStr, validator
-from sqlalchemy import Column, String, Integer, Enum, Boolean, DateTime
+from sqlalchemy import Column, String, Enum, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import PasswordType
+from sqlalchemy.dialects.postgresql import UUID
 
 from server.app.dal.database import Base
 # from sqlalchemy.dialects.postgresql import BYTEA
@@ -24,11 +26,10 @@ class UserSchema(BaseModel):
 
     class Config:
         schema_extra = {
-            'user_demo': {
-                'username': 'John Doe',
+            'example': {
+                'username': 'admin',
                 'email': 'email@addr.ess',
-                'password': 'password',
-                'tier': 'anonymous',
+                'password': '12345'
             }
         }
 
@@ -60,18 +61,17 @@ class UserLoginSchema(BaseModel):
 class User(Base):
     __tablename__ = 'users'
 
-    user_id = Column(Integer, primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = Column(String(100), nullable=False)
     email = Column(String(255), nullable=False, unique=True)
     email_verified = Column(Boolean, default=False)
     password = Column(PasswordType(schemes=['bcrypt'], deprecated=['auto']), nullable=False)
-    # password = Column(BYTEA, nullable=False)
     first_name = Column(String(100))
     last_name = Column(String(100))
     tier = Column(Enum('anonymous', 'registered', 'premium', name='tiers'), default='anonymous')
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.datetime.now())
-    updated_at = Column(DateTime, onupdate=datetime.datetime.now())
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, onupdate=datetime.now())
 
     audio_files = relationship("server.app.audio.models.AudioFile", back_populates="user")
 
@@ -97,14 +97,18 @@ class User(Base):
 
     def to_dict(self):
         return {
-            'id': self.user_id,
+            'id': self.uid,
             'username': self.username,
             'firstname': self.first_name,
             'lastname': self.last_name,
             'email_address': self.email,
             'email_verified': self.email_verified,
-            'level': self.tier
+            'tier': self.tier
         }
+
+    @property
+    def uid(self):
+        return str(self.id)
 
 
 class Roles:

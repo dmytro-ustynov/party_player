@@ -1,6 +1,7 @@
 import os
-import uuid
 import ssl
+import mimetypes
+import aiofiles
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.responses import FileResponse
@@ -22,29 +23,43 @@ router = APIRouter(prefix='/audio',
 
 @router.get("/", tags=['audio'])
 async def file_info(file_id: str, session: AsyncSession = Depends(get_session)):
-    pass
-    # should return file.to_dict()
-    return {}
+    file = await audio_service.get_audio_by_id(file_id, session)
+    return file.to_dict()
 
 
 @router.get("/get_my_files", tags=['audio'], dependencies=[Depends(JWTBearer(auto_error=False))])
-def get_my_files(user_id: str = Depends(get_current_user_id), session: AsyncSession = Depends(get_session)):
-    # should return list of user files
-    files = []
-    return {'result': True, 'details': f'you have {len(files)} files', 'files': files}
+async def get_my_files(user_id: str = Depends(get_current_user_id), session: AsyncSession = Depends(get_session)):
+    try:
+        files = await audio_service.get_audio_files_by_user_id(user_id, session)
+        files = [row.to_dict() for (row,) in files]
+        return {'result': True, 'details': f'you have {len(files)} files', 'files': files}
+    except Exception as e:
+        return {'result': False, 'details': str(e)}
 
 
-@router.post("/upload_file")
+@router.post("/upload_file", dependencies=[Depends(JWTBearer(auto_error=False))])
 async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_user_id),
                       session: AsyncSession = Depends(get_session)):
     if audiofile.content_type != 'audio/mpeg' and not AudioFile.allowed_file(audiofile.filename):
         return {'result': False, 'details': 'file not accepted'}
     # should create new AudioFile instance in db
-    # in case of success should return
-    # {'result': True, 'file': {'file_id': file_id,
-    #                           'filename': audiofile.filename,
-    #                           'duration': duration}}
-    return {'result': False, 'details': 'upload failed'}
+    try:
+        new_file = audio_service.upload_new_audio(audiofile, user_id, session)
+        out_file_path = new_file.file_path
+        async with aiofiles.open(out_file_path, 'wb') as out_file:
+            content = audiofile.file.read()  # async read
+            await out_file.write(content)
+        sound = AudioSegment.from_file(out_file_path)
+        new_file.duration = round(sound.duration_seconds, 3)
+        session.add(new_file)
+        await session.commit()
+        return {'result': True,
+                'file': {'file_id': new_file.file_id,
+                         'filename': new_file.filename,
+                         'duration': new_file.duration}}
+    except Exception as e:
+        await session.rollback()
+        return {'result': False, 'details': 'upload failed', 'error': str(e)}
 
 
 @router.delete("/file", dependencies=[Depends(JWTBearer(auto_error=False))])
@@ -75,20 +90,15 @@ async def update_file_name(update: UpdateFilenameSchema, user_id: str = Depends(
 
 
 @router.get("/get_audio")  # dependencies=[Depends(JWTBearer(auto_error=False))])
-async def get_audio(file_id: str):
+async def get_audio(file_id: str, session: AsyncSession = Depends(get_session)):
     # should return an audio as a single file object
-    # if file succesffuly found in DB, and its filepath is correct
-    fpath, mimetype = '1', '2'
-    return FileResponse(fpath, media_type=mimetype)
-    # return {'result': False, 'details': 'file not found'}
-
-
-@router.get("/file", dependencies=[Depends(JWTBearer(auto_error=False))])
-async def get_file(file_id: str):
-    # should return {'result': True, 'file': audio_file.to_dict()}
-    # if file was successfully found
-    pass
-    return {}
+    # if file successfully found in DB, and its filepath is correct
+    file = await audio_service.get_audio_by_id(file_id, session)
+    fpath = file.file_path
+    if file.valid_path:
+        mimetype = mimetypes.guess_type(fpath)[0]
+        return FileResponse(fpath, media_type=mimetype)
+    return {'result': False, 'details': 'file not found'}
 
 
 @router.get("/get_from_youtube", dependencies=[Depends(JWTBearer(auto_error=False))])
@@ -111,16 +121,20 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
         title = yt.vid_info.get('videoDetails', {}).get('title')
         audio_streams = yt.streams.filter(type='audio').order_by('abr').desc()
         stream = audio_streams.first()
-        file_id = str(uuid.uuid4())
-        default_filename = stream.download(output_path=UPLOAD_FOLDER)
-        await audio_service.create_file_from_yt(default_filename, user_id, file_id,
-                                                session,
-                                                author=yt.author,
-                                                title=title,
-                                                thumbnail=yt.thumbnail_url)
-        logger.info(f'Youtube downloaded successfully: {file_id} - {title}')
-        return {'result': True, 'file': {'file_id': file_id, 'filename': title, 'duration': video_length}}
+        file_path = stream.download(output_path=UPLOAD_FOLDER)
+        new_file = audio_service.create_file_from_yt(file_path=file_path,
+                                                     user_id=user_id,
+                                                     session=session,
+                                                     author=yt.author,
+                                                     title=title,
+                                                     duration=video_length,
+                                                     thumbnail=yt.thumbnail_url)
+        await session.commit()
+        logger.info(f'Youtube downloaded successfully: {new_file.file_id} - {title}')
+        return {'result': True, 'file': {'file_id': new_file.file_id,
+                                         'filename': title, 'duration': video_length}}
     except Exception as e:
+        print(str(e))
         return {'result': False, 'details': str(e)}
 
 

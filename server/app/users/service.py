@@ -6,13 +6,14 @@ from server.app.users.models import User, UserSchema
 
 def create_user(user: UserSchema, session: AsyncSession):
     try:
-        # password = User.create_password(user.password)
         new_user = User(username=user.username,
                         email=user.email,
                         password=user.password,
                         first_name=user.first_name,
                         last_name=user.last_name,
                         tier='registered')
+        if user.user_id:
+            new_user.id = user.user_id
         session.add(new_user)
     except Exception as e:
         print(str(e))

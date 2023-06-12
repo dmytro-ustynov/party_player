@@ -64,7 +64,7 @@ function PasswordField({value, setValue, label, error, errorMessage}) {
 
 export default function RegisterPage() {
     const [username, setUsername] = useState('')
-    const [password1, setPassword1] = useState('')
+    const [password, setPassword] = useState('')
     const [password2, setPassword2] = useState('')
     const [email, setEmail] = useState('')
     const [firstName, setFirstName] = useState('')
@@ -114,10 +114,10 @@ export default function RegisterPage() {
 
     const handleSubmit = async () => {
         const pwdError = []
-        if (!password1 || !password2 || password1.length < 5 || password2.length < 5) {
+        if (!password || !password2 || password.length < 5 || password2.length < 5) {
             pwdError.push('Password must be at least 5 characters long')
         }
-        if (password1 !== password2) {
+        if (password !== password2) {
             pwdError.push('Passwords don`t match')
         }
         const errString = pwdError.join('; ')
@@ -136,9 +136,9 @@ export default function RegisterPage() {
         }
         const payload = {
             username,
+            email,
+            password,
             user_id: uid,
-            password: password1,
-            email_address: email,
             first_name: firstName,
             last_name: lastName,
         }
@@ -156,6 +156,7 @@ export default function RegisterPage() {
 
     }
     const imageUrl = `url(${IMAGE_URL})`
+    // TODO: make email required field*/}
     return (
         <>
             <Grid container sx={{height: '100vh'}}>
@@ -204,8 +205,8 @@ export default function RegisterPage() {
                                 onChange={e => setUsername(e.target.value)}
                             />
                             <PasswordField label="Password"
-                                           value={password1}
-                                           setValue={setPassword1}/>
+                                           value={password}
+                                           setValue={setPassword}/>
                             <PasswordField label="Confirm password"
                                            value={password2}
                                            setValue={setPassword2}
