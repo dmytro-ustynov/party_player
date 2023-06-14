@@ -55,6 +55,7 @@ async def delete_file_by_id(file_id: str, user_id: str, session: AsyncSession):
     file = await get_audio_by_id(file_id, session)
     if file.uid == user_id:
         await session.delete(file)
+        os.remove(file.file_path)
         return
     else:
         raise OwnerError('Delete Forbidden')

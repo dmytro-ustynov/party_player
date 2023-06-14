@@ -54,7 +54,7 @@ async def delete_fragment(session, start, end, **kwargs):
         await session.commit()
         return {'result': True, 'duration': file.duration}
     except Exception as e:
-        print(str(e))
+        logger.error(str(e))
         return {'result': False, 'error': str(e)}
 
 
@@ -314,7 +314,7 @@ async def do_operation(operation, session: AsyncSession, **kwargs):
         Actions.INSERT_SILENCE: insert_silence,
         Actions.DENOISE: denoise
     }.get(operation)
-    return func(session, **kwargs)
+    return await func(session, **kwargs)
 
 
 async def update_duration(session, file_id):

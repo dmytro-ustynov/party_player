@@ -176,7 +176,7 @@ async def modify_operation(body: OperationSchema, user_id: str = Depends(get_cur
         data = {'file_id': body.file_id, 'user_id': user_id}
         if body.details is not None:
             data = {**body.details, **data}
-        result = await do_operation(action, session, **data)
-        return result
+        return await do_operation(action, session, **data)
     except Exception as e:
+        logger.error(str(e))
         return {'result': False, 'details': str(e)}
