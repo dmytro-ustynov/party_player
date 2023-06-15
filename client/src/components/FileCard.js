@@ -90,10 +90,10 @@ export default function FileCard(props) {
         setVolume(event.target.value)
         player.volume = parseFloat(event.target.value / 100)
     };
-    const handleDoubleClick = () =>{
+    const handleDoubleClick = () => {
         dispatch({type: AudioAction.SET_SOUND, soundId: file.file_id})
         // window.location.replace('/redactor')
-        navigate('/redactor')
+        navigate('/redactor?file_id=' + file.file_id)
     }
     const controlsProps = {height: 28, width: 28}
     return (

@@ -24,7 +24,8 @@ export default function OperationButtons() {
             setMessage('You must select fragment before')
         }
     }
-    function createOperationPayload(action){
+
+    function createOperationPayload(action) {
         const payload = {action, file_id: sound}
         let regions = wavesurfer.current.regions
         if (Object.entries(regions.list).length > 0) {
@@ -39,7 +40,8 @@ export default function OperationButtons() {
         console.log(payload)
         return payload
     }
-    const handleFadeIn = async ()=>{
+
+    const handleFadeIn = async () => {
         if (!selection) {
             setMessage('You must select fragment to Fade')
             return
@@ -58,7 +60,7 @@ export default function OperationButtons() {
         }
         dispatch({type: AudioAction.SET_LOADING, loading: false})
     }
-    const handleFadeOut = async ()=>{
+    const handleFadeOut = async () => {
         if (!selection) {
             setMessage('You must select fragment to Fade')
             return
@@ -129,8 +131,12 @@ export default function OperationButtons() {
             setMessage('Cut complete')
             wavesurfer.current.clearRegions()
             dispatch({type: AudioAction.ADD_SELECTION, selection: false})
-            dispatch({type: AudioAction.UPDATE_FILE_INFO, info: {...audio.info,
-                    duration: response.duration, filename: response.filename}})
+            dispatch({
+                type: AudioAction.UPDATE_FILE_INFO, info: {
+                    ...audio.info,
+                    duration: response.duration, filename: response.filename
+                }
+            })
             wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
         } else {
             console.log(response)

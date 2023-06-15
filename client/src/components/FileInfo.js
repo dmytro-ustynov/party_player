@@ -72,7 +72,7 @@ export default function FileInfo() {
                     <Typography variant="h5">File Details</Typography>
                     <Divider/>
                     <Typography variant="h6">{info.title}</Typography>
-                    <Typography variant="body1">{info.filename}</Typography>
+                    <Typography variant="body1" title="Track author">{info.author}</Typography>
                     <Typography variant="body1">ext: {info.ext}</Typography>
                     <Typography variant="body1">Duration: {info.duration} sec</Typography>
                     {info.thumbnail ? <Button component="label" title="Click to change thumbnail">

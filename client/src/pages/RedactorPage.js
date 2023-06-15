@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom";
 import Link from "@mui/material/Link";
 import {
     Button,
-    CircularProgress,
+    CircularProgress, Dialog, DialogActions, DialogContentText, DialogTitle,
     Divider,
     Grid, IconButton,
     ListItemIcon,
@@ -53,6 +53,7 @@ export default function RedactorPage() {
     const [anchorEffectsEl, setAnchorEffectsEl] = useState(null);
     const openFileSubmenu = Boolean(anchorFileEl);
     const openEffectsSubmenu = Boolean(anchorEffectsEl);
+    const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false)
     const [pendingRequest, setPendingRequest] = useState(false)
     const handleFileClick = (event) => {
         setAnchorFileEl(event.currentTarget);
@@ -76,6 +77,11 @@ export default function RedactorPage() {
     }, [updatedFilename])
 
     useEffect(() => {
+        if (!sound) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const soundId = urlParams.get('file_id')
+            dispatch({type: AudioAction.SET_SOUND, soundId})
+        }
         const loadInfo = async () => {
             const url = BASE_URL + '/audio/?file_id=' + sound
             const response = await fetcher({url, method: "GET"})
@@ -165,6 +171,10 @@ export default function RedactorPage() {
         }
         setPendingRequest(false)
     }
+
+    const handleClose = () => {
+        setDeleteConfirmationOpen(false)
+    }
     return (
         <>
             <Header/>
@@ -185,6 +195,20 @@ export default function RedactorPage() {
                                             endIcon={<KeyboardArrowDownIcon/>}>Effects</Button>
                                     <Button {...styles.btn} endIcon={<KeyboardArrowDownIcon/>}>Help</Button>
                                 </Stack>
+                                <Dialog open={deleteConfirmationOpen}
+                                        onClose={handleClose}>
+                                    <DialogTitle>Confirm delete</DialogTitle>
+                                    <DialogContentText>
+                                        Confirm deleting this file
+                                    </DialogContentText>
+                                    <DialogActions>
+                                        <Button onClick={handleClose}>Cancel</Button>
+                                        <Button onClick={handleDelete}
+                                                startIcon={<DeleteIcon />}
+                                                color="error"
+                                                variant="contained">Delete</Button>
+                                    </DialogActions>
+                                </Dialog>
                                 <Menu id="basic-menu"
                                       sx={{width: 320, maxWidth: '100%'}}
                                       anchorEl={anchorFileEl}
@@ -212,7 +236,8 @@ export default function RedactorPage() {
                                         <ListItemText>Save as FLAC</ListItemText>
                                     </MenuItem>
 
-                                    <MenuItem onClick={handleDelete} disabled={pendingRequest}>
+                                    <MenuItem onClick={() => setDeleteConfirmationOpen(true)}
+                                              disabled={pendingRequest}>
                                         <ListItemIcon>
                                             <DeleteIcon fontSize="small"/>
                                         </ListItemIcon>
