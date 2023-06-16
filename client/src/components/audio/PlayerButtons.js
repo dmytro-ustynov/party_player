@@ -14,7 +14,6 @@ import ZoomInRoundedIcon from "@mui/icons-material/ZoomInRounded";
 import React, {useState} from "react";
 import {useAudioState} from "./audioReducer";
 import {AudioAction} from "./actions";
-import Box from "@mui/material/Box";
 
 export default function PlayerButtons() {
     const [volumeLevel, setVolumeLevel] = useState(50)
@@ -68,8 +67,8 @@ export default function PlayerButtons() {
     }
 
     return (
-        <Stack direction="row" spacing={0} ml={1} mt={2} alignItems="center">
-            <Box sx={{maxWidth:'60px'}} mr={1}>{time}</Box>
+        <Stack direction="row" spacing={0} mt={2} alignItems="center">
+            <div style={{width:'90px'}}>{time}</div>
             <ButtonGroup color="primary" disabled={loading || !selection}>
                 <Button variant="outlined" onClick={playSelected} title="PLay selected fragment">
                     <EjectIcon sx={{transform: "rotate(90deg)"}}/></Button>

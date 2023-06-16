@@ -23,7 +23,7 @@ export default function AudioRedactor() {
             dispatch({type: AudioAction.ADD_SELECTION, selection: true})
         })
         wavesurfer.current.on('audioprocess', () =>{
-            const time = wavesurfer.current.getCurrentTime().toFixed(3)
+            const time = wavesurfer.current.getCurrentTime().toFixed(2)
             dispatch({type: AudioAction.SET_CURRENT_TIME, time})
         })
         dispatch({type: AudioAction.SET_WAVESURFER, wavesurfer})
