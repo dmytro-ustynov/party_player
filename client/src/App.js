@@ -7,6 +7,7 @@ import RedactorPage from "./pages/RedactorPage";
 import LandingPage from "./pages/LandingPage";
 import PageNotFound from "./pages/PageNotFound";
 import TermsOfUsePage from "./pages/TermsOfUsePage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                 <Route path="/welcome" element={<LandingPage />}/>
                 <Route path="/redactor" element={<RedactorPage />}/>
                 <Route path="/terms" element={<TermsOfUsePage />}/>
+                <Route path="/profile" element={<ProfilePage />}/>
                 <Route path="/about" element={<p>about</p>}/>
                 <Route path="/*" element={<PageNotFound />}/>
             </Routes>

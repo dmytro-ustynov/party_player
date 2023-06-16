@@ -57,6 +57,12 @@ class UserLoginSchema(BaseModel):
         }
 
 
+class UpdatePasswordSchema(BaseModel):
+    old_password: str = Field()
+    password: str = Field()
+    password_confirm: str = Field()
+
+
 # DB model
 class User(Base):
     __tablename__ = 'users'

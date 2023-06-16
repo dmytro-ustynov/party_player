@@ -42,6 +42,10 @@ export default function Login() {
         window.location = '/terms'
     }
 
+    const profileClick = () =>{
+        window.location = '/profile'
+    }
+
     return (
         <div className="header-right-menu">
 
@@ -100,7 +104,7 @@ export default function Login() {
                     TransitionComponent={Fade}
                 >
                     <p style={{padding: "5px"}}>Signed as <strong>{user.username}</strong></p>
-                    <MenuItem onClick={handleClose}>Profile</MenuItem>
+                    <MenuItem onClick={profileClick}>Profile</MenuItem>
                     <MenuItem onClick={handleClose}>My account</MenuItem>
                     <MenuItem onClick={handleClose}>F.A.Q.</MenuItem>
                     <Divider/>

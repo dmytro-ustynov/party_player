@@ -22,3 +22,8 @@ export async function refresh_token() {
     })
     return await req.json()
 }
+
+export function validateEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+}

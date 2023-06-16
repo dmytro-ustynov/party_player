@@ -8,59 +8,18 @@ import Typography from '@mui/material/Typography';
 import {
     Accordion, AccordionDetails,
     AccordionSummary,
-    IconButton,
-    InputAdornment,
     Paper
 } from "@mui/material";
 import BrandLogo from "../components/BrandLogo";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {useEffect, useState} from "react";
-import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {BASE_URL, CURRENT_USER_KEY, IMAGE_URL} from "../utils/constants";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Footer from "../components/Footer";
 import {fetcher} from "../utils/fetch_utils";
+import PasswordField from "../components/auth/passwordField.js";
+import {validateEmail} from "../components/auth/utils";
 
-function validateEmail(email) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-}
-
-function PasswordField({value, setValue, label, error, errorMessage}) {
-    const [showPassword, setShowPassword] = useState(false);
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-    useEffect(()=>{
-        document.title = 'SounDream | Register'
-    }, [])
-
-    return (
-        <TextField
-            label={label}
-            required
-            fullWidth
-            error={error}
-            helperText={errorMessage}
-            value={value}
-            title="Password must be at least 5 characters long"
-            sx={{height: "80px"}}
-            onChange={event => setValue(event.target.value)}
-            type={showPassword ? 'text' : 'password'}
-            InputProps={{
-                endAdornment: (<InputAdornment position="end">
-                    <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={e => e.preventDefault()}
-                        edge="end"
-                    >
-                        {showPassword ? <VisibilityOff/> : <Visibility/>}
-                    </IconButton>
-                </InputAdornment>)
-            }}
-        />
-    )
-}
 
 export default function RegisterPage() {
     const [username, setUsername] = useState('')
@@ -75,6 +34,10 @@ export default function RegisterPage() {
     const [passwordErrorMessage, setPasswordErrorMessage] = useState(null);
     const [emailErrorMessage, setEmailErrorMessage] = useState(null);
     const [expanded, setExpanded] = useState(false)
+
+    useEffect(() => {
+        document.title = 'SounDream | Register'
+    }, [])
 
     const validateInputUsername = async () => {
         if (!username) {
@@ -156,7 +119,6 @@ export default function RegisterPage() {
 
     }
     const imageUrl = `url(${IMAGE_URL})`
-    // TODO: make email required field*/}
     return (
         <>
             <Grid container sx={{height: '100vh'}}>
@@ -204,11 +166,26 @@ export default function RegisterPage() {
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
                             />
+                            <TextField
+                                fullWidth
+                                required
+                                label="Email address"
+                                margin="dense"
+                                sx={{height: "80px"}}
+                                value={email}
+                                onBlur={validateInputEmail}
+                                error={emailErrorMessage !== null}
+                                helperText={emailErrorMessage}
+                                onChange={e => setEmail(e.target.value)}/>
                             <PasswordField label="Password"
+                                           sx={{height: "80px"}}
                                            value={password}
+                                           fullwidth={true}
                                            setValue={setPassword}/>
                             <PasswordField label="Confirm password"
                                            value={password2}
+                                           sx={{height: "80px"}}
+                                           fullwidth={true}
                                            setValue={setPassword2}
                                            error={passwordErrorMessage !== null}
                                            errorMessage={passwordErrorMessage}/>
@@ -235,16 +212,7 @@ export default function RegisterPage() {
                                         margin="dense"
                                         value={lastName}
                                         onChange={e => setLastName(e.target.value)}/>
-                                    <TextField
-                                        fullWidth
-                                        label="Email address"
-                                        margin="dense"
-                                        sx={{height: "80px"}}
-                                        value={email}
-                                        onBlur={validateInputEmail}
-                                        error={emailErrorMessage !== null}
-                                        helperText={emailErrorMessage}
-                                        onChange={e => setEmail(e.target.value)}/>
+
                                 </AccordionDetails>
                             </Accordion>
                             <FormControlLabel
@@ -257,7 +225,7 @@ export default function RegisterPage() {
                             <LoadingButton
                                 fullWidth
                                 loading={loading}
-                                disabled={!agree || usernameErrorMessage !== null}
+                                disabled={!agree || usernameErrorMessage !== null || email.length ===0 || emailErrorMessage!==null}
                                 onClick={handleSubmit}
                                 variant="contained"
                                 sx={{m: 1}}
