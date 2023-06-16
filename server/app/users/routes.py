@@ -10,8 +10,10 @@ from server.app.dependencies import logger
 from server.app.auth.jwt_handler import sign_jwt
 from server.app.auth.jwt_handler import decode_jwt
 
+from server.app.auth.utils import get_current_user_id
 from server.app.users.models import UserSchema
 from server.app.users.models import UserLoginSchema
+from server.app.users.models import UpdatePasswordSchema
 from server.app.users import service as user_service
 
 router = APIRouter(prefix='/users',
@@ -77,6 +79,21 @@ async def check_free_username(email: str, session: AsyncSession = Depends(get_se
     if db_user is None:
         return {'result': True}
     return {'result': False, 'details': f"Can't use this email"}
+
+
+@router.post('/change_password', summary="Change user password")
+async def change_user_password(update: UpdatePasswordSchema,
+                               user_id: str = Depends(get_current_user_id),
+                               session: AsyncSession = Depends(get_session)):
+    user = await user_service.get_user_by_id(user_id, session)
+    if not user.check_password(update.old_password):
+        return {'result': False, 'details': 'Error changing password, Old password is incorrect'}
+    if update.password != update.password_confirm:
+        return {'result': False, 'details': "Passwords don't match"}
+    user.password = update.password
+    await session.commit()
+    logger.info(f'User {user_id} changes his password')
+    return {'result': True}
 
 
 @router.post("/logout")
