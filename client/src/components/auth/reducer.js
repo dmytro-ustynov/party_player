@@ -46,6 +46,7 @@ export const initialState = {
 export const authTypes = {
     REQUEST_LOGIN: 'REQUEST_LOGIN',
     LOGIN_SUCCESS: 'LOGIN_SUCCESS',
+    UPDATE_USER: 'UPDATE_USER',
     LOGIN_ERROR: 'LOGIN_ERROR',
     LOGOUT: 'LOGOUT',
     REQUEST_REGISTER: 'REQUEST_REGISTER',
@@ -69,6 +70,12 @@ export const AuthReducer = (initialState, action) => {
                 loading: false,
                 errorMessageLogin: null
             };
+        case authTypes.UPDATE_USER:
+            return{
+                ...initialState,
+                user: action.payload.user,
+                loading: false
+            }
         case authTypes.LOGIN_ERROR:
             return {
                 ...initialState,

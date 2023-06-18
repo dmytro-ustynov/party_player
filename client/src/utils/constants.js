@@ -12,6 +12,7 @@ export const OPERATION_URL = BASE_URL + '/audio/modify'
 export const LOGIN_PAGE_URL = '/login'
 export const REFRESH_TOKEN_URl = BASE_URL + '/users/refresh_token'
 export const CHANGE_PASSWORD_URL = BASE_URL + '/users/change_password'
+export const UPDATE_PROFILE_URL = BASE_URL + '/users/update_profile'
 export const ACCESS_TOKEN_KEY = "access_token"
 export const CURRENT_USER_KEY = "current_user"
 

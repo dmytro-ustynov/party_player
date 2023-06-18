@@ -43,6 +43,10 @@ class UserSchema(BaseModel):
         return EmailStr.validate(value)
 
 
+class UpdateUserSchema(UserSchema):
+    password: str = Field(default=None)
+
+
 class UserLoginSchema(BaseModel):
     username: str = Field(default='')
     password: str = Field(default=None)

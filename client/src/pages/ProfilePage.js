@@ -12,8 +12,7 @@ import {Roles, useAuthState} from "../components/auth/context";
 import Link from "@mui/material/Link";
 import {Button, Stack} from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
-// import {useAuthState} from "../components/auth/context";
-// import {AccountInfo} from "../components/auth/AccountInfo";
+import EditProfileForm from "../components/auth/EditProfileForm";
 
 function TabPanel(props) {
     const {children, value, index, ...other} = props;
@@ -50,6 +49,7 @@ function populateProps(index) {
 
 export default function ProfilePage() {
     const [value, setValue] = useState(0);
+    const [openEditDialog, setOpenEditDialog] = useState(false);
     const state = useAuthState()
     const user = state.user
 
@@ -62,16 +62,22 @@ export default function ProfilePage() {
             window.location ='/login'
         }
         document.title = 'SounDream | Profile'
-    }, [])
+    }, [user.role])
 
     return (
         <>
             <Header/>{user.role === Roles.ANONYMOUS ? <div className="content"><Link href={'login'}>Login</Link></div> :
             <div className='content'>
+                <EditProfileForm
+                    open={openEditDialog}
+                    setOpen={setOpenEditDialog}/>
                 <Stack direction="row" spacing={6} sx={{justifyContent:"center"}} >
                     <Typography variant="h4">{user.firstname} {user.lastname}</Typography>
-                    <Button startIcon={<EditIcon/>} variant="outlined">
-                        Efit profile
+                    <Button
+                        onClick={()=>setOpenEditDialog(true)}
+                        startIcon={<EditIcon/>}
+                        variant="outlined">
+                        Edit profile
                     </Button>
                 </Stack>
 

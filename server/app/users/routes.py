@@ -13,7 +13,7 @@ from server.app.auth.jwt_handler import decode_jwt
 from server.app.auth.utils import get_current_user_id
 from server.app.users.models import UserSchema
 from server.app.users.models import UserLoginSchema
-from server.app.users.models import UpdatePasswordSchema
+from server.app.users.models import UpdatePasswordSchema, UpdateUserSchema
 from server.app.users import service as user_service
 
 router = APIRouter(prefix='/users',
@@ -92,8 +92,36 @@ async def change_user_password(update: UpdatePasswordSchema,
         return {'result': False, 'details': "Passwords don't match"}
     user.password = update.password
     await session.commit()
-    logger.info(f'User {user_id} changes his password')
+    logger.info(f'User {user_id} changed the password')
     return {'result': True}
+
+
+@router.post('/update_profile')
+async def update_profile(update: UpdateUserSchema,
+                         user_id: str = Depends(get_current_user_id),
+                         session: AsyncSession = Depends(get_session)):
+    try:
+        user = await user_service.get_user_by_id(user_id, session)
+        updated_data = []
+        if update.username and update.username != user.username:
+            user.username = update.username
+            updated_data.append(f'USERNAME: {update.username}')
+        if update.first_name and update.first_name != user.first_name:
+            user.first_name = update.first_name
+            updated_data.append(f'FIRSTNAME: {update.first_name}')
+        if update.last_name and update.last_name != user.last_name:
+            user.last_name = update.last_name
+            updated_data.append(f'LASTNAME: {update.last_name}')
+        if update.email and update.email != user.email:
+            user.email = update.email
+            user.email_verified = False
+            updated_data.append(f'EMAIL: {update.email}')
+        await session.commit()
+        logger.info(f'User {user_id} has updated profile: {updated_data}')
+        return {'result': True, 'user': user.to_dict()}
+    except Exception as e:
+        logger.error(str(e))
+        return {'result': False, 'details': 'error updating profile'}
 
 
 @router.post("/logout")
