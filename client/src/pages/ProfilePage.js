@@ -13,6 +13,8 @@ import Link from "@mui/material/Link";
 import {Button, Stack} from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import EditProfileForm from "../components/auth/EditProfileForm";
+import {fetcher} from "../utils/fetch_utils";
+import {GET_USER_INFO_URL} from "../utils/constants";
 
 function TabPanel(props) {
     const {children, value, index, ...other} = props;
@@ -57,9 +59,18 @@ export default function ProfilePage() {
         setValue(newValue);
     };
 
+    const getUserInfo = async function (userId)
+    {
+        const url = GET_USER_INFO_URL
+        const req = await fetcher({url, method: "GET", credentials: true})
+        console.log(req.user)
+    }
+
     useEffect(() => {
         if (user.role === Roles.ANONYMOUS) {
-            window.location ='/login'
+            window.location = '/login'
+        } else {
+            getUserInfo()
         }
         document.title = 'SounDream | Profile'
     }, [user.role])
@@ -71,10 +82,10 @@ export default function ProfilePage() {
                 <EditProfileForm
                     open={openEditDialog}
                     setOpen={setOpenEditDialog}/>
-                <Stack direction="row" spacing={6} sx={{justifyContent:"center"}} >
+                <Stack direction="row" spacing={6} sx={{justifyContent: "center"}}>
                     <Typography variant="h4">{user.firstname} {user.lastname}</Typography>
                     <Button
-                        onClick={()=>setOpenEditDialog(true)}
+                        onClick={() => setOpenEditDialog(true)}
                         startIcon={<EditIcon/>}
                         variant="outlined">
                         Edit profile
@@ -82,9 +93,11 @@ export default function ProfilePage() {
                 </Stack>
 
                 <Box
-                    sx={{flexGrow: 1,
+                    sx={{
+                        flexGrow: 1,
                         bgcolor: 'background.paper',
-                        display: 'flex', height: '80vh'}}
+                        display: 'flex', height: '80vh'
+                    }}
                 >
                     <Tabs
                         orientation="vertical"
@@ -100,10 +113,10 @@ export default function ProfilePage() {
 
                     </Tabs>
                     <TabPanel value={value} index={0}>
-                        <AccountInfo />
+                        <AccountInfo/>
                     </TabPanel>
-                    <TabPanel value={value} index={1} >
-                       <Typography variant="h6">Manage my files</Typography>
+                    <TabPanel value={value} index={1}>
+                        <Typography variant="h6">Manage my files</Typography>
                     </TabPanel>
                     <TabPanel value={value} index={2}>
                         <Typography variant="h6">My costs and savings</Typography>

@@ -11,6 +11,8 @@ from server.app.auth.jwt_handler import sign_jwt
 from server.app.auth.jwt_handler import decode_jwt
 
 from server.app.auth.utils import get_current_user_id
+from server.app.auth.jwt_bearer import JWTBearer
+from server.app.auth.models import Roles
 from server.app.users.models import UserSchema
 from server.app.users.models import UserLoginSchema
 from server.app.users.models import UpdatePasswordSchema, UpdateUserSchema
@@ -22,16 +24,17 @@ router = APIRouter(prefix='/users',
 
 @router.post("/signup")
 async def user_signup(user: UserSchema, session: AsyncSession = Depends(get_session)):
-    new_user = user_service.create_user(user, session)
+    new_user = await user_service.get_or_create_user(user, session)
     try:
         await session.commit()
+        logger.info(f'New user registered: {new_user.user_id}')
         return {'result': True, 'user': new_user.to_dict()}
     except IntegrityError as e:
         logger.error(str(e))
         await session.rollback()
         return {'result': False, 'details': 'User exists'}
     except Exception as e:
-        print(str(e))
+        loger.error(str(e))
         raise HTTPException(status_code=422, detail='Error creating new user')
 
 
@@ -54,6 +57,26 @@ async def login_user(login: UserLoginSchema, response: Response, session: AsyncS
     response.set_cookie(key='refresh_token', value=result.get('refresh_token', ''))
     logger.info(f'User logged in : {username}')
     return result
+
+
+@router.get("/info", dependencies=[Depends(JWTBearer(auto_error=False))])
+async def get_current_user_info(user_id: str = Depends(get_current_user_id),
+                                session: AsyncSession = Depends(get_session)):
+    user = await user_service.get_user_by_id(user_id, session)
+    return {'result': True, 'user': user.to_dict()}
+
+
+@router.get("/temporary_access")
+async def get_temporary_access(user_id: str = None):
+    user_id = user_id or str(uuid.uuid4())
+    user = {
+        'user_id': user_id,
+        'role': Roles.ANONYMOUS
+    }
+    return {**sign_jwt(user_id, seconds=3600),
+            'user': user,
+            'duration_seconds': 3600,
+            'result': True}
 
 
 @router.post("/logout")

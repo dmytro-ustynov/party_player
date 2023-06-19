@@ -4,7 +4,6 @@ import {ACCESS_TOKEN_KEY, BASE_URL, CURRENT_USER_KEY} from "../../utils/constant
 
 let user
 let token
-let uid
 const getCookie = function (name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     if (match) return match[2];
@@ -14,8 +13,8 @@ const init = async () => {
     user = localStorage.getItem(CURRENT_USER_KEY)
         ? JSON.parse(localStorage.getItem(CURRENT_USER_KEY))
         : "";
+    const uid = user.id || uuidv4();
     if (!Boolean(user)) {
-        uid = uuidv4();
         user = {
             user_id: uid,
             role: 'anonymous'

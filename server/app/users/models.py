@@ -119,9 +119,3 @@ class User(Base):
     @property
     def uid(self):
         return str(self.id)
-
-
-class Roles:
-    ANONYMOUS = 'anonymous'
-    REGISTERED = 'registered'
-    PREMIUM = 'premium'

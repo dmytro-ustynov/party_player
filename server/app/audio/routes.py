@@ -15,6 +15,7 @@ from server.app.audio.models import AudioFile, DownloadFileSchema, UpdateFilenam
 from server.app.audio.audio_operations import do_operation
 from server.app.audio.audio_operations import generate_stream
 from server.app.audio import service as audio_service
+from server.app.users import service as user_service
 
 router = APIRouter(prefix='/audio',
                    tags=['audio'])
@@ -31,7 +32,7 @@ async def get_my_files(user_id: str = Depends(get_current_user_id), session: Asy
     try:
         files = await audio_service.get_audio_files_by_user_id(user_id, session)
         files = [row.to_dict() for (row,) in files]
-        return {'result': True, 'details': f'you have {len(files)} files', 'files': files}
+        return {'result': True, 'details': f'{user_id}, you have {len(files)} files', 'files': files}
     except Exception as e:
         return {'result': False, 'details': str(e)}
 
@@ -42,6 +43,11 @@ async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_
     if audiofile.content_type != 'audio/mpeg' and not AudioFile.allowed_file(audiofile.filename):
         return {'result': False, 'details': 'file not accepted'}
     try:
+        user = await user_service.get_user_by_id(user_id, session)
+        if user is None:
+            # create anonymous user
+            user_service.create_anonymous_user(user_id, session)
+            await session.commit()
         new_file = audio_service.upload_new_audio(audiofile, user_id, session)
         out_file_path = new_file.file_path
         async with aiofiles.open(out_file_path, 'wb') as out_file:
@@ -128,6 +134,11 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
     :param user_id:
     :return:
     """
+    user = await user_service.get_user_by_id(user_id, session)
+    if user is None:
+        # create anonymous user
+        user_service.create_anonymous_user(user_id, session)
+        await session.commit()
     try:
         logger.info(f'Start loading youtube URL: {url}')
         new_file = await audio_service.create_file_from_yt(url=url,
