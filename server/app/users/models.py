@@ -5,7 +5,7 @@ import json
 import uuid
 
 from pydantic import BaseModel, Field, EmailStr, validator
-from sqlalchemy import Column, String, Enum, Boolean, DateTime
+from sqlalchemy import Column, String, Enum, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import PasswordType
 from sqlalchemy.dialects.postgresql import UUID
@@ -78,11 +78,13 @@ class User(Base):
     password = Column(PasswordType(schemes=['bcrypt'], deprecated=['auto']), nullable=False)
     first_name = Column(String(100))
     last_name = Column(String(100))
-    tier = Column(Enum('anonymous', 'registered', 'premium', name='tiers'), default='anonymous')
+    tier = Column(Enum('anonymous', 'registered', 'premium', name='tiers'),
+                  ForeignKey('tier_descriptions.name'))
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, onupdate=datetime.now())
 
+    tier_details = relationship("server.app.tiers.models.Tier", lazy='selectin')
     audio_files = relationship("server.app.audio.models.AudioFile", back_populates="user")
 
     def check_password(self, password) -> bool:
@@ -113,7 +115,8 @@ class User(Base):
             'lastname': self.last_name,
             'email_address': self.email,
             'email_verified': self.email_verified,
-            'tier': self.tier
+            'tier': self.tier,
+            'tier_details': self.tier_details.to_dict()
         }
 
     @property

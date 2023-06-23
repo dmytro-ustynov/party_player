@@ -3,7 +3,7 @@ import {useAuthState} from "./context";
 import {
     Button,
     Paper,
-    Stack, Table, TableCell, TableRow, TableBody
+    Stack, Table, TableCell, TableRow, TableBody, Chip
 } from "@mui/material";
 import {useState} from "react";
 import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
@@ -14,6 +14,10 @@ import PasswordChangeForm from "./PasswordChangeForm";
 export default function AccountInfo() {
     const state = useAuthState()
     const user = state.user
+    // console.log(user)
+    const tier = user.tier
+    const tierDetails = user.tier_details
+    console.log(tierDetails)
 
     const [openPasswordDialog, setOpenPasswordDialog] = useState(false)
 
@@ -49,7 +53,8 @@ export default function AccountInfo() {
                                 <TableCell align="left"><Typography variant="subtitle">Email
                                     verification</Typography></TableCell>
                                 <TableCell align="left">
-                                    {user.email_verified ? <div>verified &nbsp;<DoneAllIcon color={'primary'} m={1}/></div> :
+                                    {user.email_verified ?
+                                        <div>verified &nbsp;<DoneAllIcon color={'primary'} m={1}/></div> :
                                         <><Button color="success"
                                                   variant="outlined"
                                                   startIcon={<ForwardToInboxIcon/>}
@@ -69,8 +74,40 @@ export default function AccountInfo() {
                 </Paper>
                 <Paper elevation={3} sx={{width: '35vmin'}}>
                     <Typography variant="h6">Tier</Typography>
-                    <Typography variant="h6">{user.tier}</Typography>
-                    <Button variant="outlined">Change tier</Button>
+                    <Table>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell align="center" colSpan={2}>
+                                    <Chip label={tier.toUpperCase()} color="primary"/>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell align="left"><Typography variant="subtitle">File
+                                    Limit</Typography></TableCell>
+                                <TableCell align="left">{tierDetails.max_files}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell align="left"><Typography variant="subtitle">Microphone duration,
+                                    sec</Typography></TableCell>
+                                <TableCell align="left">{tierDetails.mic_length}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell align="left"><Typography variant="subtitle">Available
+                                    formats</Typography></TableCell>
+                                <TableCell align="left">
+                                    {tierDetails.formats.map(ext => {
+                                        return (
+                                            <Chip color="success" variant="outlined" label={ext}/>
+                                        )
+                                    })}
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell colspan={2} align='center'>
+                                    <Button variant="outlined">Change tier</Button>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody></Table>
                 </Paper>
             </Stack>
 

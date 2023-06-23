@@ -2,6 +2,7 @@ import asyncio
 from server.app.dal.database import db
 from server.app.users.models import User
 from server.app.audio.models import AudioFile
+from server.app.tiers.models import Tier
 
 
 def create_tables():

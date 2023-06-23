@@ -17,6 +17,7 @@ from server.app.users.models import UserSchema
 from server.app.users.models import UserLoginSchema
 from server.app.users.models import UpdatePasswordSchema, UpdateUserSchema
 from server.app.users import service as user_service
+from server.app.tiers.models import Tier
 
 router = APIRouter(prefix='/users',
                    tags=['user'])
