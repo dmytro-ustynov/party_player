@@ -1,4 +1,4 @@
-import {ACCESS_TOKEN_KEY, LOGIN_PAGE_URL, REFRESH_TOKEN_URl} from "./constants";
+import {ACCESS_TOKEN_KEY, CURRENT_USER_KEY, LOGIN_PAGE_URL, REFRESH_TOKEN_URl} from "./constants";
 
 export async function fetcher(params) {
     let {url, payload, body, credentials, headers, method = "POST", asFile = false} = params
@@ -41,7 +41,7 @@ export async function fetcher(params) {
                 } else {
                     console.log('refresh fails, logout...')
                     localStorage.removeItem(ACCESS_TOKEN_KEY)
-                    // localStorage.removeItem(CURRENT_USER_KEY);
+                    localStorage.removeItem(CURRENT_USER_KEY);
                     // redirect to login page for protected routes
                     window.location.href = LOGIN_PAGE_URL
                 }

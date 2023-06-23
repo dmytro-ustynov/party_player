@@ -9,8 +9,8 @@ import Box from "@mui/material/Box";
 import {validateEmail} from "../auth/utils.js";
 import Typography from "@mui/material/Typography";
 import {authTypes} from "./reducer";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import InputAdornment from "@mui/material/InputAdornment";
+// import DoneAllIcon from "@mui/icons-material/DoneAll";
+// import InputAdornment from "@mui/material/InputAdornment";
 
 export default function EditProfileForm(props) {
 
