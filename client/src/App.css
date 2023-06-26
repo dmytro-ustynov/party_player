@@ -65,9 +65,19 @@ footer {
     height: 171px;
 }
 
+.files-wrapper{
+    display: flex;
+}
+
+.adv-place-vertical{
+    width: 25%;
+    border: 1px solid darkgrey;
+    display: none;
+}
+
 .file-card {
     display: flex;
-    width: 14rem;
+    width: 13rem;
     height: 10rem;
     border-radius: 1rem;
 }
@@ -76,7 +86,7 @@ footer {
     display: flex;
     flex-direction: column;
     flex: 1 0 auto;
-    width: 12rem; /* fixed width */
+    width: 11rem; /* fixed width */
     height: 5rem; /* fixed height */
     overflow: hidden; /* hide overflow content */
     padding: 16px 16px 2px;

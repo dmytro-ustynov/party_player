@@ -13,6 +13,7 @@ export default function RecentFiles() {
     const files = audio.files
     const state = useAuthState()
     const user = state.user
+    const tierDetails = user.tier_details
 
     useEffect(() => {
         const loadRecentFiles = async () => {
@@ -36,15 +37,21 @@ export default function RecentFiles() {
                     {user.role === Roles.ANONYMOUS && (
                         <Typography><Link href={'/register'}>Register</Link>, if you don't want to loose your
                             files</Typography>)}
-                    <Grid container ml={4} mr={4} sx={{display: 'flex', maxWidth: '75%'}}>
-                        {files.map(file => {
-                            return (
-                                <Grid item key={file.file_id} m={1} sx={{flex: "1 0 18%"}}>
-                                    <FileCard file={file}/>
-                                </Grid>
-                            )
-                        })}
-                    </Grid>
+                    <div className="files-wrapper">
+                        <Grid container ml={4} mr={4} sx={{display: 'flex', maxWidth: '75%'}}>
+                            {files.map(file => {
+                                return (
+                                    <Grid item key={file.file_id} m={1} sx={{flex: "1 0 18%"}}>
+                                        <FileCard file={file}/>
+                                    </Grid>
+                                )
+                            })}
+                        </Grid>
+                        <div className="adv-place-vertical">placeholder for advertisement</div>
+                    </div>
+                    {files && files.length > tierDetails.max_files * 0.5 && (
+                        <div className="advice-to-increase-files-count-or-upgrade-tier"></div>
+                    )}
                 </>
             ) : (
                 <div> Start creating your library with recording voice, loading audio from your PC or downloading

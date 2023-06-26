@@ -75,7 +75,7 @@ export default function AboutPage() {
                 <Typography variant="h4">Welcome to SounDream</Typography>
                 <div style={{maxWidth: '960px'}}>
                     <Stack spacing={{sm: 2}} direction="row">
-                        <img src={author_logo} alt="Dimon" style={{height: "230px"}}/>
+                        <img src={author_logo} alt="Dimon" style={{height: "230px", borderRadius: "8px"}} loading="lazy" />
                         <Stack>
                             <Typography variant="body1" sx={{textAlign: "left", m: 1}}>My name is Dmytro Ustynov, and I
                                 am a Python developer from Ukraine. While my main specialization is backend software

@@ -97,52 +97,50 @@ export default function FileCard(props) {
     }
     const controlsProps = {height: 28, width: 28}
     return (
-        <div key={file.file_id}>
-            <Card className="file-card">
-                <audio src={BASE_URL + "/audio/get_audio?file_id=" + file.file_id} preload="none"
-                       ref={audioRef}
-                />
-                <div style={{display: 'flex', flexDirection: 'column'}}>
-                    <CardContent className="file-card-title">
-                        <Typography component="div" variant="p"
-                                    onDoubleClick={handleDoubleClick}
-                                    sx={{cursor: 'pointer'}}
-                                    title="Double click to open in redactor">
-                            {file.filename}
-                        </Typography>
-                        <Typography variant="subtitle1" color="text.secondary"
-                                    component="div"
-                                    sx={{marginTop: "auto"}}>
-                            {formatDuration(file.duration)}
-                        </Typography>
-                    </CardContent>
-                    <Box>
-                        <LinearProgress variant="determinate" value={progress}/>
-                    </Box>
-                    <Box sx={{display: 'flex', alignItems: 'center', pl: 1, pb: 1}}>
-                        <IconButton onClick={handleStopClick} color='primary' sx={{p: 0.5}}>
-                            <StopCircleOutlined sx={controlsProps}/>
-                        </IconButton>
-                        {playing ? (
-                            <IconButton onClick={() => player.pause()} color='primary'>
-                                <PauseCircleOutlineIcon sx={controlsProps}/>
-                            </IconButton>
-                        ) : (
-                            <IconButton onClick={() => player.play()} color='primary'>
-                                <PlayArrowIcon sx={controlsProps}/>
-                            </IconButton>
-                        )}
-                        <Slider size="small"
-                                aria-label="Volume"
-                                value={volume}
-                                onChange={handleVolumeChange}
-                                sx={{width: '60px'}}/>
-                        {currentTime !== 0 && <div style={{marginLeft: 'auto', paddingRight: '15px'}}>
-                            <Typography variant="body2">{currentTime}</Typography>
-                        </div>}
-                    </Box>
+        <Card className="file-card" key={file.file_id}>
+            <audio src={BASE_URL + "/audio/get_audio?file_id=" + file.file_id} preload="none"
+                   ref={audioRef}
+            />
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+                <CardContent className="file-card-title">
+                    <Typography component="div" variant="p"
+                                onDoubleClick={handleDoubleClick}
+                                sx={{cursor: 'pointer'}}
+                                title="Double click to open in redactor">
+                        {file.filename}
+                    </Typography>
+                    <Typography variant="subtitle1" color="text.secondary"
+                                component="div"
+                                sx={{marginTop: "auto"}}>
+                        {formatDuration(file.duration)}
+                    </Typography>
+                </CardContent>
+                <div>
+                    <LinearProgress variant="determinate" value={progress}/>
                 </div>
-            </Card>
-        </div>
+                <Box sx={{display: 'flex', alignItems: 'center', pb: 1}}>
+                    <IconButton onClick={handleStopClick} color='primary' sx={{p: 0.5}}>
+                        <StopCircleOutlined sx={controlsProps}/>
+                    </IconButton>
+                    {playing ? (
+                        <IconButton onClick={() => player.pause()} color='primary'>
+                            <PauseCircleOutlineIcon sx={controlsProps}/>
+                        </IconButton>
+                    ) : (
+                        <IconButton onClick={() => player.play()} color='primary'>
+                            <PlayArrowIcon sx={controlsProps}/>
+                        </IconButton>
+                    )}
+                    <Slider size="small"
+                            aria-label="Volume"
+                            value={volume}
+                            onChange={handleVolumeChange}
+                            sx={{width: '60px'}}/>
+                    {currentTime !== 0 && <div style={{padding: "0 15px"}}>
+                        <Typography variant="caption">{currentTime}</Typography>
+                    </div>}
+                </Box>
+            </div>
+        </Card>
     )
 }
