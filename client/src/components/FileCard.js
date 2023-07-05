@@ -90,7 +90,7 @@ export default function FileCard(props) {
         setVolume(event.target.value)
         player.volume = parseFloat(event.target.value / 100)
     };
-    const handleDoubleClick = () => {
+    const openRedactor = () => {
         dispatch({type: AudioAction.SET_SOUND, soundId: file.file_id})
         // window.location.replace('/redactor')
         navigate('/redactor?file_id=' + file.file_id)
@@ -104,9 +104,9 @@ export default function FileCard(props) {
             <div style={{display: 'flex', flexDirection: 'column'}}>
                 <CardContent className="file-card-title">
                     <Typography component="div" variant="p"
-                                onDoubleClick={handleDoubleClick}
+                                onClick={openRedactor}
                                 sx={{cursor: 'pointer'}}
-                                title="Double click to open in redactor">
+                                title="Click to open in redactor">
                         {file.filename}
                     </Typography>
                     <Typography variant="subtitle1" color="text.secondary"
@@ -119,7 +119,7 @@ export default function FileCard(props) {
                     <LinearProgress variant="determinate" value={progress}/>
                 </div>
                 <Box sx={{display: 'flex', alignItems: 'center', pb: 1}}>
-                    <IconButton onClick={handleStopClick} color='primary' sx={{p: 0.5}}>
+                    <IconButton onClick={handleStopClick} color='primary'>
                         <StopCircleOutlined sx={controlsProps}/>
                     </IconButton>
                     {playing ? (
@@ -136,7 +136,7 @@ export default function FileCard(props) {
                             value={volume}
                             onChange={handleVolumeChange}
                             sx={{width: '60px'}}/>
-                    {currentTime !== 0 && <div style={{padding: "0 15px"}}>
+                    {currentTime !== 0 && <div style={{flexGrow:1}}>
                         <Typography variant="caption">{currentTime}</Typography>
                     </div>}
                 </Box>

@@ -16,6 +16,78 @@
     display: flex;
 }
 
+.landing-content {
+    display: flex;
+    justify-content: center;
+    /*background-image: url("images/bg7.jpg");*/
+    /*background-position: center;*/
+}
+
+.tiers-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    gap: 1em;
+}
+.header-tier{
+    background-color: #FE753B;
+}
+.tier-example{
+    border: 1px solid darkgray;
+    border-radius: 8px;
+    height: 75vh;
+    width: 25vw;
+}
+.tier-example.active{
+    border: 1px solid #FE753B;
+}
+.tier-name{
+    font-weight: 700;
+    padding-top: 8px;
+    background-color: lightblue;
+    height: 25px;
+    border-radius: 8px 8px 0 0;
+}
+.tier-name.selected{
+    background-color: #0a58ca;
+    color: white;
+    font-weight: 900;
+}
+.tier-option{
+    display: flex;
+    align-items: center;
+}
+.mt-10{
+    margin-top: 10px;
+}
+.tier-options-list > li{
+    text-align: start;
+}
+.option-true{
+    color: green
+}
+.option-false{
+    color: grey
+}
+.option-cost{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    height: 50px;
+    margin-top: 10px;
+    background-color: #0a58ca;
+    color: white;
+    font-weight: 900;
+    border-radius: 20px;
+}
+
+/*.tier-example:hover > *{*/
+/*    font-weight: bold;*/
+/*    font-size: larger;*/
+/*}*/
+
 :root {
     --color-vnlz: #0a58ca;
     --color-sz: green;
@@ -63,13 +135,14 @@ footer {
     margin: 0;
     padding: 0;
     height: 171px;
+    border-radius: 8px;
 }
 
-.files-wrapper{
+.files-wrapper {
     display: flex;
 }
 
-.adv-place-vertical{
+.adv-place-vertical {
     width: 25%;
     border: 1px solid darkgrey;
     display: none;

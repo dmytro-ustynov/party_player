@@ -79,7 +79,7 @@ export default function Login() {
                         TransitionComponent={Fade}
                     >
                         <MenuItem onClick={handleClose}>Help</MenuItem>
-                        <MenuItem onClick={handleClose}>Why register?</MenuItem>
+                        <MenuItem onClick={()=> window.location='/welcome'}>Why register?</MenuItem>
                         <MenuItem onClick={handleClose}>F.A.Q.</MenuItem>
                         <MenuItem onClick={handleTermsClick}>Terms of Use</MenuItem>
                     </Menu>
