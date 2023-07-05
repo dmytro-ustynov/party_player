@@ -7,7 +7,7 @@ import {
     DialogTitle,
     Grid,
     Paper,
-    TextField
+    TextField, Typography
 } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import YouTubeIcon from "@mui/icons-material/YouTube";
@@ -18,19 +18,24 @@ import {fetcher} from "../utils/fetch_utils";
 import {useAudioState} from "./audio/audioReducer";
 import {AudioAction} from "./audio/actions";
 import Snackbar from "@mui/material/Snackbar";
+import ytDownloadScreen from "../images/Youtube_download_screenshot.png"
+import {Roles, useAuthState} from "./auth/context";
 
 export default function YouTuber(props) {
     const {styles} = props
-    const [open, setOpen] = useState(false);
+    const [openDownloadDialog, setOpenDownloadDialog] = useState(false);
+    const [openRegisterDialog, setOpenRegisterDialog] = useState(false);
     const [link, setLink] = useState('');
     const [disabled, setDisabled] = useState(true);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('')
     const {dispatch} = useAudioState()
+    const state = useAuthState()
+    const user = state.user
 
     const handleClose = () => {
-        setOpen(false);
+        setOpenDownloadDialog(false);
         setLink('')
         setError('')
         setDisabled(true)
@@ -52,6 +57,14 @@ export default function YouTuber(props) {
         setError(null)
         setDisabled(false)
     }
+    const handleYouTubeClick = () => {
+        if (user.role === Roles.ANONYMOUS) {
+            setOpenRegisterDialog(true)
+        } else {
+            setOpenDownloadDialog(true)
+        }
+    }
+
     const handleDownloadClick = async () => {
         setLoading(true)
         const url = YOUTUBE_LOAD_URL + link
@@ -59,7 +72,7 @@ export default function YouTuber(props) {
         if (req.result === true) {
             // console.log('download complete : ')
             setMessage('download complete')
-            setOpen(false)
+            setOpenDownloadDialog(false)
             // post load logic
             dispatch({type: AudioAction.ADD_FILE, file: req.file})
         } else {
@@ -73,7 +86,7 @@ export default function YouTuber(props) {
     return (
         <Grid item {...styles.grid} >
             <Paper {...styles.paper}>
-                <IconButton title={"Load sound from Youtube"} onClick={() => setOpen(true)}>
+                <IconButton title={"Load sound from Youtube"} onClick={handleYouTubeClick}>
                     <YouTubeIcon {...styles.btn} color='error'/>
                 </IconButton>
             </Paper>
@@ -82,7 +95,7 @@ export default function YouTuber(props) {
                 open={!!message}
                 onClose={() => setMessage(null)}
                 message={message}/>
-            <Dialog open={open} onClose={handleClose}>
+            <Dialog open={openDownloadDialog} onClose={handleClose}>
                 <DialogTitle>Download sound from Youtube video</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
@@ -106,6 +119,28 @@ export default function YouTuber(props) {
                         disabled={disabled}
                         loading={loading}
                         onClick={handleDownloadClick}>Download</LoadingButton>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={openRegisterDialog} onClose={() => setOpenRegisterDialog(false)}>
+                <DialogTitle>Register</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Downloading from Youtube option is available for registered Users.
+                    </DialogContentText>
+                    <Typography>That's what you will see here: </Typography>
+                    <div style={{display: 'flex', justifyContent: 'center', marginTop: '1em'}}>
+                        <img src={ytDownloadScreen} alt="img" width="320px"/>
+                    </div>
+
+                    <Typography variant="h5">Why should you register today? </Typography>
+                    <Typography>Compare different Tiers and discover benefits you can get!</Typography>
+                    <div style={{display: 'flex', justifyContent: 'center', marginTop: '1em'}}>
+                        <Button href='welcome#tiers' variant="contained" color="success">Compare</Button>
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenRegisterDialog(false)}>Cancel</Button>
+                    <Button href="register" variant="contained">Register</Button>
                 </DialogActions>
             </Dialog>
         </Grid>
