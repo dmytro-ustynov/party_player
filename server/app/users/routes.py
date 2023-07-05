@@ -35,7 +35,7 @@ async def user_signup(user: UserSchema, session: AsyncSession = Depends(get_sess
         await session.rollback()
         return {'result': False, 'details': 'User exists'}
     except Exception as e:
-        loger.error(str(e))
+        logger.error(str(e))
         raise HTTPException(status_code=422, detail='Error creating new user')
 
 
