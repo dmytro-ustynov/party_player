@@ -1,7 +1,7 @@
 import {Grid, Typography} from "@mui/material";
 import FileCard from "./FileCard";
 import {useEffect} from "react";
-import {BASE_URL, CURRENT_USER_KEY} from "../utils/constants";
+import {BASE_URL} from "../utils/constants";
 import {fetcher} from "../utils/fetch_utils";
 import {useAudioState} from "./audio/audioReducer";
 import {AudioAction} from "./audio/actions";
@@ -17,7 +17,6 @@ export default function RecentFiles() {
 
     useEffect(() => {
         const loadRecentFiles = async () => {
-            const user = JSON.parse(localStorage.getItem(CURRENT_USER_KEY))
             if (Boolean(user)) {
                 const url = BASE_URL + "/audio/get_my_files"
                 const req = await fetcher({url, method: "GET", credentials: true})
@@ -27,7 +26,7 @@ export default function RecentFiles() {
             }
         }
         loadRecentFiles()
-    }, [dispatch])
+    }, [user, dispatch])
 
     return (
         <div style={{justifyContent: 'center'}}>
@@ -50,7 +49,7 @@ export default function RecentFiles() {
                         <div className="adv-place-vertical">placeholder for advertisement</div>
                     </div>
                     {files && files.length > tierDetails.max_files * 0.5 && (
-                        <div className="advice-to-increase-files-count-or-upgrade-tier"></div>
+                        <div className="advice-to-increase-files-count-or-upgrade-tier">increase-files-count-or-upgrade-tier</div>
                     )}
                 </>
             ) : (

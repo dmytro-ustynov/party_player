@@ -12,39 +12,46 @@ import {useAudioState} from "./audio/audioReducer";
 import {AudioAction} from "./audio/actions";
 import Snackbar from "@mui/material/Snackbar";
 
-function validateAudioFile(file, role) {
-    // Define the maximum file size (in bytes)
-    let maxSize
-    let maxSizeErrorMessage
-    if (role === Roles.REGISTERED) {
-        maxSize = 50 * 1024 * 1024; // 15MB in bytes
-        maxSizeErrorMessage = 'Current maximum size for your plan: 50Mb. Subscribe to higher plan'
-    } else if (role === Roles.PREMIUM) {
-        maxSize = 100 * 1024 * 1024
-        maxSizeErrorMessage = 'Too large file to upload. please contact us if you want to procced with such file'
-    } else {
-        maxSize = 15 * 1024 * 1024
-        maxSizeErrorMessage = 'Register to upload larger size'
-    }
 
-    // Define the allowed file types
-    const allowedTypes = ["audio/mpeg", "audio/wav", "audio/ogg", "audio/x-m4a"];
+function getFileExtension(fileName) {
+    return fileName.split('.').reverse()[0]
+}
 
-    // Get the file size and type
+function validateAudioFile(file, user, fileCount) {
+    const tier = user.tier_details
     const fileSize = file.size;
     const fileType = file.type;
-
-    // Check if the file size is within the allowed limit
-    if (fileSize > maxSize) {
-        return maxSizeErrorMessage;
+    // Define the maximum file size (in bytes)
+    const maxSize = tier.file_size * 1024 * 1024     // in bytes
+    // Define the allowed file types
+    const allowedTypes = ["audio/mpeg", "audio/wav", "audio/ogg", "audio/x-m4a", "audio/flac"];
+    // check files count
+    // const fileCount = audio.files.length
+    console.log('now you have: ', fileCount)
+    if (fileCount >= tier.max_files) {
+        if (user.role === Roles.PREMIUM) {
+            return `You can upload only ${fileCount} files.`
+        } else {
+            return `Your tier capacity is ${fileCount} files. Subscribe to higher plan.`
+        }
     }
-
     // Check if the file type is allowed
     if (!allowedTypes.includes(fileType)) {
-        return "File type not allowed. Please upload an audio file in MP3, WAV, or OGG format.";
+        return "File type not allowed. Please upload an audio file.";
+    }
+    const fileExtension = getFileExtension(file.name)
+    if (!tier.formats.includes(fileExtension)) {
+        return 'This file format is not allowed in your tier.'
+    }
+
+    if (fileSize > 100 * 1024 * 1024) {
+        return "Maximum size to upload is 100Mb."
+    } else if (fileSize > maxSize) {
+        return `Current maximum file size for your tier: ${tier.file_size}Mb. Subscribe to higher tier to upload up to 100 Mb`
     }
     return null;
 }
+
 
 const defaultTitle = 'drag file here'
 export default function FileUploader(props) {
@@ -54,24 +61,23 @@ export default function FileUploader(props) {
     const [message, setMessage] = useState('')
     const {styles} = props
     const state = useAuthState()
-    const {dispatch} = useAudioState()
+    const {audio, dispatch} = useAudioState()
     const user = state.user
 
     const onDrop = useCallback(acceptedFiles => {
         const file = acceptedFiles[0]
-        const errMessage = validateAudioFile(file, user.role)
+        const errMessage = validateAudioFile(file, user, audio.files.length)
         console.log(file)
         if (!errMessage) {
             setFile(file)
             setForbidden(false)
             setTitle(file.name)
             console.log('ready to upload')
-            console.log(file)
         } else {
             // setTitle(errMessage)
             setMessage(errMessage)
         }
-    }, [user.role])
+    }, [user, audio.files])
 
     const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
     const handleUpload = async () => {
@@ -85,6 +91,7 @@ export default function FileUploader(props) {
             setForbidden(true)
             setMessage('file uploaded')
             setTitle(defaultTitle)
+            console.log()
         } else {
             console.log('error uploading')
         }

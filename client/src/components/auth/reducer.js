@@ -13,11 +13,12 @@ const init = async () => {
     user = localStorage.getItem(CURRENT_USER_KEY)
         ? JSON.parse(localStorage.getItem(CURRENT_USER_KEY))
         : "";
-    const uid = user.id || uuidv4();
+    const uid = user.user_id || uuidv4();
     if (!Boolean(user)) {
         user = {
             user_id: uid,
-            role: 'anonymous'
+            role: 'anonymous',
+            tier_details: {}
         }
     }
     const storageToken = localStorage.getItem(ACCESS_TOKEN_KEY)
@@ -27,6 +28,7 @@ const init = async () => {
     if (!token) {
         const tokenData = await fetcher({url, credentials: true, method: "GET"})
         token = tokenData.access_token ? tokenData.access_token : ''
+        user = tokenData.user
     }
     localStorage.setItem(ACCESS_TOKEN_KEY, token)
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user))

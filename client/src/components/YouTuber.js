@@ -58,6 +58,7 @@ export default function YouTuber(props) {
         setDisabled(false)
     }
     const handleYouTubeClick = () => {
+        console.log(user)
         if (user.role === Roles.ANONYMOUS) {
             setOpenRegisterDialog(true)
         } else {

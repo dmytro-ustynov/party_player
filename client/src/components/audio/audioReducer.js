@@ -4,6 +4,7 @@ import {AudioAction} from "./actions";
 
 const audioState = {
     files: [],
+    filesCount: 0,
     sound: null,
     info: {},
     loading: null,
@@ -18,12 +19,14 @@ const AudioReducer = (audioState, action) => {
         case AudioAction.SET_FILES:
             return {
                 ...audioState,
-                files: action.files
+                files: action.files,
+                filesCount: action.files.length
             }
         case AudioAction.ADD_FILE:
             return {
                 ...audioState,
-                files: [...audioState.files, action.file]
+                files: [...audioState.files, action.file],
+                filesCount: audioState.filesCount +1
             }
         case AudioAction.SET_SOUND:
             return {

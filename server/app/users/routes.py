@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, Response, Request, HTTPException
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +18,6 @@ from server.app.users.models import UserSchema
 from server.app.users.models import UserLoginSchema
 from server.app.users.models import UpdatePasswordSchema, UpdateUserSchema
 from server.app.users import service as user_service
-from server.app.tiers.models import Tier
 
 router = APIRouter(prefix='/users',
                    tags=['user'])
@@ -68,11 +68,13 @@ async def get_current_user_info(user_id: str = Depends(get_current_user_id),
 
 
 @router.get("/temporary_access")
-async def get_temporary_access(user_id: str = None):
+async def get_temporary_access(user_id: str = None, session: AsyncSession = Depends(get_session)):
     user_id = user_id or str(uuid.uuid4())
+    tier_details = await user_service.get_free_tier_details(session)
     user = {
         'user_id': user_id,
-        'role': Roles.ANONYMOUS
+        'role': Roles.ANONYMOUS,
+        'tier_details': tier_details[0].to_dict()
     }
     return {**sign_jwt(user_id, seconds=3600),
             'user': user,

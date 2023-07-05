@@ -1,6 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from server.app.auth.models import Roles
+from server.app.dependencies import logger
+from server.app.tiers.models import Tier
 from server.app.users.models import User, UserSchema
 
 
@@ -16,7 +19,7 @@ def create_user(user: UserSchema, session: AsyncSession):
             new_user.id = user.user_id
         session.add(new_user)
     except Exception as e:
-        print(str(e))
+        logger.error(str(e))
         new_user = None
     return new_user
 
@@ -43,6 +46,11 @@ def create_anonymous_user(user_id: str, session: AsyncSession):
                 email=f'{user_id}@fake.mail')
     session.add(user)
     return user
+
+
+async def get_free_tier_details(session):
+    free_tier = await session.execute(select(Tier).where(Tier.name == Roles.ANONYMOUS))
+    return free_tier.one_or_none()
 
 
 async def get_or_create_user(user: UserSchema, session: AsyncSession):
