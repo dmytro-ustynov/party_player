@@ -15,6 +15,8 @@ import IconButton from "@mui/material/IconButton";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import InputAdornment from "@mui/material/InputAdornment";
 import Snackbar from "@mui/material/Snackbar";
+import LaunchIcon from '@mui/icons-material/Launch';
+
 
 export default function AboutPage() {
     const [open, setOpen] = useState(false)
@@ -111,7 +113,7 @@ export default function AboutPage() {
                     <Typography variant="h5" sx={{textAlign: "center"}}>Stand with us and make a meaningful impact! We
                         offer you several options to contribute, allowing you to choose the most convenient way to
                         support our project and provide essential resources for the Military Institute of
-                        Telecommunications and Informatization.</Typography>
+                        Telecommunications and Informatization<Link href="http://www.viti.edu.ua/en-index" rel="noreferrer" target="_blank"><LaunchIcon fontSize="small"/></Link>.</Typography>
                     <Typography variant="h5" sx={{textAlign: "center"}}>Together, we can fortify our forces and
                         safeguard
                         our nation.</Typography>
@@ -127,11 +129,10 @@ export default function AboutPage() {
                              onClick={() => setOpen(true)}/>
                     </Stack>
                     <Typography variant="body1" sx={{textAlign: "left", mt: 3}}>You may also directly support one of the
-                        most popular and powerful charity funds in Ukraine: <Link
-                            href="https://prytulafoundation.org/en/donation" rel="noreferrer" target="_blank">"Serhiy
-                            Prytula Foundation" </Link> or <Link
-                            href="https://lifefoundation.com.ua/partners/en" rel="noreferrer" target="_blank">"Life
-                            foundation"</Link>.</Typography>
+                        most popular and powerful charity funds in Ukraine: "Serhiy Prytula Foundation" <Link
+                            href="https://prytulafoundation.org/en/donation" rel="noreferrer" target="_blank"><LaunchIcon fontSize="small"/></Link> or  "Life
+                            foundation"<Link
+                            href="https://lifefoundation.com.ua/partners/en" rel="noreferrer" target="_blank"><LaunchIcon fontSize="small"/></Link>.</Typography>
                     <Typography variant="h6" sx={{textAlign: "center"}}>Find me on social media:</Typography>
                     <Stack direction="row" spacing={2} sx={{justifyContent: "center"}}>
                         <Link href="https://www.linkedin.com/in/dmytro-ustynov" rel="noreferrer"
