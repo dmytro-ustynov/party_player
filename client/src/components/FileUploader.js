@@ -1,4 +1,4 @@
-import {Grid, Paper} from "@mui/material";
+import {CircularProgress, Grid, Paper} from "@mui/material";
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import IconButton from "@mui/material/IconButton";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -81,6 +81,7 @@ export default function FileUploader(props) {
 
     const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
     const handleUpload = async () => {
+        dispatch({type: AudioAction.SET_LOADING, loading: true})
         const url = UPLOAD_FILE_URL
         const body = new FormData()
         body.append('audiofile', file)
@@ -95,6 +96,7 @@ export default function FileUploader(props) {
         } else {
             console.log('error uploading')
         }
+        dispatch({type: AudioAction.SET_LOADING, loading: false})
     }
 
     return (
@@ -109,7 +111,9 @@ export default function FileUploader(props) {
                         <Typography variant="subtitle1"
                                     color="text.secondary"> {isDragActive ? "drop" : title} </Typography>
                     </div>
-                ) : (<>
+                ) : (audio.loading ? <div className="uploader-loading-block">
+                        <CircularProgress />
+                    </div>:<>
                         <IconButton onClick={handleUpload}>
                             <FileUploadIcon color="success" sx={{
                                 fontSize: "8rem",
