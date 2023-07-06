@@ -97,13 +97,13 @@ export default function AccountInfo() {
                                 <TableCell align="left">
                                     {tierDetails.formats.map(ext => {
                                         return (
-                                            <Chip color="success" variant="outlined" label={ext}/>
+                                            <Chip color="success" variant="outlined" label={ext} key={ext}/>
                                         )
                                     })}
                                 </TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell colspan={2} align='center'>
+                                <TableCell colSpan={2} align='center'>
                                     <Button variant="outlined">Change tier</Button>
                                 </TableCell>
                             </TableRow>
