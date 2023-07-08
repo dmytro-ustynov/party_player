@@ -43,6 +43,7 @@ def create_anonymous_user(user_id: str, session: AsyncSession):
     user = User(id=user_id,
                 username=user_id,
                 password='fake_password',
+                tier='anonymous',
                 email=f'{user_id}@fake.mail')
     session.add(user)
     return user

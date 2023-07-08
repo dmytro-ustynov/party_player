@@ -4,6 +4,13 @@ import {ACCESS_TOKEN_KEY, BASE_URL, CURRENT_USER_KEY} from "../../utils/constant
 
 let user
 let token
+const anonymousTier = {
+    max_files: 5,
+    formats: ['mp3', 'webm'],
+    mic_length: 150,
+    adv_ratio: 5,
+    file_size: 10
+}
 const getCookie = function (name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     if (match) return match[2];
@@ -18,7 +25,7 @@ const init = async () => {
         user = {
             user_id: uid,
             role: 'anonymous',
-            tier_details: {}
+            tier_details: anonymousTier
         }
     }
     const storageToken = localStorage.getItem(ACCESS_TOKEN_KEY)
@@ -45,24 +52,14 @@ export const initialState = {
 };
 
 export const authTypes = {
-    REQUEST_LOGIN: 'REQUEST_LOGIN',
     LOGIN_SUCCESS: 'LOGIN_SUCCESS',
     UPDATE_USER: 'UPDATE_USER',
     LOGIN_ERROR: 'LOGIN_ERROR',
     LOGOUT: 'LOGOUT',
-    REQUEST_REGISTER: 'REQUEST_REGISTER',
-    REGISTER_SUCCESS: 'REGISTER_SUCCESS',
-    REGISTER_ERROR: 'REGISTER_ERROR',
-
 }
 
 export const AuthReducer = (initialState, action) => {
     switch (action.type) {
-        case authTypes.REQUEST_LOGIN:
-            return {
-                ...initialState,
-                loading: true
-            };
         case authTypes.LOGIN_SUCCESS:
             return {
                 ...initialState,
@@ -72,7 +69,7 @@ export const AuthReducer = (initialState, action) => {
                 errorMessageLogin: null
             };
         case authTypes.UPDATE_USER:
-            return{
+            return {
                 ...initialState,
                 user: action.payload.user,
                 loading: false
@@ -86,32 +83,12 @@ export const AuthReducer = (initialState, action) => {
         case authTypes.LOGOUT:
             return {
                 ...initialState,
-                // user: null,
                 user: {
-                    //   user_id: uid,
-                    role: 'anonymous'
+                    role: 'anonymous',
+                    tier_details: anonymousTier
                 },
                 accessToken: null,
                 errorMessageLogin: null,
-            };
-        case authTypes.REQUEST_REGISTER:
-            return {
-                ...initialState,
-                loading: true
-            };
-        case authTypes.REGISTER_SUCCESS:
-            return {
-                ...initialState,
-                user: action.payload.user,
-                accessToken: action.payload.access_token,
-                loading: false,
-                errorMessageRegister: null
-            };
-        case authTypes.REGISTER_ERROR:
-            return {
-                ...initialState,
-                loading: false,
-                errorMessageRegister: action.error
             };
 
         default:
