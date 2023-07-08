@@ -26,8 +26,6 @@ function validateAudioFile(file, user, fileCount) {
     // Define the allowed file types
     const allowedTypes = ["audio/mpeg", "audio/wav", "audio/ogg", "audio/x-m4a", "audio/flac"];
     // check files count
-    // const fileCount = audio.files.length
-    console.log('now you have: ', fileCount)
     if (fileCount >= tier.max_files) {
         if (user.role === Roles.PREMIUM) {
             return `You can upload only ${fileCount} files.`
@@ -41,7 +39,11 @@ function validateAudioFile(file, user, fileCount) {
     }
     const fileExtension = getFileExtension(file.name)
     if (!tier.formats.includes(fileExtension)) {
-        return 'This file format is not allowed in your tier.'
+        let errMessage = "Allowed formats for your account are: " + tier.formats;
+        if (tier.name !== Roles.PREMIUM){
+            errMessage += '. Subscribe to higher Account plan.'
+        }
+        return errMessage
     }
 
     if (fileSize > 100 * 1024 * 1024) {
