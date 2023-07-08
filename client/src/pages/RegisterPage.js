@@ -116,7 +116,7 @@ export default function RegisterPage() {
         } else {
             console.log(req)
         }
-
+        setLoading(false)
     }
     const imageUrl = `url(${IMAGE_URL})`
     return (
