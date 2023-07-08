@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse
 from pydub import AudioSegment
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from server.app.auth.models import Roles
 from server.app.auth.utils import get_current_user_id
 from server.app.auth.jwt_bearer import JWTBearer
 from server.app.dal.database import OwnerError
@@ -135,12 +136,10 @@ async def get_youtube_audio(url: str, user_id: str = Depends(get_current_user_id
     :return:
     """
     user = await user_service.get_user_by_id(user_id, session)
-    if user is None:
-        # create anonymous user
-        user_service.create_anonymous_user(user_id, session)
-        await session.commit()
+    if user is None or user.tier == Roles.ANONYMOUS:
+        return {'result': False, 'details': 'You are not allowed to download from YouTube'}
     try:
-        logger.info(f'Start loading youtube URL: {url}')
+        logger.info(f'User {user.id} starts loading youtube URL: {url}')
         new_file = await audio_service.create_file_from_yt(url=url,
                                                            user_id=user_id,
                                                            session=session)

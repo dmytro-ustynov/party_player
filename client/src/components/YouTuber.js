@@ -70,14 +70,14 @@ export default function YouTuber(props) {
         setLoading(true)
         const url = YOUTUBE_LOAD_URL + link
         const req = await fetcher({url, method: "GET", credentials: true})
-        if (req.result === true) {
+        if (req.status === 200 && req.result === true) {
             // console.log('download complete : ')
             setMessage('download complete')
             setOpenDownloadDialog(false)
             // post load logic
             dispatch({type: AudioAction.ADD_FILE, file: req.file})
         } else {
-            console.log('error loading')
+            setMessage('Error occurred: ' + req.details)
         }
         console.log(req)
         setLoading(false)
