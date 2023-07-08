@@ -65,7 +65,9 @@ async def login_user(login: UserLoginSchema, response: Response, session: AsyncS
 async def get_current_user_info(user_id: str = Depends(get_current_user_id),
                                 session: AsyncSession = Depends(get_session)):
     user = await user_service.get_user_by_id(user_id, session)
-    return {'result': True, 'user': user.to_dict()}
+    if user is not None:
+        return {'result': True, 'user': user.to_dict()}
+    return {'result': False, 'details': 'corrupt user data in request'}
 
 
 @router.get("/temporary_access")
@@ -113,6 +115,8 @@ async def change_user_password(update: UpdatePasswordSchema,
                                user_id: str = Depends(get_current_user_id),
                                session: AsyncSession = Depends(get_session)):
     user = await user_service.get_user_by_id(user_id, session)
+    if user is None:
+        return {'result': False, 'details': 'Corrupt user data in request'}
     if not user.check_password(update.old_password):
         return {'result': False, 'details': 'Error changing password, Old password is incorrect'}
     if update.password != update.password_confirm:

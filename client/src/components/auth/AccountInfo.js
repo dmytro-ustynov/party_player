@@ -78,7 +78,7 @@ export default function AccountInfo() {
                         <TableBody>
                             <TableRow>
                                 <TableCell align="center" colSpan={2}>
-                                    <Chip label={tier.toUpperCase()} color="primary"/>
+                                    <Chip label={tier} color="primary" sx={{textTransform: 'uppercase'}}/>
                                 </TableCell>
                             </TableRow>
                             <TableRow>
