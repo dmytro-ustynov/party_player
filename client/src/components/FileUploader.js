@@ -24,7 +24,7 @@ function validateAudioFile(file, user, fileCount) {
     // Define the maximum file size (in bytes)
     const maxSize = tier.file_size * 1024 * 1024     // in bytes
     // Define the allowed file types
-    const allowedTypes = ["audio/mpeg", "audio/wav", "audio/ogg", "audio/x-m4a", "audio/flac"];
+    const allowedTypes = ["audio/mpeg", "audio/wav", "audio/ogg", "audio/x-m4a", "audio/flac", "video/webm"];
     // check files count
     if (fileCount >= tier.max_files) {
         if (user.role === Roles.PREMIUM) {
