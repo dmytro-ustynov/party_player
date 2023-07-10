@@ -121,12 +121,16 @@ export default function AboutPage() {
                         and join us
                         in making a difference today!</Typography>
                     <Stack direction="row" spacing={4} sx={{justifyContent: 'center'}}>
-                        <a href="https://patreon.com/user?u=95586488"><img src={patreon_image} alt="mono"
-                                                                               style={{height: '50px'}}/></a>
-                        <a href="https://send.monobank.ua/jar/2gTDiFo2Am" rel="noreferrer" target="_blank"><img
-                            src={monobank_logo} style={{height: '50px'}} alt=""/></a>
-                        <img src={paypal_logo} style={{height: '50px', cursor: 'pointer'}} alt=""
-                             onClick={() => setOpen(true)}/>
+                        <a href="https://patreon.com/user?u=95586488" rel="noreferrer" target="_blank">
+                            <img src={patreon_image} alt="mono"
+                                 style={{height: '50px'}}/></a>
+                        <a href="https://send.monobank.ua/jar/2gTDiFo2Am" rel="noreferrer" target="_blank">
+                            <img src={monobank_logo}
+                                 style={{height: '50px'}} alt=""/></a>
+                        <a href="https://www.paypal.com/donate/?hosted_button_id=FWW43SFMT9UPY" rel="noreferrer" target="_blank">
+                            <img src={paypal_logo}
+                                 style={{height: '50px'}} alt="paypal"/>
+                        </a>
                     </Stack>
                     <Typography variant="body1" sx={{textAlign: "left", mt: 3}}>You may also directly support one of the
                         most popular and powerful charity funds in Ukraine: "Serhiy Prytula Foundation" <Link
