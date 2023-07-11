@@ -17,7 +17,7 @@ export default function RecentFiles() {
 
     useEffect(() => {
         const loadRecentFiles = async () => {
-            if (Boolean(user)) {
+            if (files.length === 0) {
                 const url = BASE_URL + "/audio/get_my_files"
                 const req = await fetcher({url, method: "GET", credentials: true})
                 if (req.result === true) {
@@ -26,7 +26,7 @@ export default function RecentFiles() {
             }
         }
         loadRecentFiles()
-    }, [user, dispatch])
+    }, [files.length, dispatch])
 
     return (
         <div style={{justifyContent: 'center'}}>
@@ -49,7 +49,8 @@ export default function RecentFiles() {
                         <div className="adv-place-vertical">placeholder for advertisement</div>
                     </div>
                     {files && files.length > tierDetails.max_files * 0.5 && (
-                        <div className="advice-to-increase-files-count-or-upgrade-tier">increase-files-count-or-upgrade-tier</div>
+                        <div
+                            className="advice-to-increase-files-count-or-upgrade-tier">increase-files-count-or-upgrade-tier</div>
                     )}
                 </>
             ) : (

@@ -14,10 +14,8 @@ import PasswordChangeForm from "./PasswordChangeForm";
 export default function AccountInfo() {
     const state = useAuthState()
     const user = state.user
-    // console.log(user)
     const tier = user.tier
     const tierDetails = user.tier_details
-    console.log(tierDetails)
 
     const [openPasswordDialog, setOpenPasswordDialog] = useState(false)
 

@@ -1,5 +1,5 @@
 import Typography from "@mui/material/Typography";
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {useAuthState} from "./context";
 import {Button, Divider, Paper} from "@mui/material";
 import {Chart as ChartJS, ArcElement, Tooltip, Legend} from "chart.js";
@@ -9,7 +9,7 @@ import {useAudioState} from "../audio/audioReducer";
 import IconButton from "@mui/material/IconButton";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Link from "@mui/material/Link";
-
+import {useNavigate} from "react-router-dom";
 
 const usedFilesChart = {
     labels: [
@@ -42,8 +42,9 @@ export default function FilesStatictics() {
     const state = useAuthState()
     const user = state.user
     const tierDetails = user.tier_details
-    const {audio, dispatch} = useAudioState()
+    const {audio} = useAudioState()
     const files = audio.files
+    const navigate = useNavigate()
     const fileTypes = {mp3: 0, webm: 0, wav: 0, flac: 0, wma: 0, aac: 0, ogg: 0}
     const fileTypeChart = {
         labels: [],
@@ -61,15 +62,15 @@ export default function FilesStatictics() {
         tierDetails.formats.forEach(f => fileTypes[f] = 0)
         const freeSpace = tierDetails.max_files - files.length
         usedFilesChart.datasets[0].data = [files.length, freeSpace]
-    }, [files.length])
+    }, )
 
     files.forEach((f, n) => {
         fileTypes[f.ext] += 1
         renderedList.push(<tr
             key={f.id}>
             <td>{n + 1}.</td>
-            <td style={{textAlign: 'start'}}><Link onClick={()=>{
-                navigate('/redactor?file_id='+f.id)
+            <td style={{textAlign: 'start'}}><Link onClick={() => {
+                navigate('/redactor?file_id=' + f.id)
             }}>{f.filename} </Link></td>
             <td style={{color: colors[f.ext]}}>{f.ext}</td>
             <td><IconButton>
@@ -117,7 +118,6 @@ export default function FilesStatictics() {
                     <tbody>
                     {renderedList}
                     </tbody>
-
                 </table>
             </Paper>
         </>

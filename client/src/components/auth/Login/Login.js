@@ -12,6 +12,7 @@ import {useState} from "react";
 import {Roles, useAuthDispatch, useAuthState} from "../context";
 import {logout} from "../actions";
 import MenuIcon from '@mui/icons-material/Menu';
+import {useNavigate} from "react-router-dom";
 
 export default function Login() {
     const state = useAuthState()
@@ -20,6 +21,7 @@ export default function Login() {
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
+    const navigate = useNavigate()
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -39,11 +41,11 @@ export default function Login() {
     }
 
     const handleTermsClick = () => {
-        window.location = '/terms'
+        navigate('/terms')
     }
 
     const profileClick = () => {
-        window.location = '/profile'
+       navigate('/profile');
     }
 
     return (
@@ -79,7 +81,7 @@ export default function Login() {
                         TransitionComponent={Fade}
                     >
                         <MenuItem onClick={handleClose}>Help</MenuItem>
-                        <MenuItem onClick={() => window.location = '/welcome'}>Why register?</MenuItem>
+                        <MenuItem onClick={() => navigate('/welcome')}>Why register?</MenuItem>
                         <MenuItem onClick={handleClose}>F.A.Q.</MenuItem>
                         <MenuItem onClick={handleTermsClick}>Terms of Use</MenuItem>
                     </Menu>
