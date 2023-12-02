@@ -2,7 +2,7 @@
   services:
     server:
       build: ./server
-      container_name: server_fastapi
+      container_name: party_server
       ports:
         - "5000:5000"
       depends_on:
@@ -25,7 +25,7 @@
         - logs:/code/server/data/logs/
     client:
       build: ./client
-      container_name: client_react
+      container_name: party_client
       depends_on:
         - server
       ports:
