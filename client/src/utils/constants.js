@@ -1,4 +1,4 @@
-const PORT = process.env.REACT_APP_SERVER_PORT || 8008
+const PORT = process.env.REACT_APP_SERVER_PORT || 5000
 const HOST = process.env.REACT_APP_SERVER_HOST || 'localhost'
 export const BASE_URL = `http://${HOST}:${PORT}`
 export const IMAGE_URL = BASE_URL + "/image/random"
