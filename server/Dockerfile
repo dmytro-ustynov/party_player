@@ -21,4 +21,4 @@ COPY ./jobs /code/server/jobs
 COPY ./static /code/server/static
 COPY ./logger_config.yaml /code/server/logger_config.yaml
 
-CMD ["uvicorn", "server.app.main:app", "--host", "0.0.0.0"]
+CMD ["uvicorn", "server.app.main:app", "--host", "0.0.0.0", "--log-config", "server/logger_config.yaml"]
