@@ -21,6 +21,7 @@
         API_HOST: ${API_HOST}
         API_PORT: ${API_PORT}
         UVICORN_PORT: ${API_PORT}
+        HOST_ADDRESS: ${HOST_ADDRESS}
       hostname: api
       volumes:
         - ${VOLUME_PATH}upload_files:/code/server/data/upload_files/
