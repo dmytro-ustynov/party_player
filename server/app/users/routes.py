@@ -28,7 +28,7 @@ async def user_signup(user: UserSchema, session: AsyncSession = Depends(get_sess
     new_user = await user_service.get_or_create_user(user, session)
     try:
         await session.commit()
-        logger.info(f'New user registered: {new_user.user_id}')
+        logger.info(f'New user registered: {new_user.uid}')
         return {'result': True, 'user': new_user.to_dict()}
     except IntegrityError as e:
         logger.error(str(e))
