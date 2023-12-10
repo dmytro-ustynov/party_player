@@ -3,6 +3,7 @@
     server:
       build: ./server
       container_name: party_server
+      restart: always
       ports:
         - "${API_PORT}:${API_PORT}"
       depends_on:
@@ -19,13 +20,15 @@
         API_SCHEMA: ${API_SCHEMA}
         API_HOST: ${API_HOST}
         API_PORT: ${API_PORT}
+        UVICORN_PORT: ${API_PORT}
       hostname: api
       volumes:
-        - upload_files:/code/server/data/upload_files/
-        - logs:/code/server/data/logs/
+        - ${VOLUME_PATH}upload_files:/code/server/data/upload_files/
+        - ${VOLUME_PATH}logs:/code/server/data/logs/
     client:
       build: ./client
       container_name: party_client
+      restart: always
       depends_on:
         - server
       ports:
@@ -56,5 +59,3 @@
         - REDIS_PASSWORD=${REDIS_PASSWORD}
   volumes:
     postgres_data:
-    upload_files:
-    logs:

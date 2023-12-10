@@ -22,7 +22,7 @@ class SqlManager:
 
     async def init_models(self):
         async with self.engine.begin() as conn:
-            print('TABLES: ', Base.metadata.tables.keys())
+            print(f'TABLES: {[t for t in Base.metadata.tables.keys()]}',)
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
 
