@@ -8,6 +8,7 @@ from server.app.dal.database import db
 from server.app.users.models import User
 from server.app.audio.models import AudioFile
 from server.app.tiers.models import Tier
+from server.app.url_shortener.models import ShortLink
 from server.app.dependencies import get_session
 
 
