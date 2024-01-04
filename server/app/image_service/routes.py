@@ -3,12 +3,13 @@ from random import choice
 
 import aiofiles
 from fastapi import APIRouter, Depends, UploadFile, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 from starlette.responses import StreamingResponse
 
-from server.app.audio.models import AudioFile
+from server.app.audio import service
 from server.app.auth.jwt_bearer import JWTBearer
-from server.app.dependencies import UPLOAD_FOLDER
+from server.app.dependencies import UPLOAD_FOLDER, get_session
 from decouple import config as env
 
 router = APIRouter(prefix='/image',
@@ -30,7 +31,9 @@ async def get_random_picture():
 
 
 @router.post("/thumbnail", dependencies=[Depends(JWTBearer(auto_error=False))])
-async def upload_thumbnail(request: Request, file: UploadFile, file_id: str):
+async def upload_thumbnail(request: Request,
+                           file: UploadFile, file_id: str,
+                           session: AsyncSession = Depends(get_session)):
     max_size = 2 * 1024 * 1024
     if file.content_type.split('/')[0] != 'image':
         return {'result': False, 'details': 'file not allowed'}
@@ -48,8 +51,7 @@ async def upload_thumbnail(request: Request, file: UploadFile, file_id: str):
     # path should be like 'http://localhost:8008/image/thumbnail/839881b5-1391-4aed-88cf-792362a9520b.png'
     # to be successfully recognized by endpoint "get_thumbnail"
     path = f"{env('API_SCHEMA')}://{env('API_HOST')}:{env('API_PORT')}/image/thumbnail/{filename}"
-    # todo fix getting thumbnails from new PG model
-    # MM.query(AudioFile).update(filters={'file_id': file_id}, payload={'thumbnail': path})
+    await service.update_file_thumbnail(file_id, path, session)
     return {'result': True, 'path': path}
 
 

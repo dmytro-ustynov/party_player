@@ -101,3 +101,12 @@ async def update_file_name(update: UpdateFilenameSchema, user_id, session: Async
         return file
     else:
         raise OwnerError('Forbidden to update')
+
+
+async def update_file_thumbnail(file_id, path, session: AsyncSession):
+    file = await get_audio_by_id(file_id, session)
+    if not file:
+        raise FileNotFoundError
+    file.thumbnail = path
+    await session.commit()
+    return file

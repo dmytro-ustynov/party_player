@@ -63,7 +63,8 @@ async def upload_file(audiofile: UploadFile, user_id: str = Depends(get_current_
                          'duration': new_file.duration}}
     except Exception as e:
         await session.rollback()
-        return {'result': False, 'details': 'upload failed', 'error': str(e)}
+        logger.error(str(e))
+        return {'result': False, 'details': 'upload failed'}
 
 
 @router.delete("/file", dependencies=[Depends(JWTBearer(auto_error=False))])
