@@ -48,6 +48,7 @@ export default function RedactorPage() {
     const [message, setMessage] = useState('')
     const [inputWidth, setInputWidth] = useState(200)
     const sound = audio.sound
+    const wavesurfer = audio.wavesurfer
     const navigate = useNavigate()
     const [anchorFileEl, setAnchorFileEl] = useState(null);
     const [anchorEffectsEl, setAnchorEffectsEl] = useState(null);
@@ -158,14 +159,50 @@ export default function RedactorPage() {
             console.log(response)
         }
     }
-    const handleDenoise = async () => {
-        console.log('denoisinng....')
+
+    const createOperationPayload = (action, file_id) => {
+        const payload = {action, file_id, details:{}}
+        let regions = wavesurfer.current.regions
+        if (Object.entries(regions.list).length > 0) {
+            for (const region of Object.entries(regions.list)) {
+                payload.details = {
+                    start: region[1].start,
+                    end: region[1].end
+                }
+                break
+            }
+        }
+        console.log(payload)
+        return payload
+    }
+
+    const handleHeliumEffect = async () => {
+        console.log('making helium voice effect...')
+        handleVoiceEffect(1.4)
+    }
+    const handleDeepVoiceEffect = async () => {
+        console.log('making deep voice effect...')
+        handleVoiceEffect(0.8)
+    }
+
+    const handleVoiceEffect = async (rate) => {
+        let msg
+        if (rate > 1) {
+            msg = 'Helium Voice Effect Applied'
+        } else {
+            msg = 'Deep Voice Effect Applied'
+        }
         setPendingRequest(true)
         const url = OPERATION_URL
-        const payload = {action: AudioOperation.DENOISE, file_id: sound}
+        const payload = createOperationPayload(AudioOperation.SPEEDUP, sound)
+        payload.details.sound_speed = rate
         const response = await fetcher({url, payload, credentials: true})
         if (response.result === true) {
-            setMessage('Denoise Complete')
+            setMessage(msg)
+            wavesurfer.current.clearRegions()
+            dispatch({type: AudioAction.ADD_SELECTION, selection: false})
+            dispatch({type: AudioAction.UPDATE_FILE_INFO, info: {...audio.info, duration: response.duration}})
+            wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
         } else {
             setMessage(response.details)
         }
@@ -204,7 +241,7 @@ export default function RedactorPage() {
                                     <DialogActions>
                                         <Button onClick={handleClose}>Cancel</Button>
                                         <Button onClick={handleDelete}
-                                                startIcon={<DeleteIcon />}
+                                                startIcon={<DeleteIcon/>}
                                                 color="error"
                                                 variant="contained">Delete</Button>
                                     </DialogActions>
@@ -259,11 +296,17 @@ export default function RedactorPage() {
                                       MenuListProps={{
                                           'aria-labelledby': 'basic-button',
                                       }}>
-                                    <MenuItem onClick={handleDenoise}>
+                                    <MenuItem onClick={handleHeliumEffect}>
                                         <ListItemIcon>
-                                            N
+                                            He
                                         </ListItemIcon>
-                                        <ListItemText>Denoise</ListItemText>
+                                        <ListItemText>Helium voice</ListItemText>
+                                    </MenuItem>
+                                    <MenuItem onClick={handleDeepVoiceEffect}>
+                                        <ListItemIcon>
+                                            SO<sub>2</sub>
+                                        </ListItemIcon>
+                                        <ListItemText>Deep voice</ListItemText>
                                     </MenuItem>
                                 </Menu>
                             </div>

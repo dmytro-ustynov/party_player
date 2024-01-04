@@ -4,7 +4,7 @@ import TimelinePlugin from "wavesurfer.js/dist/plugin/wavesurfer.timeline";
 import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions";
 import MarkersPlugin from "wavesurfer.js/dist/plugin/wavesurfer.markers";
 
-export default function createWavesurfer(){
+export function createWavesurfer(){
     return WaveSurfer.create({
             container: `#audioplayer`,
             waveColor: "#29d9ce",

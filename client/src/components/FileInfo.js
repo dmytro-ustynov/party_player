@@ -75,6 +75,7 @@ export default function FileInfo() {
                     <Typography variant="body1" title="Track author">{info.author}</Typography>
                     <Typography variant="body1">ext: {info.ext}</Typography>
                     <Typography variant="body1">Duration: {info.duration} sec</Typography>
+                    <Typography variant="body1">Size: {info.size} Mb</Typography>
                     {info.thumbnail ? <Button component="label" title="Click to change thumbnail">
                             <input hidden accept="image/*" type="file"
                                    onChange={handleFileInputChange}/>

@@ -69,6 +69,14 @@ class AudioFile(Base):
     def valid_path(self):
         return os.path.isfile(str(self.file_path))
 
+    @property
+    def file_size(self):
+        """
+        Returns the file size in Mb
+        :return:
+        """
+        return os.path.getsize(self.file_path) / 2 ** 20
+
     def create_path(self):
         return os.path.join(UPLOAD_FOLDER, '{}.{}'.format(self.filename, self.ext))
 
@@ -126,6 +134,7 @@ class AudioFile(Base):
     def to_dict(self):
         result = self.__dict__
         result['file_id'] = self.file_id
+        result['size'] = round(self.file_size, 2)
         return result
 
 

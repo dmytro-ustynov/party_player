@@ -50,9 +50,9 @@ async def delete_fragment(session, start, end, **kwargs):
             new_sound = sound[:from_]
             new_sound = new_sound.append(sound[to_:])
         new_sound.export(fpath)
-        file = await audio_service.update_audio_duration(file_id, session, new_sound.duration_seconds)
-        await session.commit()
-        return {'result': True, 'duration': file.duration}
+        asyncio.create_task(update_duration(session, file_id))
+        logger.info(f'Delete fragment for {file_id} completed successfully')
+        return {'result': True, 'duration': round(new_sound.duration_seconds, 2)}
     except Exception as e:
         logger.error(str(e))
         return {'result': False, 'error': str(e)}
@@ -178,10 +178,11 @@ async def speed_up(session, **kwargs):
         else:
             new_sound = speed_sound
         new_sound.export(fpath)
-        asyncio.run(update_duration(session, file_id))
-        return {'result': True}
+        asyncio.create_task(update_duration(session, file_id))
+        logger.info(f'Speed {"up" if sound_speed > 1 else "down"} for {file_id} completed successfully')
+        return {'result': True, 'duration': round(new_sound.duration_seconds, 2)}
     except Exception as e:
-        logger.log(str(e))
+        logger.error(str(e))
         return {'result': False, 'error': str(e)}
 
 
@@ -221,7 +222,7 @@ async def paste(session, start, end, **kwargs):
         new_sound.export(fpath_source)
         return {'result': True}
     except Exception as e:
-        logger.log(str(e))
+        logger.error(str(e))
         return {'result': False, 'error': str(e)}
 
 
@@ -321,8 +322,8 @@ async def update_duration(session, file_id):
     try:
         file = await audio_service.update_audio_duration(file_id, session)
         await session.commit()
-        logger.info(f'File info updated : {file_id}')
-        return round(file.duration_seconds, 3)
+        logger.info(f'File duration updated : {file_id}')
+        return round(file.duration, 3)
     except Exception as e:
         logger.error(f'ERROR UPDATING  :{file_id}: {str(e)}')
         return 0.0

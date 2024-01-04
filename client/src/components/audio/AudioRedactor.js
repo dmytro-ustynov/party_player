@@ -1,12 +1,12 @@
-import {Grid, LinearProgress} from "@mui/material";
+import {Button, Grid, LinearProgress} from "@mui/material";
 import React, {useEffect, useRef} from "react";
 import {useAudioState} from "./audioReducer";
 import {BASE_URL} from "../../utils/constants";
 import {AudioAction} from "./actions";
 import Box from "@mui/material/Box";
-import createWavesurfer from "./utils";
 import PlayerButtons from "./PlayerButtons";
 import OperationButtons from "./OperationButtons";
+import {createWavesurfer} from "./utils";
 
 
 export default function AudioRedactor() {
@@ -70,6 +70,9 @@ export default function AudioRedactor() {
         // newMarker.el.addEventListener('contextmenu', markerRightClick,)
     }
 
+    const addTrack = () =>{
+
+    }
     return (
         <Grid container>
             <OperationButtons/>
@@ -84,6 +87,13 @@ export default function AudioRedactor() {
                          title='Double click to add marker'
                          onDoubleClick={createMarker}>
                     </div>
+                </div>
+                <div id='secondary_track'>
+                </div>
+                <div>
+                    <Button variant='outlined'
+                            style={{minWidth: "15px", padding: 0}}
+                            disabled={loading} onClick={addTrack}>+</Button>
                 </div>
                 <div id='audioplayer_tl'></div>
             </div>
