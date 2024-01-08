@@ -54,6 +54,7 @@ export default function OperationButtons() {
             setMessage('Fade In complete')
             wavesurfer.current.clearRegions()
             dispatch({type: AudioAction.ADD_SELECTION, selection: false})
+            dispatch({type: AudioAction.UPDATE_FILE_INFO, info: {...audio.info, size: response.size}})
             wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
         } else {
             console.log(response)
@@ -73,6 +74,7 @@ export default function OperationButtons() {
             setMessage('Fade Out complete')
             wavesurfer.current.clearRegions()
             dispatch({type: AudioAction.ADD_SELECTION, selection: false})
+            dispatch({type: AudioAction.UPDATE_FILE_INFO, info: {...audio.info, size: response.size}})
             wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
         } else {
             console.log(response)
@@ -92,7 +94,7 @@ export default function OperationButtons() {
             setMessage('delete complete')
             wavesurfer.current.clearRegions()
             dispatch({type: AudioAction.ADD_SELECTION, selection: false})
-            dispatch({type: AudioAction.UPDATE_FILE_INFO, info: {...audio.info, duration: response.duration}})
+            dispatch({type: AudioAction.UPDATE_FILE_INFO, info: {...audio.info, duration: response.duration, size: response.size}})
             wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
         } else {
             console.log(response)
@@ -112,6 +114,7 @@ export default function OperationButtons() {
             setMessage('clear complete')
             wavesurfer.current.clearRegions()
             dispatch({type: AudioAction.ADD_SELECTION, selection: false})
+            dispatch({type: AudioAction.UPDATE_FILE_INFO, info: {...audio.info, size: response.size}})
             wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)
         } else {
             console.log(response)
@@ -134,7 +137,9 @@ export default function OperationButtons() {
             dispatch({
                 type: AudioAction.UPDATE_FILE_INFO, info: {
                     ...audio.info,
-                    duration: response.duration, filename: response.filename
+                    duration: response.duration,
+                    filename: response.filename,
+                    size: response.size
                 }
             })
             wavesurfer.current.load(BASE_URL + "/audio/get_audio?file_id=" + sound)

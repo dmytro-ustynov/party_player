@@ -27,7 +27,9 @@ async def clear(session, start, end, **kwargs):
             new_sound = new_sound.append(sound[to_:])
 
         new_sound.export(fpath)
-        return {'result': True}
+        return {'result': True,
+                'duration': round(new_sound.duration_seconds, 2),
+                'size': os.path.getsize(fpath)}
         # return {'new_file_id': file_id}
     except Exception as e:
         print(str(e))
@@ -52,7 +54,10 @@ async def delete_fragment(session, start, end, **kwargs):
         new_sound.export(fpath)
         asyncio.create_task(update_duration(session, file_id))
         logger.info(f'Delete fragment for {file_id} completed successfully')
-        return {'result': True, 'duration': round(new_sound.duration_seconds, 2)}
+        return {'result': True,
+                'duration': round(new_sound.duration_seconds, 2),
+                'size': os.path.getsize(fpath)
+                }
     except Exception as e:
         logger.error(str(e))
         return {'result': False, 'error': str(e)}
@@ -86,7 +91,8 @@ async def trim(session, **kwargs):
             session.add(new_file)
         await session.commit()
         return {'result': True,
-                'duration': new_sound.duration_seconds,
+                'duration': round(new_sound.duration_seconds, 2),
+                'size': os.path.getsize(fpath),
                 'filename': filename,
                 'file_id': file_id}
     except Exception as e:
@@ -106,7 +112,10 @@ async def fade_in(session, **kwargs):
         to_ = int(end * 1000)
         new_sound = sound.fade(from_gain=-120, start=from_, end=to_)
         new_sound.export(fpath)
-        return {'result': True}
+        return {'result': True,
+                'duration': round(new_sound.duration_seconds, 2),
+                'size': os.path.getsize(fpath)
+                }
     except Exception as e:
         logger.error(str(e))
         return {'result': False, 'error': str(e)}
@@ -125,7 +134,9 @@ async def fade_out(session, **kwargs):
         to_ = int(end * 1000)
         new_sound = sound.fade(to_gain=to_gain, start=from_, end=to_)
         new_sound.export(fpath)
-        return {'result': True}
+        return {'result': True,
+                'duration': round(new_sound.duration_seconds, 2),
+                'size': os.path.getsize(fpath)}
     except Exception as e:
         logger.error(str(e))
         return {'result': False, 'error': str(e)}
@@ -144,7 +155,8 @@ async def gain(session, **kwargs):
         to_ = int(end * 1000)
         new_sound = sound.fade(to_gain=to_gain, start=from_, end=to_)
         new_sound.export(fpath)
-        return {'result': True}
+        return {'result': True,
+                'size': os.path.getsize(fpath)}
     except Exception as e:
         logger.error(str(e))
         return {'result': False, 'error': str(e)}
@@ -180,7 +192,9 @@ async def speed_up(session, **kwargs):
         new_sound.export(fpath)
         asyncio.create_task(update_duration(session, file_id))
         logger.info(f'Speed {"up" if sound_speed > 1 else "down"} for {file_id} completed successfully')
-        return {'result': True, 'duration': round(new_sound.duration_seconds, 2)}
+        return {'result': True,
+                'duration': round(new_sound.duration_seconds, 2),
+                'size': os.path.getsize(fpath)}
     except Exception as e:
         logger.error(str(e))
         return {'result': False, 'error': str(e)}
@@ -220,7 +234,10 @@ async def paste(session, start, end, **kwargs):
         new_sound = new_sound.append(target_sound)
         new_sound = new_sound.append(source_sound[target_time:])
         new_sound.export(fpath_source)
-        return {'result': True}
+        asyncio.create_task(update_duration(session, source))
+        return {'result': True,
+                'duration': round(new_sound.duration_seconds, 2),
+                'size': os.path.getsize(fpath_source)}
     except Exception as e:
         logger.error(str(e))
         return {'result': False, 'error': str(e)}
@@ -257,7 +274,8 @@ async def overlay(session, **kwargs):
         target_time = int(target_time * 1000)
         new_sound = source_sound.overlay(target_sound, position=target_time)
         new_sound.export(fpath_source)
-        return {'result': True}
+        asyncio.create_task(update_duration(session, source))
+        return {'result': True, }
     except Exception as e:
         logger.error(str(e))
         return {'result': False, 'error': str(e)}
@@ -279,8 +297,10 @@ async def insert_silence(session, **kwargs):
         new_sound = new_sound.append(AudioSegment.silent(silence_duration))
         new_sound = new_sound.append(sound[target_time:])
         new_sound.export(fpath)
-        asyncio.run(update_duration(session, file_id))
-        return {'result': True}
+        asyncio.create_task(update_duration(session, file_id))
+        return {'result': True,
+                'duration': round(new_sound.duration_seconds, 2),
+                'size': os.path.getsize(fpath)}
     except Exception as e:
         print(str(e))
         return {'result': False, 'error': str(e)}
