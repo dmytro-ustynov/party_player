@@ -72,10 +72,11 @@ class AudioFile(Base):
     @property
     def file_size(self):
         """
-        Returns the file size in Mb
+        Returns the file size in bytes
         :return:
         """
-        return os.path.getsize(self.file_path) / 2 ** 20
+        if self.valid_path:
+            return os.path.getsize(self.file_path)
 
     def create_path(self):
         return os.path.join(UPLOAD_FOLDER, '{}.{}'.format(self.filename, self.ext))
@@ -178,3 +179,7 @@ class OperationSchema(BaseModel):
                 }
             }
         }
+
+
+def generate_session_id():
+    return str(uuid.uuid4())
