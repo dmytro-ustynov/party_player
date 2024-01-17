@@ -2,6 +2,7 @@ import redis
 from decouple import config as env
 
 REDIS_PASSWORD = env('REDIS_PASSWORD')
+REDIS_DB = env('REDIS_DB')
 
 
 class RedisManager:
@@ -47,6 +48,3 @@ class RedisManager:
 
     def expire(self, key, seconds):
         return self.db.expire(key, seconds)
-
-
-rdb = redis.StrictRedis(db=1, password=REDIS_PASSWORD)

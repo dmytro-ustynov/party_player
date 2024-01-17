@@ -1,11 +1,11 @@
 import asyncio
 import os.path
-from bot.dal.redis_db import RedisManager
 from decouple import config as env
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 from bot.youtuber.youtuber import YouTuber
 from bot.sound_bot.logger import logger
+from server.app.dal.redis_db import RedisManager
 
 REDIS_PASSWORD = env('REDIS_PASSWORD')
 TOKEN = env('TOKEN')
