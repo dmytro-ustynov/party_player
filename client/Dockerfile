@@ -10,5 +10,10 @@ RUN npm run build
 FROM nginx:1.23.3
 COPY --from=build_stage /app/build/ /usr/share/nginx/html
 ## Copy the default nginx.conf to work with react routes
-COPY  default_nginx.conf /etc/nginx/conf.d/default.conf
+COPY default_nginx.conf /etc/nginx/conf.d/default.conf
+COPY ssl_cert/fullchain.pem /etc/nginx/certs/fullchain.pem
+COPY ssl_cert/privkey.pem /etc/nginx/certs/privkey.pem
 EXPOSE 80
+EXPOSE 443
+
+CMD ["nginx", "-g", "daemon off;"]
