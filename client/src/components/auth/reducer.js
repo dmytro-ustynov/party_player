@@ -17,7 +17,12 @@ const init = async () => {
     if (!Boolean(user)) {
         user = {
             user_id: uid,
-            role: 'anonymous'
+            role: 'anonymous',
+            tier_details: {
+                max_files: 5,
+                adv_ratio: 5,
+                mic_length: 150
+            }
         }
     }
     const storageToken = localStorage.getItem(ACCESS_TOKEN_KEY)

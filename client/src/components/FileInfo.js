@@ -14,6 +14,7 @@ export default function FileInfo() {
     const [error, setError] = useState(null);
     const [allowed, setAllowed] = useState(false);
     const [message, setMessage] = useState('')
+    const [fileSizeStr, setFileSizestr] = useState('')
 
     const {audio, dispatch} = useAudioState()
     const info = audio.info
@@ -22,6 +23,20 @@ export default function FileInfo() {
     useEffect(() => {
         setImgSrc(info.thumbnail)
     }, [info.thumbnail])
+
+    useEffect(() => {
+        const kiloBytes = info.size / 2**10
+        if (kiloBytes < 1000){
+            setFileSizestr(`${Number(kiloBytes).toFixed(2)} kb`)
+        } else if (kiloBytes < 10**6){
+            const megaBytes = info.size / 2**20
+            setFileSizestr(`${Number(megaBytes).toFixed(2)} Mb`)
+        }
+        else{
+
+        }
+
+    }, [info.size]);
 
     const handleFileInputChange = (e) => {
         const file = e.target.files[0];
@@ -75,7 +90,7 @@ export default function FileInfo() {
                     <Typography variant="body1" title="Track author">{info.author}</Typography>
                     <Typography variant="body1">ext: {info.ext}</Typography>
                     <Typography variant="body1">Duration: {info.duration} sec</Typography>
-                    <Typography variant="body1">Size: {info.size} Mb</Typography>
+                    <Typography variant="body1">Size: {fileSizeStr}</Typography>
                     {info.thumbnail ? <Button component="label" title="Click to change thumbnail">
                             <input hidden accept="image/*" type="file"
                                    onChange={handleFileInputChange}/>

@@ -30,47 +30,58 @@
     height: 90vh;
     gap: 1em;
 }
-.header-tier{
+
+.header-tier {
     background-color: #FE753B;
 }
-.tier-example{
+
+.tier-example {
     border: 1px solid darkgray;
     border-radius: 8px;
     height: 75vh;
     width: 25vw;
 }
-.tier-example.active{
+
+.tier-example.active {
     border: 1px solid #FE753B;
 }
-.tier-name{
+
+.tier-name {
     font-weight: 700;
     padding-top: 8px;
     background-color: lightblue;
     height: 25px;
     border-radius: 8px 8px 0 0;
 }
-.tier-name.selected{
+
+.tier-name.selected {
     background-color: #0a58ca;
     color: white;
     font-weight: 900;
 }
-.tier-option{
+
+.tier-option {
     display: flex;
     align-items: center;
 }
-.mt-10{
+
+.mt-10 {
     margin-top: 10px;
 }
-.tier-options-list > li{
+
+.tier-options-list > li {
     text-align: start;
 }
-.option-true{
+
+.option-true {
     color: green
 }
-.option-false{
+
+.option-false {
     color: grey
 }
-.option-cost{
+
+.option-cost {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -190,7 +201,7 @@ footer {
 }
 
 .playerLayerCurrentPosition {
-    margin-bottom: 15px;
+    /*margin-bottom: 15px;*/
     position: relative;
     background: #28282f;
     overflow: scroll;
@@ -199,6 +210,11 @@ footer {
 .playerLayerCurrentPosition marker {
     top: -5px;
     height: calc(100% + 25px) !important;
+}
+
+.playerAddTrackBtn {
+    min-width: 25px;
+    padding: 0;
 }
 
 .playerLayerCurrentPosition marker div {
