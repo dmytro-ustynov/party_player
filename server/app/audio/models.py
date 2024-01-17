@@ -77,6 +77,7 @@ class AudioFile(Base):
         """
         if self.valid_path:
             return os.path.getsize(self.file_path)
+        return 0
 
     def create_path(self):
         return os.path.join(UPLOAD_FOLDER, '{}.{}'.format(self.filename, self.ext))
