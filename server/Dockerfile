@@ -20,6 +20,6 @@ COPY ./app /code/server/app
 COPY ./jobs /code/server/jobs
 COPY ./static /code/server/static
 COPY ./logger_config.yaml /code/server/logger_config.yaml
+COPY ../ssl_cert /code/ssl_sert
 
-CMD ["uvicorn", "server.app.main:app", "--host", "0.0.0.0", "--log-config", "server/logger_config.yaml",
-"--ssl-keyfile", "/etc/nginx/certs/privkey.pem", "--ssl-certfile", "/etc/nginx/certs/fullchain.pem"]
+CMD ["uvicorn", "server.app.main:app", "--host", "0.0.0.0", "--log-config", "server/logger_config.yaml", "--ssl-keyfile", "ssl_cert/privkey.pem", "--ssl-certfile", "ssl_cert/fullchain.pem"]
