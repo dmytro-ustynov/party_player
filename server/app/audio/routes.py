@@ -246,7 +246,8 @@ async def complete_upload(session_id: str, user_id: str = Depends(get_current_us
         new_file = AudioFile(id=session_id,
                              user_id=user_id,
                              file_path=final_file_path,
-                             filename=f'recording_{session_id}',
+                             author=user.full_name,
+                             filename=f'Record {number}',
                              ext='webm',
                              title=f'Record {number}')
         session.add(new_file)
@@ -256,16 +257,12 @@ async def complete_upload(session_id: str, user_id: str = Depends(get_current_us
         return {"message": "Upload complete",
                 'file_id': session_id,
                 # "file_path": f"recording_{session_id}.webm",
-                'size': os.path.getsize(final_file_path)}
+                'size': os.path.getsize(final_file_path),
+                'file': {'file_id': new_file.file_id,
+                         'filename': new_file.filename,
+                         'duration': new_file.duration
+                         }}
     raise HTTPException(status_code=404)
-    # file_path = session_data_map[session_id]["file_path"]
-    #
-    # # Perform any final processing or validation here
-    # # For example, you can save the file to a final location
-    # final_file_path = os.path.join(UPLOAD_FOLDER, f"recording_{session_id}.webm")
-    # shutil.move(file_path, final_file_path)
-    #
-    # del session_data_map[session_id]
 
 
 @router.get("/record/{session_id}")

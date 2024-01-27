@@ -98,9 +98,13 @@ class AudioFile(Base):
         return mimetype
 
     def create_tags(self):
-        tags = {'title': self.title.replace(self.author, ''),
-                'artist': self.author,
-                'album': 'SoundDream'}
+        tags ={'album': 'SoundDream'}
+        if self.author:
+            tags['artist'] = self.author
+        if self.title:
+            title = self.title.replace(self.author, '') if self.author else self.title
+            tags['title'] = title
+
         return tags
 
     def create_thumbnail_tag(self):

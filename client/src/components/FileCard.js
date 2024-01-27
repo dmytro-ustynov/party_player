@@ -112,7 +112,7 @@ export default function FileCard(props) {
                     <Typography variant="subtitle1" color="text.secondary"
                                 component="div"
                                 sx={{marginTop: "auto"}}>
-                        {formatDuration(file.duration)}
+                        {file.duration != -1 ? formatDuration(file.duration) : "... s"}
                     </Typography>
                 </CardContent>
                 <div>
@@ -136,7 +136,7 @@ export default function FileCard(props) {
                             value={volume}
                             onChange={handleVolumeChange}
                             sx={{width: '60px'}}/>
-                    {currentTime !== 0 && <div style={{flexGrow:1}}>
+                    {currentTime !== 0 && <div style={{flexGrow: 1}}>
                         <Typography variant="caption">{currentTime}</Typography>
                     </div>}
                 </Box>

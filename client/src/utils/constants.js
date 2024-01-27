@@ -5,6 +5,7 @@ export const IMAGE_URL = BASE_URL + "/image/random"
 export const YOUTUBE_LOAD_URL = BASE_URL + "/audio/get_from_youtube?url="
 export const UPLOAD_FILE_URL = BASE_URL + "/audio/upload_file"
 export const SAVEAS_URL = BASE_URL + "/audio/save_as"
+export const STREAM_UPLOAD_URL = BASE_URL + "/audio/record"
 export const DELETE_FILE_URL = BASE_URL + "/audio/file?file_id="
 export const UPDATE_FILENAME_URL = BASE_URL + "/audio/change_filename"
 export const OPERATION_URL = BASE_URL + '/audio/modify'

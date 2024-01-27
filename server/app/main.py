@@ -13,7 +13,7 @@ app = FastAPI()
 origins = [
     env('HOST_ADDRESS', "http://localhost"),
     "http://localhost:3000",
-    'http://localhost:63342'
+    "https://soundream.com.ua"
 ]
 
 app.add_middleware(
