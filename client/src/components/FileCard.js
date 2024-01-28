@@ -112,7 +112,7 @@ export default function FileCard(props) {
                     <Typography variant="subtitle1" color="text.secondary"
                                 component="div"
                                 sx={{marginTop: "auto"}}>
-                        {file.duration != -1 ? formatDuration(file.duration) : "... s"}
+                        {file.duration !== -1 ? formatDuration(file.duration) : "... s"}
                     </Typography>
                 </CardContent>
                 <div>

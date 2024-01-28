@@ -18,6 +18,17 @@ import Snackbar from "@mui/material/Snackbar";
 const backGroundColor = '#eeeeff'
 const barsColor = '#1976d2'
 
+
+const formatSizeBytes = (size) => {
+    if (size < 1024) {
+        return `${size} bytes`
+    } else if (size < 2 ** 20) {
+        return `${(size / 1024).toFixed(1)} KB`
+    } else if (size < 2 ** 30) {
+        return `${(size / 2 ** 20).toFixed(2)} MB`
+    }
+}
+
 const VoiceRecorder = (props) => {
     const {setOpen} = props
     const {dispatch} = useAudioState()
@@ -28,11 +39,8 @@ const VoiceRecorder = (props) => {
     const [audioURL, setAudioURL] = useState('');
     const [recordedFile, setRecordedFile] = useState(null)
     const [message, setMessage] = useState('')
-    // const [audioBlob, setAudioBlob] = useState(null);
-    const [currentTime, setCurrentTime] = useState(0)
     const [startTime, setStartTime] = useState(0)
     const [elapsedTime, setElapsedTime] = useState(0)
-    const [countTimer, setCountTimer] = useState(null)
     const [size, setSize] = useState(0)
     const [sessionID, setSessionID] = useState(null)
     const mediaRecorderRef = useRef(null);
@@ -51,9 +59,7 @@ const VoiceRecorder = (props) => {
         let audioContext = new AudioContext();
         let analyzer = audioContext.createAnalyser();
         let gainNode = audioContext.createGain();
-        // destination = audioContext.createMediaStreamDestination();
         gainNode.connect(analyzer);
-        // analyzer.connect(destination);
         analyzer.fftSize = 1024;
         analyzerRef.current = analyzer;
         audioContextRef.current = audioContext
@@ -66,6 +72,24 @@ const VoiceRecorder = (props) => {
             mediaRecorderRef.current = null
         }
     }, []);
+
+    useEffect(() => {
+        let interval;
+        let newElapsedTime;
+        interval = setInterval(() => {
+            if (isRecording && !isPaused) {
+                newElapsedTime = (Date.now() - startTime) / 1000 + elapsedTime
+                setElapsedTime(newElapsedTime)
+            } else {
+                clearInterval(interval)
+            }
+        }, 100)
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, [isRecording, isPaused]);
+
 
     // useEffect(() => {
     //     if (countTimer === 0) {
@@ -80,7 +104,7 @@ const VoiceRecorder = (props) => {
     //     return () => clearInterval(timer)
     // }, [countTimer]);
     const handleStartRecording = async () => {
-        // setCountTimer(3)
+        setStartTime(Date.now() - elapsedTime * 1000)
         navigator.mediaDevices.getUserMedia({audio: true})
             .then(stream => {
                 const source = audioContextRef.current.createMediaStreamSource(stream)
@@ -88,20 +112,17 @@ const VoiceRecorder = (props) => {
 
                 const recorder = new MediaRecorder(stream);
                 recorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        uploadData(event.data);
-                    }
+                    uploadData(event.data);
                 };
 
                 recorder.onstop = () => {
                     stream.getTracks().forEach(track => track.stop());
                 };
-                setStartTime(Date.now())
                 recorder.start(1000);
                 mediaRecorderRef.current = recorder;
+                setIsRecording(true);
             })
             .catch(error => console.error('Error accessing microphone:', error));
-        setIsRecording(true);
     }
 
     const uploadData = async (data) => {
@@ -111,9 +132,6 @@ const VoiceRecorder = (props) => {
         const url = STREAM_UPLOAD_URL + `/chunk/${sessionID}/${chunkNum}`
         const response = await fetcher({url, body, credentials: true})
         setSize(response.size)
-        const delta = (startTime - Date.now()) / 1000
-        console.log(startTime, Date.now(), delta)
-        setElapsedTime(delta)
     }
 
     const completeUpload = async () => {
@@ -122,7 +140,7 @@ const VoiceRecorder = (props) => {
         const readyUrl = BASE_URL + `/audio/get_audio?file_id=${response.file_id}`
         setAudioURL(readyUrl)
         setIsCompleted(true)
-        setRecordedFile({...response.file, duration: -1})
+        setRecordedFile({...response.file, duration: elapsedTime})
         setMessage('Your record was saved!')
     }
 
@@ -130,41 +148,40 @@ const VoiceRecorder = (props) => {
         setAudioURL(null)
         const recorder = mediaRecorderRef.current
         recorder.pause()
-        // setIsRecording(false)
         setIsPaused(true)
         setAudioURL(STREAM_UPLOAD_URL + `/${sessionID}`)
     }
     const handleResumeRecording = () => {
+        setStartTime(prev => Date.now())
         const recorder = mediaRecorderRef.current
         recorder.resume()
-        // setIsRecording(true)
         setIsPaused(false)
     }
     const handleStopRecording = () => {
         const recorder = mediaRecorderRef.current
         recorder.stop()
-        setIsRecording(false)
+        setIsRecording(null)
         setIsPaused(null)
         completeUpload();
     }
 
     const handleRecordAgain = () => {
         setIsRecording(false);
+        setElapsedTime(0)
         setIsPaused(false);
         setAudioURL('');
-        // setAudioBlob(null);
         setIsCompleted(false)
         initSessionId()
         setSize(0)
+        if (!!mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop()
+        }
     }
 
     const completeAndClose = () => {
-
         setOpen(false)
         dispatch({type: AudioAction.ADD_FILE, file: recordedFile})
         setMessage('Record successfully uploaded')
-        // TODO: recordedFile does not have duration seconds here
-        console.log(recordedFile)
     }
 
     const visualize = async (canvasContext) => {
@@ -184,7 +201,7 @@ const VoiceRecorder = (props) => {
             let barHeight;
             let x = 0;
             for (let i = 0; i < dataArray.length; i++) {
-                barHeight = isPaused ? 2 : dataArray[i];
+                barHeight = isPaused ? 2 : dataArray[i] * 0.8;
                 let centerY = canvas.height / 2;
                 let barTop = centerY - barHeight / 2;
                 let barBottom = centerY + barHeight / 2;
@@ -247,17 +264,17 @@ const VoiceRecorder = (props) => {
                     <audio ref={audioRef} src={audioURL} controls/>
                     <Canvas draw={visualize}/>
                     <div>
-                        Time : {elapsedTime} seconds
+                        Time : {elapsedTime.toFixed(1)} seconds
                     </div>
                     <div>
-                        Uploaded: {size} bytes
+                        Uploaded: {formatSizeBytes(size) || 0}
                     </div>
 
                 </div>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleRecordAgain}
-                        // disabled={isCompleted}
+                    // disabled={isCompleted}
                         startIcon={<ReplayIcon/>}
                         variant='contained'>
                     Record Again
