@@ -202,7 +202,12 @@ async def modify_operation(body: OperationSchema, user_id: str = Depends(get_cur
 
 
 @router.post("/record/start", tags=['record'], dependencies=[Depends(JWTBearer(auto_error=False))])
-async def start_record(user_id: str = Depends(get_current_user_id)):
+async def start_record(session_id: str = None, user_id: str = Depends(get_current_user_id)):
+    if session_id is not None:
+        file_path = os.path.join(RECORD_TEMP_FOLDER, f"recording_{session_id}.webm")
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+            logger.info(f"previous session {session_id} cleared")
     session_id = generate_session_id()
     file_path = os.path.join(RECORD_TEMP_FOLDER, f"recording_{session_id}.webm")
     data = {"file_path": file_path, "user_id": user_id}

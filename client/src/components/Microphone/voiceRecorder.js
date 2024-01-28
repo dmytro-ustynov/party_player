@@ -17,6 +17,7 @@ import Snackbar from "@mui/material/Snackbar";
 
 const backGroundColor = '#eeeeff'
 const barsColor = '#1976d2'
+const DELAY_TIMER = 3
 
 
 const formatSizeBytes = (size) => {
@@ -41,6 +42,8 @@ const VoiceRecorder = (props) => {
     const [message, setMessage] = useState('')
     const [startTime, setStartTime] = useState(0)
     const [elapsedTime, setElapsedTime] = useState(0)
+    const [isCounting, setIsCounting] = useState(false)
+    const [reverseCounter, setReverseCounter] = useState(DELAY_TIMER)
     const [size, setSize] = useState(0)
     const [sessionID, setSessionID] = useState(null)
     const mediaRecorderRef = useRef(null);
@@ -50,7 +53,10 @@ const VoiceRecorder = (props) => {
     let dataArray = new Uint8Array(256);
 
     const initSessionId = async () => {
-        const url = STREAM_UPLOAD_URL + `/start`
+        let url = STREAM_UPLOAD_URL + `/start`
+        if (sessionID !== null) {
+            url += '?session_id=' + sessionID
+        }
         const response = await fetcher({url, credentials: true})
         setSessionID(response.session_id)
     }
@@ -90,21 +96,30 @@ const VoiceRecorder = (props) => {
         };
     }, [isRecording, isPaused]);
 
+    useEffect(() => {
+        let counter = reverseCounter
+        let counterInterval = setInterval(() => {
+            if (isCounting) {
+                counter--
+                setReverseCounter(prev => prev - 1)
+            }
+            if (counter <= 0) {
+                clearInterval(counterInterval)
+                setReverseCounter(DELAY_TIMER)
+                handleStartRecording()
+            }
+        }, 1000)
+        return () => {
+            clearInterval(counterInterval);
+        }
+    }, [isCounting]);
 
-    // useEffect(() => {
-    //     if (countTimer === 0) {
-    //         setCountTimer(null)
-    //         setIsRecording(true)
-    //         setStartTime(Date.now())
-    //     }
-    //     if (!countTimer) return
-    //     const timer = setInterval(() => {
-    //         setCountTimer(prev => prev - 1)
-    //     }, 1000)
-    //     return () => clearInterval(timer)
-    // }, [countTimer]);
+    const handleCountDown = () => {
+        setIsCounting(prev => !prev)
+    }
     const handleStartRecording = async () => {
         setStartTime(Date.now() - elapsedTime * 1000)
+        setIsCounting(false)
         navigator.mediaDevices.getUserMedia({audio: true})
             .then(stream => {
                 const source = audioContextRef.current.createMediaStreamSource(stream)
@@ -171,6 +186,7 @@ const VoiceRecorder = (props) => {
         setIsPaused(false);
         setAudioURL('');
         setIsCompleted(false)
+        setReverseCounter(DELAY_TIMER)
         initSessionId()
         setSize(0)
         if (!!mediaRecorderRef.current) {
@@ -229,11 +245,11 @@ const VoiceRecorder = (props) => {
                 <div>
                     <div style={{marginBottom: "1rem"}}>
                         {!isRecording && !audioURL && (
-                            <Button onClick={handleStartRecording}
+                            <Button onClick={handleCountDown}
                                     title="Start recording"
                                     variant='outlined'
                                     startIcon={<FiberManualRecordIcon color='error'/>}>
-                                RECORD
+                                RECORD {isCounting && <> starts in : {reverseCounter} s</>}
                             </Button>
                         )}
                         {isRecording && (
@@ -274,7 +290,6 @@ const VoiceRecorder = (props) => {
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleRecordAgain}
-                    // disabled={isCompleted}
                         startIcon={<ReplayIcon/>}
                         variant='contained'>
                     Record Again
