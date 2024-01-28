@@ -122,3 +122,9 @@ class User(Base):
     @property
     def uid(self):
         return str(self.id)
+
+    @property
+    def full_name(self):
+        if self.first_name is None and self.last_name is None:
+            return self.username
+        return f'{self.first_name} {self.last_name}'

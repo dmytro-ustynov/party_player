@@ -1,19 +1,26 @@
 import os
 import mimetypes
+import shutil
+import tempfile
 import aiofiles
-from fastapi import APIRouter, Depends, UploadFile
+import asyncio
+from time import time
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.responses import FileResponse
+from fastapi.responses import JSONResponse
 from pydub import AudioSegment
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.app.auth.utils import get_current_user_id
 from server.app.auth.jwt_bearer import JWTBearer
 from server.app.dal.database import OwnerError
-from server.app.dependencies import logger, UPLOAD_FOLDER, get_session
-from server.app.audio.models import AudioFile, DownloadFileSchema, UpdateFilenameSchema, OperationSchema
+from server.app.dependencies import logger, UPLOAD_FOLDER, get_session, RECORD_TEMP_FOLDER
+from server.app.dependencies import rdb  # RedisDataBase
+from server.app.audio.models import AudioFile, DownloadFileSchema, UpdateFilenameSchema, OperationSchema, \
+    generate_session_id
 from server.app.audio.audio_operations import do_operation
-from server.app.audio.audio_operations import generate_stream
+from server.app.audio.audio_operations import generate_stream, update_duration
 from server.app.audio import service as audio_service
 from server.app.users import service as user_service
 
@@ -192,3 +199,91 @@ async def modify_operation(body: OperationSchema, user_id: str = Depends(get_cur
     except Exception as e:
         logger.error(str(e))
         return {'result': False, 'details': str(e)}
+
+
+@router.post("/record/start", tags=['record'], dependencies=[Depends(JWTBearer(auto_error=False))])
+async def start_record(session_id: str = None, user_id: str = Depends(get_current_user_id)):
+    if session_id is not None:
+        file_path = os.path.join(RECORD_TEMP_FOLDER, f"recording_{session_id}.webm")
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+            logger.info(f"previous session {session_id} cleared")
+    session_id = generate_session_id()
+    file_path = os.path.join(RECORD_TEMP_FOLDER, f"recording_{session_id}.webm")
+    data = {"file_path": file_path, "user_id": user_id}
+    rdb.set_item(session_id, data)
+    rdb.expire(session_id, 3600 * 12)
+    logger.info(f"Start recording {file_path} by {user_id}")
+    return {"session_id": session_id, }
+
+
+@router.post("/record/chunk/{session_id}/{chunk_num}", tags=['record'],
+             dependencies=[Depends(JWTBearer(auto_error=False))])
+async def upload_chunk(session_id: str, chunk_num: int, file: UploadFile, user_id: str = Depends(get_current_user_id)):
+    data = rdb.get(session_id)
+    if data is not None:
+        if data['user_id'] != user_id:
+            raise OwnerError
+        file_path = data["file_path"]
+        with open(file_path, "ab") as f:
+            shutil.copyfileobj(file.file, f)
+        return {"chunk_num": chunk_num, 'size': os.path.getsize(file_path)}
+    raise HTTPException(status_code=404)
+
+
+@router.post("/record/complete/{session_id}", tags=['record'], dependencies=[Depends(JWTBearer(auto_error=False))])
+async def complete_upload(session_id: str, user_id: str = Depends(get_current_user_id),
+                          session: AsyncSession = Depends(get_session)):
+    data = rdb.get(session_id)
+    if data is not None:
+        if data['user_id'] != user_id:
+            raise OwnerError
+        file_path = data["file_path"]
+        filename = f"recording_{session_id}.webm"
+        final_file_path = os.path.join(UPLOAD_FOLDER, filename)
+        shutil.move(file_path, final_file_path)
+        user = await user_service.get_user_by_id(user_id, session)
+        if user is None:
+            # create anonymous user
+            user_service.create_anonymous_user(user_id, session)
+            await session.commit()
+        number = str(time()).replace('.', '')
+        new_file = AudioFile(id=session_id,
+                             user_id=user_id,
+                             file_path=final_file_path,
+                             author=user.full_name,
+                             filename=f'Record {number}',
+                             ext='webm',
+                             title=f'Record {number}')
+        session.add(new_file)
+        await session.commit()
+        asyncio.create_task(update_duration(session, session_id))
+        logger.info(f'Record completed {session_id}, file saved to DB')
+        return {"message": "Upload complete",
+                'file_id': session_id,
+                # "file_path": f"recording_{session_id}.webm",
+                'size': os.path.getsize(final_file_path),
+                'file': {'file_id': new_file.file_id,
+                         'filename': new_file.filename,
+                         'duration': new_file.duration
+                         }}
+    raise HTTPException(status_code=404)
+
+
+@router.get("/record/{session_id}")
+async def recorded(session_id: str):
+    data = rdb.get(session_id)
+    if data is None:
+        raise HTTPException(status_code=404)
+    file_path = data["file_path"]
+    if os.path.isfile(file_path):
+        return FileResponse(file_path, media_type='video/webm')
+    return {'result': False}
+
+
+@router.get("/recorded_ready")
+async def recorded(file_name: str):
+    file_path = os.path.join(UPLOAD_FOLDER, file_name)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path, media_type='video/webm')
+    return {'result': False}

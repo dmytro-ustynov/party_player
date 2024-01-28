@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Response, Request, HTTPException
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
