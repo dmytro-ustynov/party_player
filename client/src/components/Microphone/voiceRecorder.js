@@ -66,7 +66,7 @@ const VoiceRecorder = (props) => {
         let analyzer = audioContext.createAnalyser();
         let gainNode = audioContext.createGain();
         gainNode.connect(analyzer);
-        analyzer.fftSize = 1024;
+        analyzer.fftSize = 512;
         analyzerRef.current = analyzer;
         audioContextRef.current = audioContext
         initSessionId()
@@ -161,20 +161,17 @@ const VoiceRecorder = (props) => {
 
     const handlePauseRecording = () => {
         setAudioURL(null)
-        const recorder = mediaRecorderRef.current
-        recorder.pause()
+        mediaRecorderRef.current.pause()
         setIsPaused(true)
         setAudioURL(STREAM_UPLOAD_URL + `/${sessionID}`)
     }
     const handleResumeRecording = () => {
         setStartTime(prev => Date.now())
-        const recorder = mediaRecorderRef.current
-        recorder.resume()
+        mediaRecorderRef.current.resume()
         setIsPaused(false)
     }
     const handleStopRecording = () => {
-        const recorder = mediaRecorderRef.current
-        recorder.stop()
+        mediaRecorderRef.current.stop()
         setIsRecording(null)
         setIsPaused(null)
         completeUpload();
@@ -204,20 +201,20 @@ const VoiceRecorder = (props) => {
         const analyzer = analyzerRef.current
         const canvas = canvasContext.canvas
         if (!!canvas && !!analyzer) {
-            if (!!isRecording) {
-                analyzer.getByteFrequencyData(dataArray)
-            } else {
-                dataArray = new Uint8Array(256)
-            }
+            analyzer.getByteFrequencyData(dataArray)
             canvasContext.clearRect(0, 0, canvas.width, canvas.height);
             canvasContext.fillStyle = backGroundColor;
             canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-            canvasContext.fillStyle = barsColor;
+            if (!isPaused) {
+                canvasContext.fillStyle = barsColor;
+            } else {
+                canvasContext.fillStyle = '#a9aaaa';
+            }
             let barWidth = (canvas.width / dataArray.length) * 2.5;
             let barHeight;
             let x = 0;
             for (let i = 0; i < dataArray.length; i++) {
-                barHeight = isPaused ? 2 : dataArray[i] * 0.8;
+                barHeight = dataArray[i] * 0.8;
                 let centerY = canvas.height / 2;
                 let barTop = centerY - barHeight / 2;
                 let barBottom = centerY + barHeight / 2;
@@ -232,8 +229,7 @@ const VoiceRecorder = (props) => {
         <div>
             <DialogTitle>
                 <Stack direction="row" spacing={8}>
-                    <span>RECORD</span>
-
+                    <span>Microphone recorder</span>
                 </Stack>
             </DialogTitle>
 
