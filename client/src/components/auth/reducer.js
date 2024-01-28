@@ -21,7 +21,8 @@ const init = async () => {
             tier_details: {
                 max_files: 5,
                 adv_ratio: 5,
-                mic_length: 150
+                mic_length: 150,
+                file_size: 10
             }
         }
     }

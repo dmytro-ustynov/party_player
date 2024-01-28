@@ -13,6 +13,7 @@ import {BASE_URL, STREAM_UPLOAD_URL} from "../../utils/constants";
 import {AudioAction} from "../audio/actions";
 import {useAudioState} from "../audio/audioReducer";
 import Snackbar from "@mui/material/Snackbar";
+import {useAuthState} from "../auth/context";
 
 
 const backGroundColor = '#eeeeff'
@@ -45,12 +46,19 @@ const VoiceRecorder = (props) => {
     const [isCounting, setIsCounting] = useState(false)
     const [reverseCounter, setReverseCounter] = useState(DELAY_TIMER)
     const [size, setSize] = useState(0)
+    const [maxSize, setMaxSize] = useState(0)
+    const [maxTime, setMaxTime] = useState(0)
+    const [limitReached, setLimitReached] = useState(false)
     const [sessionID, setSessionID] = useState(null)
     const mediaRecorderRef = useRef(null);
     const audioRef = useRef(null);
     const audioContextRef = useRef(null);
     const analyzerRef = useRef(null);
     let dataArray = new Uint8Array(256);
+
+    const state = useAuthState()
+    const user = state.user
+    const tierDetails = user.tier_details
 
     const initSessionId = async () => {
         let url = STREAM_UPLOAD_URL + `/start`
@@ -69,6 +77,8 @@ const VoiceRecorder = (props) => {
         analyzer.fftSize = 512;
         analyzerRef.current = analyzer;
         audioContextRef.current = audioContext
+        setMaxTime(tierDetails.mic_length)
+        setMaxSize(tierDetails.file_size * 2 ** 20)     // convert  DB limit (Mb) to bytes
         initSessionId()
         return () => {
             audioContext.close()
@@ -88,6 +98,14 @@ const VoiceRecorder = (props) => {
                 setElapsedTime(newElapsedTime)
             } else {
                 clearInterval(interval)
+            }
+            if (newElapsedTime > maxTime - 10) {
+                setMessage('You are running out of time, record will be stopped soon')
+                if (newElapsedTime > maxTime) {
+                    handlePauseRecording()
+                    setLimitReached(true)
+                    setMessage('You have reached the limit, record was paused')
+                }
             }
         }, 100)
 
@@ -147,6 +165,14 @@ const VoiceRecorder = (props) => {
         const url = STREAM_UPLOAD_URL + `/chunk/${sessionID}/${chunkNum}`
         const response = await fetcher({url, body, credentials: true})
         setSize(response.size)
+        if (response.size > maxSize * 0.9) {
+            setMessage('You are running out of space, record will be stopped soon')
+            if (response.size > maxSize) {
+                handlePauseRecording()
+                setLimitReached(true)
+                setMessage('You have reached the limit, record was paused')
+            }
+        }
     }
 
     const completeUpload = async () => {
@@ -257,7 +283,7 @@ const VoiceRecorder = (props) => {
                                         onClick={handlePauseRecording}>
                                     Pause
                                 </Button>
-                                <Button disabled={!isPaused}
+                                <Button disabled={!isPaused && !limitReached}
                                         variant='outlined'
                                         title="Resume Recording"
                                         startIcon={<EjectIcon sx={{transform: "rotate(90deg)"}}/>}
@@ -276,10 +302,10 @@ const VoiceRecorder = (props) => {
                     <audio ref={audioRef} src={audioURL} controls/>
                     <Canvas draw={visualize}/>
                     <div>
-                        Time : {elapsedTime.toFixed(1)} seconds
+                        Time : {elapsedTime.toFixed(1)} seconds of {maxTime} seconds
                     </div>
                     <div>
-                        Uploaded: {formatSizeBytes(size) || 0}
+                        Uploaded: {formatSizeBytes(size) || 0} of {formatSizeBytes(maxSize)}
                     </div>
 
                 </div>
