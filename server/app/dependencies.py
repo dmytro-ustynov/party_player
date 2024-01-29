@@ -16,6 +16,8 @@ LOG_YAML = os.path.join(os.getcwd(), 'server', 'logger_config.yaml')
 
 RECORD_TEMP_FOLDER = tempfile.mkdtemp(prefix="audio_upload_")
 
+REDIS_HOST = config('REDIS_HOST')
+REDIS_PORT = config('REDIS_PORT')
 REDIS_PASSWORD = config('REDIS_PASSWORD')
 REDIS_DB = config('REDIS_DB')
 
@@ -25,7 +27,7 @@ dictConfig(logger_config)
 
 logger = logging.getLogger('server')
 
-rdb = RedisManager(db=REDIS_DB, password=REDIS_PASSWORD)
+rdb = RedisManager(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, password=REDIS_PASSWORD)
 
 
 async def get_session() -> AsyncSession:
