@@ -127,10 +127,6 @@ export default function YouTuber(props) {
                     <DialogContentText>
                         Downloading from Youtube option is available for registered Users.
                     </DialogContentText>
-                    <Typography>That's what you will see here: </Typography>
-                    <div style={{display: 'flex', justifyContent: 'center', marginTop: '1em'}}>
-                        <img src={ytDownloadScreen} alt="img" width="320px"/>
-                    </div>
 
                     <Typography variant="h5">Why should you register today? </Typography>
                     <Typography>Compare different Tiers and discover benefits you can get!</Typography>
