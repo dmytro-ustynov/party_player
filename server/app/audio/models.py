@@ -141,7 +141,16 @@ class AudioFile(Base):
         result = self.__dict__
         result['file_id'] = self.file_id
         result['size'] = round(self.file_size, 2)
+        result['thumbnail_res'] = self.thumbnail_res
         return result
+
+    @property
+    def thumbnail_res(self, size=64):
+        if self.thumbnail is not None:
+            return (self.thumbnail +
+                    ('?' if '?' not in self.thumbnail else '&')
+                    + f'size={size}')
+        return None
 
 
 class DownloadFileSchema(BaseModel):

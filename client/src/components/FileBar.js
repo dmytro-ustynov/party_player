@@ -55,7 +55,7 @@ export default function FileBar(props) {
         wavesurfer.current = createWavesurfer(file.file_id)
         const url = BASE_URL + "/audio/get_audio?file_id=" + file.file_id
         wavesurfer.current.load(url)
-        wavesurfer.current.on('audioprocess', () =>{
+        wavesurfer.current.on('audioprocess', () => {
             const time = wavesurfer.current.getCurrentTime().toFixed(2)
             setCurrentTime(time)
         })
@@ -96,7 +96,7 @@ export default function FileBar(props) {
             )}
             <div className="file-bar-thumbnail"
                  onClick={openRedactor}
-                 style={{backgroundImage: `url(${file.thumbnail})`}}/>
+                 style={{backgroundImage: `url(${file.thumbnail_res})`}}/>
 
             <div className='file-bar-title-placeholder'>
                 <Typography variant="body1" onClick={openRedactor}>{file.filename}</Typography>

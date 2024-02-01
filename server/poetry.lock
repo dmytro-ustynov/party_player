@@ -243,6 +243,22 @@ build_docs = ["sphinx (>=1.6)", "sphinxcontrib-fulltoc (>=1.2.0)", "cloud-spthem
 totp = ["cryptography"]
 
 [[package]]
+name = "pillow"
+version = "10.2.0"
+description = "Python Imaging Library (Fork)"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.extras]
+docs = ["furo", "olefile", "sphinx (>=2.4)", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-removed-in", "sphinxext-opengraph"]
+fpx = ["olefile"]
+mic = ["olefile"]
+tests = ["check-manifest", "coverage", "defusedxml", "markdown2", "olefile", "packaging", "pyroma", "pytest", "pytest-cov", "pytest-timeout"]
+typing = ["typing-extensions"]
+xmp = ["defusedxml"]
+
+[[package]]
 name = "pydantic"
 version = "1.10.13"
 description = "Data validation and settings management using python type hints"
@@ -504,7 +520,7 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "0a89bee74261b3f8afda3aab63ea407e71613d70d4f007955555150c065f08f8"
+content-hash = "b419dbee9cc46913927404920fcc770a16436773353fe2957b06e04e5a6ea30e"
 
 [metadata.files]
 aiofiles = []
@@ -527,6 +543,7 @@ httpcore = []
 httpx = []
 idna = []
 passlib = []
+pillow = []
 pydantic = []
 pydub = []
 pyjwt = []

@@ -12,6 +12,8 @@ from server.app.auth.jwt_bearer import JWTBearer
 from server.app.dependencies import UPLOAD_FOLDER, get_session
 from decouple import config as env
 
+from server.app.image_service.utils import resize_image
+
 router = APIRouter(prefix='/image',
                    tags=['image'])
 
@@ -56,10 +58,13 @@ async def upload_thumbnail(request: Request,
 
 
 @router.get('/thumbnail/{filename}')
-async def get_thumbnail(filename: str):
+async def get_thumbnail(filename: str, size: int = 0):
     file_path = os.path.join(UPLOAD_FOLDER, 'thumbnails', filename)
     if os.path.isfile(file_path):
         media_type = "image/" + file_path.split('.')[-1]
+        if size:
+            image = resize_image(file_path, (size, size))
+            return StreamingResponse(image, media_type=media_type)
         return StreamingResponse(iterfile(file_path), media_type=media_type)
     raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
