@@ -8,7 +8,7 @@
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     content: "";
     display: block;
-    background-color: #eeff;
+    background-color: #D7E7FF;
 }
 
 .redactor-content {
@@ -142,7 +142,7 @@ footer {
 }
 
 .dropzone {
-    border: 3px dashed deepskyblue;
+    border: 3px dashed #3E96FF;
     margin: 0;
     padding: 0;
     height: 171px;
@@ -151,6 +151,7 @@ footer {
 
 .files-wrapper {
     display: flex;
+    justify-content: center;
 }
 
 .adv-place-vertical {
@@ -179,6 +180,47 @@ footer {
 .file-card-title:hover {
     overflow: visible; /* show hidden content on hover */
     filter: none; /* remove the blur effect on hover */
+}
+
+.file-bar {
+    display: flex;
+    flex-direction: row;
+    flex: 1 0 auto;
+    width: 80%;
+    height: 40px; /* fixed height */
+    overflow: hidden; /* hide overflow content */
+    align-items: center;
+    padding: 0.4rem;
+    margin-bottom: 8px;
+}
+
+.file-bar-thumbnail {
+    width: 40px;
+    height: 40px;
+    border-radius: 3px;
+    background-size: 40px 40px;
+    cursor: pointer;
+}
+
+.file-bar-title-placeholder {
+    padding: 0 0.8rem;
+    width: 40%;
+    overflow: hidden;
+    cursor: pointer;
+    text-align: left;
+}
+
+.file-bar-wave {
+    width: 40%;
+    height: 50px;
+}
+
+.file-bar-time {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+    min-width: 3.5rem;
 }
 
 .duration-info {

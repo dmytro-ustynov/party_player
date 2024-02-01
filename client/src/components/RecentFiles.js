@@ -1,12 +1,13 @@
 import {Grid, Typography} from "@mui/material";
-import FileCard from "./FileCard";
-import {useEffect} from "react";
+// import FileCard from "./FileCard";
+import {useEffect, useState} from "react";
 import {BASE_URL, CURRENT_USER_KEY} from "../utils/constants";
 import {fetcher} from "../utils/fetch_utils";
 import {useAudioState} from "./audio/audioReducer";
 import {AudioAction} from "./audio/actions";
 import {Roles, useAuthState} from "./auth/context";
 import Link from "@mui/material/Link";
+import FileBar from "./FileBar";
 
 export default function RecentFiles() {
     const {audio, dispatch} = useAudioState()
@@ -40,11 +41,7 @@ export default function RecentFiles() {
                     <div className="files-wrapper">
                         <Grid container ml={4} mr={4} sx={{display: 'flex', maxWidth: '75%'}}>
                             {files.map(file => {
-                                return (
-                                    <Grid item key={file.file_id} m={1} sx={{flex: "1 0 18%"}}>
-                                        <FileCard file={file}/>
-                                    </Grid>
-                                )
+                                return <FileBar key={file.file_id} file={file}/>
                             })}
                         </Grid>
                         <div className="adv-place-vertical">placeholder for advertisement</div>
