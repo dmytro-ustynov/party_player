@@ -210,6 +210,14 @@ footer {
     text-align: left;
 }
 
+.file-bar-filename {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+
 .file-bar-wave {
     width: 40%;
     height: 50px;

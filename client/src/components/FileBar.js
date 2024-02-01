@@ -99,8 +99,14 @@ export default function FileBar(props) {
                  style={{backgroundImage: `url(${file.thumbnail_res})`}}/>
 
             <div className='file-bar-title-placeholder'>
-                <Typography variant="body1" onClick={openRedactor}>{file.filename}</Typography>
-                <Typography variant="caption">{file.author}</Typography>
+                <Typography variant="body1"
+                            title={file.filename}
+                            className='file-bar-filename'
+                            onClick={openRedactor}>{file.filename}</Typography>
+                <div className="file-bar-filename">
+                    <Typography variant="caption"
+                                title={file.author}>{file.author}</Typography>
+                </div>
             </div>
             <div id={`waveform-${file.file_id}`} className="file-bar-wave"/>
             <div className="file-bar-time">
